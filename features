@@ -1,0 +1,59 @@
+Features
+	Multi-user collaborative development
+	Version management
+	Compatible with leading technology in DWH
+	specification is technology agnostic
+	Connects to Metadata repositories using standard interfaces (APIs, JDBC/ODBC, Xls, csv)
+	Adapt to existing metadata interface data format
+	Supports Document generation
+	Supports test scripts generation
+	Future proof – possibility to extend with change in technology (New features of Teradata, Informatica)
+	Integrates with existing re-usable artefacts
+	Work with access control
+
+Input
+	ER model
+		basic templates provided
+	Users&Roles
+		users need to provide their e-mail
+		basic set of Roles (& 1 User per Role) provided
+	Specific metadata
+		permissions (R/W for Object X Role)
+			For MVP only global R/W is enough
+		
+Output
+	DB structures
+		SCD4
+		Users&Roles
+			Passwords (e-mailed) / LDAP
+		Grants
+		
+	API
+		Password change (!not if LDAP used)
+		
+		
+Must-have
+	SSL for API
+	SCD4
+	
+Could-have
+	Full RACI implementation
+	
+Excluded for MVP
+	Other forms of versioning than SCD4
+    Composite FOREIGN KEYS
+    FILESTREAMS, XML
+    STORAGE and other TABLE-level specification
+	Other CONSTRAINTS than FKs
+    Spaces and special characters in column names not supported
+    Non-PK-tables (would require other versioning)
+    PKs must not be FKs (this will probably hold for eternity as it is ridiculous, namely with ON UPDATE CASCADE)
+    FKs must point to PKs
+    ON UPDATE not effectively used due to API design and point (FKs must point to PKs)
+    => ON UPDATE not used at all
+    
+Must be figured out
+	LDAP
+	Backup (import / export)
+	Data handling when model changes
+    

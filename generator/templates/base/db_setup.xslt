@@ -1,13 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
+	<xsl:strip-space elements="*"/>
+    <xsl:template match="tables">
 USE master
-IF (EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE ('[' + name + ']' = 'metaSimple2' OR name = 'metaSimple2')))
+IF (EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE ('[' + name + ']' = '<xsl:value-of select="$metaDbName" />' OR name = '<xsl:value-of select="$metaDbName" />')))
     BEGIN
-	   ALTER DATABASE metaSimple2 SET single_user WITH ROLLBACK IMMEDIATE;
-	   DROP DATABASE metaSimple2
+	   ALTER DATABASE <xsl:value-of select="$metaDbName" /> SET single_user WITH ROLLBACK IMMEDIATE;
+	   DROP DATABASE <xsl:value-of select="$metaDbName" />
     END
 GO
-CREATE DATABASE metaSimple2;
+CREATE DATABASE <xsl:value-of select="$metaDbName" />;
 GO
-use metaSimple2;
+use <xsl:value-of select="$metaDbName" />;
 GO
 CREATE FUNCTION dbo.is_version_closed (@version_id NVARCHAR(50)) RETURNS BIT
 AS
@@ -60,22 +65,16 @@ BEGIN
     BEGIN TRY
     BEGIN TRANSACTION
         EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
-	   -- GENERATED >>>
         delete from dbo.version;
         delete from dbo.branch;
-        delete from dbo.A;
-        delete from dbo.conflicts_A;
-        delete from dbo.B;
-        delete from dbo.conflicts_B;
-        delete from dbo.C;
-        delete from dbo.conflicts_C;
-        delete from dbo.AtC;
-        delete from dbo.conflicts_AtC;
-        delete from dbo.hist_A;
-        delete from dbo.hist_C;
-        delete from dbo.hist_AtC;
-        delete from dbo.hist_B;
-	   -- <<<
+        <xsl:for-each select="//_table" >
+            delete from dbo.<xsl:value-of select="@_table" />;
+            delete from dbo.conflicts_<xsl:value-of select="@_table" />;
+        </xsl:for-each>
+        <xsl:for-each select="//_table" >
+            delete from dbo.hist_<xsl:value-of select="@_table" />;
+        </xsl:for-each>
+        
         exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
         INSERT INTO dbo.[branch] VALUES ('master', NULL, NULL, NULL)
         INSERT INTO dbo.[version] VALUES ('empty', 'master', NULL, 0, 'closed')
@@ -87,3 +86,5 @@ BEGIN
 	   THROW
     END CATCH 
 END
+</xsl:template>
+</xsl:stylesheet>

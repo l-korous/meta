@@ -1,4 +1,10 @@
-use metaSimple2
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
+    <xsl:strip-space elements="*"/>
+    <xsl:template match="tables">
+    
+use <xsl:value-of select="$metaDbName" />
 
 IF OBJECT_ID ('dbo.create_branch') IS NOT NULL 
      DROP PROCEDURE dbo.create_branch
@@ -35,27 +41,16 @@ BEGIN
 	   update branch set current_version_id = @version_id where branch_id = @branch_id
 
 	   EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
-	   -- GENERATED >>>
-	   insert into dbo.A
-	   select id, cA, B_id, this_is_my_column_name, @branch_id
-	   from dbo.A
-	   where branch_id = 'master'
-	   
-	   insert into dbo.B
-	   select id, [select], @branch_id
-	   from dbo.B
-	   where branch_id = 'master'
-	   
-	   insert into dbo.C
-	   select _123, _4, @branch_id
-	   from dbo.C
-	   where branch_id = 'master'
-	   
-	   insert into dbo.AtC
-	   select A_sru, Cid, @branch_id
-	   from dbo.AtC
-	   where branch_id = 'master'
-	   -- <<<
+        <xsl:for-each select="//_table" >
+            insert into dbo.<xsl:value-of select="@_table" />
+            select 
+            <xsl:for-each select="_column" >
+                <xsl:value-of select="@_column" />,
+            </xsl:for-each>
+                @branch_id
+            from dbo.<xsl:value-of select="@_table" />
+            where branch_id = 'master'
+        </xsl:for-each>
 	   exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
 
 	   COMMIT TRANSACTION;
@@ -65,3 +60,5 @@ BEGIN
 	   THROW
     END CATCH
 END
+</xsl:template>
+</xsl:stylesheet>

@@ -1,4 +1,10 @@
-use metaSimple2
+<?xml version="1.0" encoding="utf-8"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
+    <xsl:strip-space elements="*"/>
+    <xsl:template match="tables">
+    
+use <xsl:value-of select="$metaDbName" />
 
 IF OBJECT_ID ('dbo.[get]') IS NOT NULL 
      DROP PROCEDURE dbo.[get]
@@ -81,7 +87,6 @@ BEGIN
 		  set @i_s = @i_s + 1
 	   END
 
-	   print @select
 	   EXEC(@select)
 
 	   COMMIT TRANSACTION;
@@ -91,3 +96,5 @@ BEGIN
 	   THROW
     END CATCH 
 END
+</xsl:template>
+</xsl:stylesheet>

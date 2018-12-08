@@ -1,4 +1,6 @@
-use metaSimple2
+
+    
+use meta3
 
 ALTER TABLE dbo.A ADD CONSTRAINT FK_A_B_id FOREIGN KEY ([B_id], [branch_id]) REFERENCES B ([id], [branch_id]) ON UPDATE NO ACTION ON DELETE CASCADE
 ALTER TABLE dbo.AtC ADD CONSTRAINT FK_AtC_A_sru FOREIGN KEY ([A_sru], [branch_id]) REFERENCES A ([id], [branch_id]) ON UPDATE NO ACTION ON DELETE CASCADE
