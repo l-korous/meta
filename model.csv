@@ -1,11 +1,11 @@
-Table, Column, Is Primary Key, Is Unique, Datatype, Is Nullable, References, On Delete
-A, id, 1, 1, INT, 0, NULL, NULL
-A, cA, 0, 0, NVARCHAR(255), 1, NULL, NULL
-A, B_id, 0, 0, INT, 0, B.id, CASCADE
-A, this_is_my_column_name, 0, 0, FLOAT, 1, NULL, NULL
-B, id, 1, 1, INT, 0, NULL, NULL
-B, select, 0, 1, NVARCHAR(255), 0, NULL, NULL
-C, _123, 1, 1, NVARCHAR(255), 0, NULL, NULL
-C, _4, 0, 0, NVARCHAR(255), 0, NULL, NULL
-AtC, A_sru, 1, 1, INT, 0, A.id, CASCADE
-AtC, Cid, 1, 1, NVARCHAR(255), 0, C._123, CASCADE
+Table, Column, Is_Primary_Key, Is_Unique, Datatype, Is_Nullable, Referenced_Table, Referenced_Table_Column, On_Delete
+A, id, 1, 1, INT, 0, NULL, NULL, NULL
+A, cA, 0, 0, NVARCHAR(255), 1, NULL, NULL, NULL
+A, B_id, 0, 0, INT, 0, B, id, CASCADE
+A, this_is_my_column_name, 0, 0, FLOAT, 1, NULL, NULL, NULL
+B, id, 1, 1, INT, 0, NULL, NULL, NULL
+B, select, 0, 1, NVARCHAR(255), 0, NULL, NULL, NULL
+C, _123, 1, 1, NVARCHAR(255), 0, NULL, NULL, NULL
+C, _4, 0, 0, NVARCHAR(255), 0, NULL, NULL, NULL
+AtC, A_sru, 1, 1, INT, 0, A, id, "NO ACTION"
+AtC, Cid, 1, 1, NVARCHAR(255), 0, C, _123, CASCADE

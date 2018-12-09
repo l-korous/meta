@@ -1,0 +1,5 @@
+﻿Changed database context to 'meta3'.
+Msg 1776, Level 16, State 1, Server LK-HP-NEW\SQLEXPRESS, Line 4
+There are no primary or candidate keys in the referenced table 'dbo.Column' that match the referencing column list in the foreign key 'FK_Reference_src_column_Column_name'.
+Msg 1750, Level 16, State 1, Server LK-HP-NEW\SQLEXPRESS, Line 4
+Could not create constraint or index. See previous errors.

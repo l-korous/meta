@@ -1,23 +1,22 @@
+@echo off
 REM === Setup ===
 REM SQL credentials (! no quotes)
 set sqlCredentials=-S LK-HP-NEW\SQLEXPRESS
-set fileNameRoot=%~dp0log\
+set logDir=%~dp0log
+set targetPath=%~dp0target
 REM =================
 
-del /Q %fileNameRoot%*
+REM Delete logs
+del /Q %logDir%*
 
-sqlcmd -d master -C -o %fileNameRoot%_db_setup.txt %sqlCredentials% -i "target\base\db_setup.sql"
-
-for /f %%D in ('dir target\content\*/a:d /b ^| sort') do (
-    for /f %%F in ('dir target\content\%%D\ /b ^| sort') do (
-        sqlcmd -C -o %fileNameRoot%_%%D_%%F.txt %sqlCredentials% -i "target\content\%%D\%%F"
-    )
+REM Deploy
+for /f %%F in ('dir %targetPath%\*/a-d /b ^| sort') do (
+    echo|set /p="."
+    sqlcmd -b -C -o %logDir%/%%F.txt %sqlCredentials% -i "%targetPath%\%%F" -f 65001
+    IF ERRORLEVEL 1 goto err_handler
 )
+echo  Deployment successful.
+goto :eof
 
-for /f %%F in ('dir target\base\version_control\ /b ^| sort') do (
-    sqlcmd -C -o %fileNameRoot%_%%F.txt %sqlCredentials% -i "target\base\version_control\%%F"
-)
-
-for /f %%F in ('dir target\content\*/a-d /b ^| sort') do (
-    sqlcmd -C -o %fileNameRoot%_%%F.txt %sqlCredentials% -i "target\content\%%F"
-)
+:err_handler
+echo Errors occured, deployment NOT successful.
