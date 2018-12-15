@@ -37,18 +37,27 @@ BEGIN
 
 	   EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
         
+            insert into dbo.[Table]
+            select 
+            
+                [table_name],
+            
+                @branch_id
+            from dbo.[Table]
+            where branch_id = 'master'
+        
             insert into dbo.[Column]
             select 
             
-                [name],
+                [column_name],
             
                 [table_name],
+            
+                [datatype],
             
                 [is_primary_key],
             
                 [is_unique],
-            
-                [datatype],
             
                 [is_nullable],
             
@@ -59,15 +68,11 @@ BEGIN
             insert into dbo.[Reference]
             select 
             
-                [name],
+                [reference_name],
             
-                [src_table],
+                [src_table_name],
             
-                [src_column],
-            
-                [dest_table],
-            
-                [dest_column],
+                [dest_table_name],
             
                 [on_delete],
             
@@ -75,13 +80,21 @@ BEGIN
             from dbo.[Reference]
             where branch_id = 'master'
         
-            insert into dbo.[Table]
+            insert into dbo.[ReferenceDetail]
             select 
             
-                [name],
+                [reference_name],
+            
+                [src_table_name],
+            
+                [src_column_name],
+            
+                [dest_table_name],
+            
+                [dest_column_name],
             
                 @branch_id
-            from dbo.[Table]
+            from dbo.[ReferenceDetail]
             where branch_id = 'master'
         
 	   exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"

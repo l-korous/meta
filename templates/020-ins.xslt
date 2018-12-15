@@ -5,15 +5,15 @@
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
-use <xsl:value-of select="$metaDbName" />
+use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
-<xsl:for-each select="//_table" >
-IF OBJECT_ID ('dbo.ins_<xsl:value-of select="@_table" />') IS NOT NULL 
-     DROP PROCEDURE dbo.ins_<xsl:value-of select="@_table" />
+<xsl:for-each select="//table" >
+IF OBJECT_ID ('dbo.ins_<xsl:value-of select="@table_name" />') IS NOT NULL 
+     DROP PROCEDURE dbo.ins_<xsl:value-of select="@table_name" />
 GO
-CREATE PROCEDURE dbo.ins_<xsl:value-of select="@_table" />(@branch_id NVARCHAR(50)
-<xsl:for-each select="_column" >
-    , @_<xsl:value-of select="@_column" />&s;<xsl:value-of select="@_datatype" />
+CREATE PROCEDURE dbo.ins_<xsl:value-of select="@table_name" />(@branch_id NVARCHAR(50)
+<xsl:for-each select="columns/column" >
+    , @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />
 </xsl:for-each>
 )
 AS
@@ -39,14 +39,14 @@ BEGIN
 		  THROW 50000, @msg, 1
 	   END
       -- Record does not exist
-      IF EXISTS (select * from dbo.[<xsl:value-of select="@_table" />] where
-       <xsl:for-each select="_column[@_is_primary_key=1]" >
-            [<xsl:value-of select="@_column" />] = @_<xsl:value-of select="@_column" /> AND
+      IF EXISTS (select * from dbo.[<xsl:value-of select="@table_name" />] where
+       <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
         </xsl:for-each>
        branch_id = @branch_id) BEGIN
-		  set @msg = 'ERROR: <xsl:value-of select="@_table" /> ( '+ 
-          <xsl:for-each select="_column[@_is_primary_key=1]" >
-            '[<xsl:value-of select="@_column" />]: ' + CAST(@_<xsl:value-of select="@_column" /> AS NVARCHAR(MAX)) + ', ' +
+		  set @msg = 'ERROR: <xsl:value-of select="@table_name" /> ( '+ 
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            '[<xsl:value-of select="@column_name" />]: ' + CAST(@<xsl:value-of select="@column_name" /> AS NVARCHAR(MAX)) + ', ' +
         </xsl:for-each>
             'branch_id: ' + @branch_id + ') already exists';
 		  THROW 50000, @msg, 1
@@ -55,26 +55,26 @@ BEGIN
 	   declare @current_datetime datetime = getdate()
 	   declare @current_version nvarchar(50) = (SELECT current_version_id from [branch] where branch_id = @branch_id)
 
-      INSERT INTO dbo.[<xsl:value-of select="@_table" />] VALUES (
-        <xsl:for-each select="_column" >
-            @_<xsl:value-of select="@_column" />,
+      INSERT INTO dbo.[<xsl:value-of select="@table_name" />] VALUES (
+        <xsl:for-each select="columns/column" >
+            @<xsl:value-of select="@column_name" />,
         </xsl:for-each>
          @branch_id
       )
 
       -- This handles the case when the entry used to exist, and was deleted. So we finish the validity of the deletion.
-      UPDATE dbo.hist_<xsl:value-of select="@_table" /> SET
+      UPDATE dbo.hist_<xsl:value-of select="@table_name" /> SET
             valid_to = @current_datetime
          WHERE
-            <xsl:for-each select="_column[@_is_primary_key=1]" >
-                [<xsl:value-of select="@_column" />] = @_<xsl:value-of select="@_column" /> AND
+            <xsl:for-each select="columns/column[@is_primary_key=1]" >
+                [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
             </xsl:for-each>
             branch_id = @branch_id
             AND valid_to IS NULL
          
-      INSERT INTO dbo.hist_<xsl:value-of select="@_table" /> VALUES (
-         <xsl:for-each select="_column" >
-            @_<xsl:value-of select="@_column" />,
+      INSERT INTO dbo.hist_<xsl:value-of select="@table_name" /> VALUES (
+         <xsl:for-each select="columns/column" >
+            @<xsl:value-of select="@column_name" />,
         </xsl:for-each>
          @branch_id,
          @current_version,

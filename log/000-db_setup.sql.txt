@@ -1,8 +1,0 @@
-﻿Changed database context to 'master'.
-Changed database context to 'meta3'.
-
-(1 rows affected)
-
-(1 rows affected)
-
-(1 rows affected)

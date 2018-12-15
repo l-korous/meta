@@ -1,0 +1,7 @@
+Reference Name, Source Table Name, Dest Table Name, On Delete
+col_to_table, Column, Table, CASCADE
+ref_to_src_table, Reference, Table, NULL
+ref_to_dest_table, Reference, Table, NULL
+ref_detail_to_src, ReferenceDetail, Column, NULL
+ref_detail_to_dest, ReferenceDetail, Column, NULL
+ref_detail_to_ref, ReferenceDetail, Reference, NULL

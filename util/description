@@ -1,0 +1,67 @@
+csv-to-xml
+==========
+Tool to transform a set of CSV files into the canonical XML form.
+
+The parameter of the shell utility is the full path to the directory containing these CSV files:
+- "tables.csv", with these columns:
+    "Table Name"
+        - Unicode string, 255 chars
+        - no reserved words
+        - no special characters
+        
+- "columns.csv", with these columns:
+    "Column Name"
+        - Unicode string, 255 chars
+        - no reserved words
+        - no special characters
+    "Table Name"
+        - refers to "tables.csv"
+    "Datatype"
+        - one of MSSQL datatypes
+        - no XML, FILESTREAM, etc.
+    "Is Primary Key"
+        - 0/1
+    "Is Unique"
+        - 0/1
+    "Is Nullable"
+        - 0/1
+        
+- "references.csv", with these columns:
+    "Reference Name"
+        - Unicode string, 255 chars
+        - no reserved words
+        - no special characters
+    "Source Table Name"
+        - refers to "tables.csv"
+    "Dest Table Name"
+        - refers to "tables.csv"
+    "On Delete"
+        - NULL (representing NO ACTION), or MSSQL syntax for ON UPDATE (CASCADE, SET NULL)
+        
+- "reference_details.csv", with these columns:
+    "Reference Name"
+        - refers to "references.csv"
+    "Source Table"
+        - refers to "tables.csv"
+        - must correspond to the same value in "references.csv"
+    "Source Column"
+        - refers to "columns.csv"
+        - must refer to an entry in "columns.csv" where "Table Name" = "Source Table" here
+    "Dest Table"
+        - refers to "tables.csv"
+        - must correspond to the same value in "references.csv"
+    "Dest Column"
+        - refers to "columns.csv"
+        - must refer to an entry in "columns.csv" where "Table Name" = "Dest Table" here
+        
+- "configuration.csv", with these columns:
+    "Key"
+        - Unicode string, 255 chars
+        - unique entry for each "Key" value within the file
+        - recognized values of "Key":
+            "DbName"
+    "Value"
+        - Unicode string, arbitrary length
+        - no reserved words
+        - no special characters
+

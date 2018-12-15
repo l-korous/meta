@@ -4,7 +4,7 @@
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
-use <xsl:value-of select="$metaDbName" />
+use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 IF OBJECT_ID ('dbo.delete_branch') IS NOT NULL 
      DROP PROCEDURE dbo.delete_branch
@@ -27,11 +27,11 @@ BEGIN
 			 THROW 50000, @msg, 1
 		  END
 
-	   <xsl:for-each select="//_table" >
-            DELETE FROM dbo.[<xsl:value-of select="@_table" />]
+	   <xsl:for-each select="//table" >
+            DELETE FROM dbo.[<xsl:value-of select="@table_name" />]
                 WHERE branch_id = @branch_id
 
-            DELETE FROM dbo.hist_<xsl:value-of select="@_table" />
+            DELETE FROM dbo.hist_<xsl:value-of select="@table_name" />
        </xsl:for-each>
 
 	   DELETE FROM dbo.[version]

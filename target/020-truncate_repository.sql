@@ -15,20 +15,25 @@ BEGIN
         delete from dbo.version;
         delete from dbo.branch;
         
+            delete from dbo.[Table];
+            delete from dbo.conflicts_Table;
+        
             delete from dbo.[Column];
             delete from dbo.conflicts_Column;
         
             delete from dbo.[Reference];
             delete from dbo.conflicts_Reference;
         
-            delete from dbo.[Table];
-            delete from dbo.conflicts_Table;
+            delete from dbo.[ReferenceDetail];
+            delete from dbo.conflicts_ReferenceDetail;
+        
+            delete from dbo.hist_Table;
         
             delete from dbo.hist_Column;
         
             delete from dbo.hist_Reference;
         
-            delete from dbo.hist_Table;
+            delete from dbo.hist_ReferenceDetail;
         
         
         exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"

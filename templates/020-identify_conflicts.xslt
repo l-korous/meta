@@ -4,13 +4,13 @@
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
-use <xsl:value-of select="$metaDbName" />
+use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
-<xsl:for-each select="//_table" >
-IF OBJECT_ID ('dbo.identify_conflicts_<xsl:value-of select="@_table" />') IS NOT NULL 
-     DROP PROCEDURE dbo.identify_conflicts_<xsl:value-of select="@_table" />
+<xsl:for-each select="//table" >
+IF OBJECT_ID ('dbo.identify_conflicts_<xsl:value-of select="@table_name" />') IS NOT NULL 
+     DROP PROCEDURE dbo.identify_conflicts_<xsl:value-of select="@table_name" />
 GO
-CREATE PROCEDURE dbo.identify_conflicts_<xsl:value-of select="@_table" />
+CREATE PROCEDURE dbo.identify_conflicts_<xsl:value-of select="@table_name" />
 (@branch_id NVARCHAR(50), @merge_version_id NVARCHAR(50), @min_version_order_master int, @number_of_conflicts int output)
 AS
 BEGIN
@@ -22,10 +22,10 @@ BEGIN
        
        set @number_of_conflicts = (
           SELECT COUNT(*)
-          FROM dbo.hist_<xsl:value-of select="@_table" /> h_master
-             INNER JOIN dbo.hist_<xsl:value-of select="@_table" /> h_branch ON
-                <xsl:for-each select="_column[@_is_primary_key=1]" >
-                    h_master.[<xsl:value-of select="@_column" />] = h_branch.[<xsl:value-of select="@_column" />] AND
+          FROM dbo.hist_<xsl:value-of select="@table_name" /> h_master
+             INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> h_branch ON
+                <xsl:for-each select="columns/column[@is_primary_key=1]" >
+                    h_master.[<xsl:value-of select="@column_name" />] = h_branch.[<xsl:value-of select="@column_name" />] AND
                 </xsl:for-each>
                 h_master.branch_id = 'master'
                 AND h_branch.branch_id = @branch_id
@@ -34,39 +34,39 @@ BEGIN
                 AND h_branch.valid_to IS NULL
                 AND (
                         (0 = 1)
-                        <xsl:for-each select="_column[@_is_primary_key=0]" >
+                        <xsl:for-each select="columns/column[@is_primary_key=0]" >
                         OR
                             (
-                              (h_master.[<xsl:value-of select="@_column" />] IS NULL AND h_branch.[<xsl:value-of select="@_column" />] IS NOT NULL)
+                              (h_master.[<xsl:value-of select="@column_name" />] IS NULL AND h_branch.[<xsl:value-of select="@column_name" />] IS NOT NULL)
                               OR
-                              (h_master.[<xsl:value-of select="@_column" />] IS NOT NULL AND h_branch.[<xsl:value-of select="@_column" />] IS NULL)
+                              (h_master.[<xsl:value-of select="@column_name" />] IS NOT NULL AND h_branch.[<xsl:value-of select="@column_name" />] IS NULL)
                               OR
-                              (h_master.[<xsl:value-of select="@_column" />] &lt;&gt; h_branch.[<xsl:value-of select="@_column" />])
+                              (h_master.[<xsl:value-of select="@column_name" />] &lt;&gt; h_branch.[<xsl:value-of select="@column_name" />])
                            )
                         </xsl:for-each>
                     )
 
        )
        IF @number_of_conflicts &gt; 0 BEGIN
-          INSERT INTO dbo.conflicts_<xsl:value-of select="@_table" />
+          INSERT INTO dbo.conflicts_<xsl:value-of select="@table_name" />
           SELECT @merge_version_id,
-          <xsl:for-each select="_column[@_is_primary_key=1]" >
-            h_master.[<xsl:value-of select="@_column" />],
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            h_master.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>
           h_master.is_delete, h_branch.is_delete,
-          <xsl:for-each select="_column[@_is_primary_key=0]" >
-            h_master.[<xsl:value-of select="@_column" />],
+          <xsl:for-each select="columns/column[@is_primary_key=0]" >
+            h_master.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>         
-          <xsl:for-each select="_column[@_is_primary_key=0]" >
-            h_branch.[<xsl:value-of select="@_column" />],
+          <xsl:for-each select="columns/column[@is_primary_key=0]" >
+            h_branch.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>
           h_master.author, h_master.version_id, h_master.valid_from
           FROM
-             dbo.hist_<xsl:value-of select="@_table" /> h_master
-             INNER JOIN dbo.hist_<xsl:value-of select="@_table" /> h_branch
+             dbo.hist_<xsl:value-of select="@table_name" /> h_master
+             INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> h_branch
                 ON
-                    <xsl:for-each select="_column[@_is_primary_key=1]" >
-                        h_master.[<xsl:value-of select="@_column" />] = h_branch.[<xsl:value-of select="@_column" />] AND
+                    <xsl:for-each select="columns/column[@is_primary_key=1]" >
+                        h_master.[<xsl:value-of select="@column_name" />] = h_branch.[<xsl:value-of select="@column_name" />] AND
                     </xsl:for-each>
                     h_master.branch_id = 'master'
                     AND h_branch.branch_id = @branch_id
@@ -75,14 +75,14 @@ BEGIN
                     AND h_branch.valid_to IS NULL
                     AND (
                         0 = 1
-                        <xsl:for-each select="_column[@_is_primary_key=0]" >
+                        <xsl:for-each select="columns/column[@is_primary_key=0]" >
                             OR
                             (
-                              (h_master.[<xsl:value-of select="@_column" />] IS NULL AND h_branch.[<xsl:value-of select="@_column" />] IS NOT NULL)
+                              (h_master.[<xsl:value-of select="@column_name" />] IS NULL AND h_branch.[<xsl:value-of select="@column_name" />] IS NOT NULL)
                               OR
-                              (h_master.[<xsl:value-of select="@_column" />] IS NOT NULL AND h_branch.[<xsl:value-of select="@_column" />] IS NULL)
+                              (h_master.[<xsl:value-of select="@column_name" />] IS NOT NULL AND h_branch.[<xsl:value-of select="@column_name" />] IS NULL)
                               OR
-                              (h_master.[<xsl:value-of select="@_column" />] &lt;&gt; h_branch.[<xsl:value-of select="@_column" />])
+                              (h_master.[<xsl:value-of select="@column_name" />] &lt;&gt; h_branch.[<xsl:value-of select="@column_name" />])
                            )
                         </xsl:for-each>
                     )

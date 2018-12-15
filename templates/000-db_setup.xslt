@@ -4,15 +4,15 @@
 	<xsl:strip-space elements="*"/>
     <xsl:template match="tables">
 USE master
-IF (EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE ('[' + name + ']' = '<xsl:value-of select="$metaDbName" />' OR name = '<xsl:value-of select="$metaDbName" />')))
+IF (EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE ('[' + name + ']' = '<xsl:value-of select="//configuration[@key='DbName']/@value" />' OR name = '<xsl:value-of select="//configuration[@key='DbName']/@value" />')))
     BEGIN
-	   ALTER DATABASE <xsl:value-of select="$metaDbName" /> SET single_user WITH ROLLBACK IMMEDIATE;
-	   DROP DATABASE <xsl:value-of select="$metaDbName" />
+	   ALTER DATABASE <xsl:value-of select="//configuration[@key='DbName']/@value" /> SET single_user WITH ROLLBACK IMMEDIATE;
+	   DROP DATABASE <xsl:value-of select="//configuration[@key='DbName']/@value" />
     END
 GO
-CREATE DATABASE <xsl:value-of select="$metaDbName" />;
+CREATE DATABASE <xsl:value-of select="//configuration[@key='DbName']/@value" />;
 GO
-use <xsl:value-of select="$metaDbName" />
+use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 CREATE FUNCTION dbo.is_version_closed (@version_id NVARCHAR(50)) RETURNS BIT
 AS

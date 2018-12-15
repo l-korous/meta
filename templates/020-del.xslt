@@ -5,17 +5,17 @@
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
-use <xsl:value-of select="$metaDbName" />
+use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
-<xsl:for-each select="//_table" >
-IF OBJECT_ID ('dbo.del_<xsl:value-of select="@_table" />') IS NOT NULL 
-     DROP PROCEDURE dbo.del_<xsl:value-of select="@_table" />
+<xsl:for-each select="//table" >
+IF OBJECT_ID ('dbo.del_<xsl:value-of select="@table_name" />') IS NOT NULL 
+     DROP PROCEDURE dbo.del_<xsl:value-of select="@table_name" />
 GO
-CREATE PROCEDURE dbo.del_<xsl:value-of select="@_table" />
+CREATE PROCEDURE dbo.del_<xsl:value-of select="@table_name" />
 (
     @branch_id NVARCHAR(50)
-<xsl:for-each select="_column[@_is_primary_key=1]" >
-    , @_<xsl:value-of select="@_column" />&s;<xsl:value-of select="@_datatype" />
+<xsl:for-each select="columns/column[@is_primary_key=1]" >
+    , @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />
 </xsl:for-each>
 
 )
@@ -42,23 +42,23 @@ BEGIN
 		  THROW 50000, @msg, 1
 	   END
 	   -- Record exists
-	   IF NOT EXISTS (select * from dbo.[<xsl:value-of select="@_table" />] where
-       <xsl:for-each select="_column[@_is_primary_key=1]" >
-            [<xsl:value-of select="@_column" />] = @_<xsl:value-of select="@_column" /> AND
+	   IF NOT EXISTS (select * from dbo.[<xsl:value-of select="@table_name" />] where
+       <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
         </xsl:for-each>
        branch_id = @branch_id) BEGIN
-            set @msg = 'ERROR: <xsl:value-of select="@_table" /> ( '+
-            <xsl:for-each select="_column[@_is_primary_key=1]" >
-            '[<xsl:value-of select="@_column" />]: ' + CAST(@_<xsl:value-of select="@_column" /> AS NVARCHAR(MAX)) + ', ' +
+            set @msg = 'ERROR: <xsl:value-of select="@table_name" /> ( '+
+            <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            '[<xsl:value-of select="@column_name" />]: ' + CAST(@<xsl:value-of select="@column_name" /> AS NVARCHAR(MAX)) + ', ' +
             </xsl:for-each>
             'branch_id: ' + @branch_id + ') does not exist';
 		  THROW 50000, @msg, 1
 	   END
 
-	   DELETE FROM dbo.[<xsl:value-of select="@_table" />]
+	   DELETE FROM dbo.[<xsl:value-of select="@table_name" />]
 	   WHERE
-        <xsl:for-each select="_column[@_is_primary_key=1]" >
-            [<xsl:value-of select="@_column" />] = @_<xsl:value-of select="@_column" /> AND
+        <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
         </xsl:for-each>
 		  branch_id = @branch_id
 
@@ -70,33 +70,33 @@ BEGIN
     END CATCH
 END
 GO
-IF OBJECT_ID('TRG_del_<xsl:value-of select="@_table" />') IS NOT NULL
-DROP TRIGGER TRG_del_<xsl:value-of select="@_table" />
+IF OBJECT_ID('TRG_del_<xsl:value-of select="@table_name" />') IS NOT NULL
+DROP TRIGGER TRG_del_<xsl:value-of select="@table_name" />
 GO
-CREATE TRIGGER TRG_del_<xsl:value-of select="@_table" />
-ON dbo.[<xsl:value-of select="@_table" />]
+CREATE TRIGGER TRG_del_<xsl:value-of select="@table_name" />
+ON dbo.[<xsl:value-of select="@table_name" />]
 AFTER DELETE AS
 BEGIN
     declare @current_datetime datetime = getdate()
 
     -- EXISTENCE of history record for this branch (always true for master)
-    INSERT INTO dbo.hist_<xsl:value-of select="@_table" />
+    INSERT INTO dbo.hist_<xsl:value-of select="@table_name" />
     SELECT
-        <xsl:for-each select="_column" >
-            _h.[<xsl:value-of select="@_column" />],
+        <xsl:for-each select="columns/column" >
+            _h.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>
         _d.branch_id, _h.version_id, _h.valid_from, @current_datetime, _h.is_delete, _h.author
-    FROM dbo.hist_<xsl:value-of select="@_table" /> _h
+    FROM dbo.hist_<xsl:value-of select="@table_name" /> _h
     INNER JOIN DELETED _d
 	   ON
-        <xsl:for-each select="_column[@_is_primary_key=1]" >
-            _h.[<xsl:value-of select="@_column" />] = _d.[<xsl:value-of select="@_column" />] AND
+        <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            _h.[<xsl:value-of select="@column_name" />] = _d.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
         _h.branch_id = 'master' and _h.valid_to is null
-    LEFT JOIN dbo.hist_<xsl:value-of select="@_table" /> _h_branch
+    LEFT JOIN dbo.hist_<xsl:value-of select="@table_name" /> _h_branch
 	   ON
-        <xsl:for-each select="_column[@_is_primary_key=1]" >
-            _h_branch.[<xsl:value-of select="@_column" />] = _d.[<xsl:value-of select="@_column" />] AND
+        <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            _h_branch.[<xsl:value-of select="@column_name" />] = _d.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
         _h_branch.branch_id = _d.branch_id
     WHERE
@@ -106,21 +106,21 @@ BEGIN
 	   UPDATE _h SET
 		  valid_to = @current_datetime
 	   FROM
-		  dbo.hist_<xsl:value-of select="@_table" /> _h
+		  dbo.hist_<xsl:value-of select="@table_name" /> _h
 		  INNER JOIN DELETED _d
 		  ON
-          <xsl:for-each select="_column[@_is_primary_key=1]" >
-            _h.[<xsl:value-of select="@_column" />] = _d.[<xsl:value-of select="@_column" />] AND
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            _h.[<xsl:value-of select="@column_name" />] = _d.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
 			 _h.branch_id = _d.branch_id
 			 AND valid_to IS NULL
     END
 
-    INSERT INTO dbo.hist_<xsl:value-of select="@_table" /> SELECT
-    <xsl:for-each select="_column[@_is_primary_key=1]" >
-        DELETED.[<xsl:value-of select="@_column" />],
+    INSERT INTO dbo.hist_<xsl:value-of select="@table_name" /> SELECT
+    <xsl:for-each select="columns/column[@is_primary_key=1]" >
+        DELETED.[<xsl:value-of select="@column_name" />],
     </xsl:for-each>
-    <xsl:for-each select="_column[@_is_primary_key=0]" >
+    <xsl:for-each select="columns/column[@is_primary_key=0]" >
         NULL,
     </xsl:for-each>
 DELETED.branch_id,

@@ -1,2 +1,0 @@
-﻿Changed database context to 'meta3'.
-Warning! The maximum key length for a clustered index is 900 bytes. The index 'PK__Column__5626FB76E9095430' has maximum length of 1120 bytes. For some combination of large values, the insert/update operation will fail.

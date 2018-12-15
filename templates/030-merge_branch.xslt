@@ -4,7 +4,7 @@
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
-use <xsl:value-of select="$metaDbName" />
+use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 IF OBJECT_ID ('dbo.merge_branch') IS NOT NULL 
      DROP PROCEDURE dbo.merge_branch
@@ -80,13 +80,13 @@ BEGIN
           WHERE branch_id = 'master' 
 
        -- Conflict check
-        <xsl:for-each select="//_table" >
-            TRUNCATE TABLE dbo.conflicts_<xsl:value-of select="@_table" />
+        <xsl:for-each select="//table" >
+            TRUNCATE TABLE dbo.conflicts_<xsl:value-of select="@table_name" />
         </xsl:for-each>
         IF @force_merge = 0 BEGIN
         DECLARE @number_of_conflicts int = 0, @number_of_conflicts_util int
-        <xsl:for-each select="//_table" >
-            EXEC dbo.identify_conflicts_<xsl:value-of select="@_table" /> @branch_id, @merge_version_id, @min_version_order_master, @number_of_conflicts_util output
+        <xsl:for-each select="//table" >
+            EXEC dbo.identify_conflicts_<xsl:value-of select="@table_name" /> @branch_id, @merge_version_id, @min_version_order_master, @number_of_conflicts_util output
             set @number_of_conflicts = @number_of_conflicts + @number_of_conflicts_util
         </xsl:for-each>     
         COMMIT TRANSACTION
@@ -100,8 +100,8 @@ BEGIN
        -- No conflicts / forced, put all changes to master
        declare @current_datetime datetime = getdate()
        EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
-        <xsl:for-each select="//_table" >
-            EXEC dbo.perform_merge_<xsl:value-of select="@_table" /> @branch_id, @merge_version_id, @current_datetime
+        <xsl:for-each select="//table" >
+            EXEC dbo.perform_merge_<xsl:value-of select="@table_name" /> @branch_id, @merge_version_id, @current_datetime
         </xsl:for-each>   
        exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
     

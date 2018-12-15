@@ -4,7 +4,7 @@
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
-use <xsl:value-of select="$metaDbName" />
+use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 IF OBJECT_ID ('dbo.close_version') IS NOT NULL 
      DROP PROCEDURE dbo.close_version

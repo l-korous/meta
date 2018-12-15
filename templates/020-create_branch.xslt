@@ -4,7 +4,7 @@
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
-use <xsl:value-of select="$metaDbName" />
+use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 IF OBJECT_ID ('dbo.create_branch') IS NOT NULL 
      DROP PROCEDURE dbo.create_branch
@@ -40,14 +40,14 @@ BEGIN
 	   update branch set current_version_id = @version_id where branch_id = @branch_id
 
 	   EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
-        <xsl:for-each select="//_table" >
-            insert into dbo.[<xsl:value-of select="@_table" />]
+        <xsl:for-each select="//table" >
+            insert into dbo.[<xsl:value-of select="@table_name" />]
             select 
-            <xsl:for-each select="_column" >
-                [<xsl:value-of select="@_column" />],
+            <xsl:for-each select="columns/column" >
+                [<xsl:value-of select="@column_name" />],
             </xsl:for-each>
                 @branch_id
-            from dbo.[<xsl:value-of select="@_table" />]
+            from dbo.[<xsl:value-of select="@table_name" />]
             where branch_id = 'master'
         </xsl:for-each>
 	   exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"

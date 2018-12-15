@@ -24,6 +24,10 @@ BEGIN
 		  END
 
 	   
+            DELETE FROM dbo.[Table]
+                WHERE branch_id = @branch_id
+
+            DELETE FROM dbo.hist_Table
             DELETE FROM dbo.[Column]
                 WHERE branch_id = @branch_id
 
@@ -32,10 +36,10 @@ BEGIN
                 WHERE branch_id = @branch_id
 
             DELETE FROM dbo.hist_Reference
-            DELETE FROM dbo.[Table]
+            DELETE FROM dbo.[ReferenceDetail]
                 WHERE branch_id = @branch_id
 
-            DELETE FROM dbo.hist_Table
+            DELETE FROM dbo.hist_ReferenceDetail
 
 	   DELETE FROM dbo.[version]
 	   WHERE branch_id = @branch_id

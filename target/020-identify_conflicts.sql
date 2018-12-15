@@ -3,6 +3,72 @@
 use meta3
 GO
 
+IF OBJECT_ID ('dbo.identify_conflicts_Table') IS NOT NULL 
+     DROP PROCEDURE dbo.identify_conflicts_Table
+GO
+CREATE PROCEDURE dbo.identify_conflicts_Table
+(@branch_id NVARCHAR(50), @merge_version_id NVARCHAR(50), @min_version_order_master int, @number_of_conflicts int output)
+AS
+BEGIN
+    SET XACT_ABORT, NOCOUNT ON
+    DECLARE @msg nvarchar(255)
+    BEGIN TRY
+       BEGIN TRANSACTION
+           -- SANITY CHECKS DONE IN THE CALLER (merge_branch)
+       
+       set @number_of_conflicts = (
+          SELECT COUNT(*)
+          FROM dbo.hist_Table h_master
+             INNER JOIN dbo.hist_Table h_branch ON
+                
+                    h_master.[table_name] = h_branch.[table_name] AND
+                
+                h_master.branch_id = 'master'
+                AND h_branch.branch_id = @branch_id
+                AND h_master.version_id in (SELECT version_id from dbo.[version] where version_order > @min_version_order_master)
+                AND h_master.valid_to IS NULL
+                AND h_branch.valid_to IS NULL
+                AND (
+                        (0 = 1)
+                        
+                    )
+
+       )
+       IF @number_of_conflicts > 0 BEGIN
+          INSERT INTO dbo.conflicts_Table
+          SELECT @merge_version_id,
+          
+            h_master.[table_name],
+        
+          h_master.is_delete, h_branch.is_delete,
+          
+          h_master.author, h_master.version_id, h_master.valid_from
+          FROM
+             dbo.hist_Table h_master
+             INNER JOIN dbo.hist_Table h_branch
+                ON
+                    
+                        h_master.[table_name] = h_branch.[table_name] AND
+                    
+                    h_master.branch_id = 'master'
+                    AND h_branch.branch_id = @branch_id
+                    AND h_master.version_id in (SELECT version_id from dbo.[version] where version_order > @min_version_order_master)
+                    AND h_master.valid_to IS NULL
+                    AND h_branch.valid_to IS NULL
+                    AND (
+                        0 = 1
+                        
+                    )
+       END
+       COMMIT TRANSACTION;
+    END TRY 
+    BEGIN CATCH
+       IF ERROR_NUMBER() <> 60000
+          ROLLBACK TRANSACTION;
+       THROW
+    END CATCH
+END
+
 IF OBJECT_ID ('dbo.identify_conflicts_Column') IS NOT NULL 
      DROP PROCEDURE dbo.identify_conflicts_Column
 GO
@@ -21,7 +87,7 @@ BEGIN
           FROM dbo.hist_Column h_master
              INNER JOIN dbo.hist_Column h_branch ON
                 
-                    h_master.[name] = h_branch.[name] AND
+                    h_master.[column_name] = h_branch.[column_name] AND
                 
                     h_master.[table_name] = h_branch.[table_name] AND
                 
@@ -32,6 +98,15 @@ BEGIN
                 AND h_branch.valid_to IS NULL
                 AND (
                         (0 = 1)
+                        
+                        OR
+                            (
+                              (h_master.[datatype] IS NULL AND h_branch.[datatype] IS NOT NULL)
+                              OR
+                              (h_master.[datatype] IS NOT NULL AND h_branch.[datatype] IS NULL)
+                              OR
+                              (h_master.[datatype] <> h_branch.[datatype])
+                           )
                         
                         OR
                             (
@@ -49,15 +124,6 @@ BEGIN
                               (h_master.[is_unique] IS NOT NULL AND h_branch.[is_unique] IS NULL)
                               OR
                               (h_master.[is_unique] <> h_branch.[is_unique])
-                           )
-                        
-                        OR
-                            (
-                              (h_master.[datatype] IS NULL AND h_branch.[datatype] IS NOT NULL)
-                              OR
-                              (h_master.[datatype] IS NOT NULL AND h_branch.[datatype] IS NULL)
-                              OR
-                              (h_master.[datatype] <> h_branch.[datatype])
                            )
                         
                         OR
@@ -76,25 +142,25 @@ BEGIN
           INSERT INTO dbo.conflicts_Column
           SELECT @merge_version_id,
           
-            h_master.[name],
+            h_master.[column_name],
         
             h_master.[table_name],
         
           h_master.is_delete, h_branch.is_delete,
           
+            h_master.[datatype],
+        
             h_master.[is_primary_key],
         
             h_master.[is_unique],
         
-            h_master.[datatype],
-        
             h_master.[is_nullable],
+        
+            h_branch.[datatype],
         
             h_branch.[is_primary_key],
         
             h_branch.[is_unique],
-        
-            h_branch.[datatype],
         
             h_branch.[is_nullable],
         
@@ -104,7 +170,7 @@ BEGIN
              INNER JOIN dbo.hist_Column h_branch
                 ON
                     
-                        h_master.[name] = h_branch.[name] AND
+                        h_master.[column_name] = h_branch.[column_name] AND
                     
                         h_master.[table_name] = h_branch.[table_name] AND
                     
@@ -115,6 +181,15 @@ BEGIN
                     AND h_branch.valid_to IS NULL
                     AND (
                         0 = 1
+                        
+                            OR
+                            (
+                              (h_master.[datatype] IS NULL AND h_branch.[datatype] IS NOT NULL)
+                              OR
+                              (h_master.[datatype] IS NOT NULL AND h_branch.[datatype] IS NULL)
+                              OR
+                              (h_master.[datatype] <> h_branch.[datatype])
+                           )
                         
                             OR
                             (
@@ -132,15 +207,6 @@ BEGIN
                               (h_master.[is_unique] IS NOT NULL AND h_branch.[is_unique] IS NULL)
                               OR
                               (h_master.[is_unique] <> h_branch.[is_unique])
-                           )
-                        
-                            OR
-                            (
-                              (h_master.[datatype] IS NULL AND h_branch.[datatype] IS NOT NULL)
-                              OR
-                              (h_master.[datatype] IS NOT NULL AND h_branch.[datatype] IS NULL)
-                              OR
-                              (h_master.[datatype] <> h_branch.[datatype])
                            )
                         
                             OR
@@ -181,7 +247,7 @@ BEGIN
           FROM dbo.hist_Reference h_master
              INNER JOIN dbo.hist_Reference h_branch ON
                 
-                    h_master.[name] = h_branch.[name] AND
+                    h_master.[reference_name] = h_branch.[reference_name] AND
                 
                 h_master.branch_id = 'master'
                 AND h_branch.branch_id = @branch_id
@@ -193,38 +259,20 @@ BEGIN
                         
                         OR
                             (
-                              (h_master.[src_table] IS NULL AND h_branch.[src_table] IS NOT NULL)
+                              (h_master.[src_table_name] IS NULL AND h_branch.[src_table_name] IS NOT NULL)
                               OR
-                              (h_master.[src_table] IS NOT NULL AND h_branch.[src_table] IS NULL)
+                              (h_master.[src_table_name] IS NOT NULL AND h_branch.[src_table_name] IS NULL)
                               OR
-                              (h_master.[src_table] <> h_branch.[src_table])
+                              (h_master.[src_table_name] <> h_branch.[src_table_name])
                            )
                         
                         OR
                             (
-                              (h_master.[src_column] IS NULL AND h_branch.[src_column] IS NOT NULL)
+                              (h_master.[dest_table_name] IS NULL AND h_branch.[dest_table_name] IS NOT NULL)
                               OR
-                              (h_master.[src_column] IS NOT NULL AND h_branch.[src_column] IS NULL)
+                              (h_master.[dest_table_name] IS NOT NULL AND h_branch.[dest_table_name] IS NULL)
                               OR
-                              (h_master.[src_column] <> h_branch.[src_column])
-                           )
-                        
-                        OR
-                            (
-                              (h_master.[dest_table] IS NULL AND h_branch.[dest_table] IS NOT NULL)
-                              OR
-                              (h_master.[dest_table] IS NOT NULL AND h_branch.[dest_table] IS NULL)
-                              OR
-                              (h_master.[dest_table] <> h_branch.[dest_table])
-                           )
-                        
-                        OR
-                            (
-                              (h_master.[dest_column] IS NULL AND h_branch.[dest_column] IS NOT NULL)
-                              OR
-                              (h_master.[dest_column] IS NOT NULL AND h_branch.[dest_column] IS NULL)
-                              OR
-                              (h_master.[dest_column] <> h_branch.[dest_column])
+                              (h_master.[dest_table_name] <> h_branch.[dest_table_name])
                            )
                         
                         OR
@@ -243,27 +291,19 @@ BEGIN
           INSERT INTO dbo.conflicts_Reference
           SELECT @merge_version_id,
           
-            h_master.[name],
+            h_master.[reference_name],
         
           h_master.is_delete, h_branch.is_delete,
           
-            h_master.[src_table],
+            h_master.[src_table_name],
         
-            h_master.[src_column],
-        
-            h_master.[dest_table],
-        
-            h_master.[dest_column],
+            h_master.[dest_table_name],
         
             h_master.[on_delete],
         
-            h_branch.[src_table],
+            h_branch.[src_table_name],
         
-            h_branch.[src_column],
-        
-            h_branch.[dest_table],
-        
-            h_branch.[dest_column],
+            h_branch.[dest_table_name],
         
             h_branch.[on_delete],
         
@@ -273,7 +313,7 @@ BEGIN
              INNER JOIN dbo.hist_Reference h_branch
                 ON
                     
-                        h_master.[name] = h_branch.[name] AND
+                        h_master.[reference_name] = h_branch.[reference_name] AND
                     
                     h_master.branch_id = 'master'
                     AND h_branch.branch_id = @branch_id
@@ -285,38 +325,20 @@ BEGIN
                         
                             OR
                             (
-                              (h_master.[src_table] IS NULL AND h_branch.[src_table] IS NOT NULL)
+                              (h_master.[src_table_name] IS NULL AND h_branch.[src_table_name] IS NOT NULL)
                               OR
-                              (h_master.[src_table] IS NOT NULL AND h_branch.[src_table] IS NULL)
+                              (h_master.[src_table_name] IS NOT NULL AND h_branch.[src_table_name] IS NULL)
                               OR
-                              (h_master.[src_table] <> h_branch.[src_table])
+                              (h_master.[src_table_name] <> h_branch.[src_table_name])
                            )
                         
                             OR
                             (
-                              (h_master.[src_column] IS NULL AND h_branch.[src_column] IS NOT NULL)
+                              (h_master.[dest_table_name] IS NULL AND h_branch.[dest_table_name] IS NOT NULL)
                               OR
-                              (h_master.[src_column] IS NOT NULL AND h_branch.[src_column] IS NULL)
+                              (h_master.[dest_table_name] IS NOT NULL AND h_branch.[dest_table_name] IS NULL)
                               OR
-                              (h_master.[src_column] <> h_branch.[src_column])
-                           )
-                        
-                            OR
-                            (
-                              (h_master.[dest_table] IS NULL AND h_branch.[dest_table] IS NOT NULL)
-                              OR
-                              (h_master.[dest_table] IS NOT NULL AND h_branch.[dest_table] IS NULL)
-                              OR
-                              (h_master.[dest_table] <> h_branch.[dest_table])
-                           )
-                        
-                            OR
-                            (
-                              (h_master.[dest_column] IS NULL AND h_branch.[dest_column] IS NOT NULL)
-                              OR
-                              (h_master.[dest_column] IS NOT NULL AND h_branch.[dest_column] IS NULL)
-                              OR
-                              (h_master.[dest_column] <> h_branch.[dest_column])
+                              (h_master.[dest_table_name] <> h_branch.[dest_table_name])
                            )
                         
                             OR
@@ -339,10 +361,10 @@ BEGIN
     END CATCH
 END
 
-IF OBJECT_ID ('dbo.identify_conflicts_Table') IS NOT NULL 
-     DROP PROCEDURE dbo.identify_conflicts_Table
+IF OBJECT_ID ('dbo.identify_conflicts_ReferenceDetail') IS NOT NULL 
+     DROP PROCEDURE dbo.identify_conflicts_ReferenceDetail
 GO
-CREATE PROCEDURE dbo.identify_conflicts_Table
+CREATE PROCEDURE dbo.identify_conflicts_ReferenceDetail
 (@branch_id NVARCHAR(50), @merge_version_id NVARCHAR(50), @min_version_order_master int, @number_of_conflicts int output)
 AS
 BEGIN
@@ -354,10 +376,12 @@ BEGIN
        
        set @number_of_conflicts = (
           SELECT COUNT(*)
-          FROM dbo.hist_Table h_master
-             INNER JOIN dbo.hist_Table h_branch ON
+          FROM dbo.hist_ReferenceDetail h_master
+             INNER JOIN dbo.hist_ReferenceDetail h_branch ON
                 
-                    h_master.[name] = h_branch.[name] AND
+                    h_master.[reference_name] = h_branch.[reference_name] AND
+                
+                    h_master.[src_column_name] = h_branch.[src_column_name] AND
                 
                 h_master.branch_id = 'master'
                 AND h_branch.branch_id = @branch_id
@@ -367,24 +391,67 @@ BEGIN
                 AND (
                         (0 = 1)
                         
+                        OR
+                            (
+                              (h_master.[src_table_name] IS NULL AND h_branch.[src_table_name] IS NOT NULL)
+                              OR
+                              (h_master.[src_table_name] IS NOT NULL AND h_branch.[src_table_name] IS NULL)
+                              OR
+                              (h_master.[src_table_name] <> h_branch.[src_table_name])
+                           )
+                        
+                        OR
+                            (
+                              (h_master.[dest_table_name] IS NULL AND h_branch.[dest_table_name] IS NOT NULL)
+                              OR
+                              (h_master.[dest_table_name] IS NOT NULL AND h_branch.[dest_table_name] IS NULL)
+                              OR
+                              (h_master.[dest_table_name] <> h_branch.[dest_table_name])
+                           )
+                        
+                        OR
+                            (
+                              (h_master.[dest_column_name] IS NULL AND h_branch.[dest_column_name] IS NOT NULL)
+                              OR
+                              (h_master.[dest_column_name] IS NOT NULL AND h_branch.[dest_column_name] IS NULL)
+                              OR
+                              (h_master.[dest_column_name] <> h_branch.[dest_column_name])
+                           )
+                        
                     )
 
        )
        IF @number_of_conflicts > 0 BEGIN
-          INSERT INTO dbo.conflicts_Table
+          INSERT INTO dbo.conflicts_ReferenceDetail
           SELECT @merge_version_id,
           
-            h_master.[name],
+            h_master.[reference_name],
+        
+            h_master.[src_column_name],
         
           h_master.is_delete, h_branch.is_delete,
           
+            h_master.[src_table_name],
+        
+            h_master.[dest_table_name],
+        
+            h_master.[dest_column_name],
+        
+            h_branch.[src_table_name],
+        
+            h_branch.[dest_table_name],
+        
+            h_branch.[dest_column_name],
+        
           h_master.author, h_master.version_id, h_master.valid_from
           FROM
-             dbo.hist_Table h_master
-             INNER JOIN dbo.hist_Table h_branch
+             dbo.hist_ReferenceDetail h_master
+             INNER JOIN dbo.hist_ReferenceDetail h_branch
                 ON
                     
-                        h_master.[name] = h_branch.[name] AND
+                        h_master.[reference_name] = h_branch.[reference_name] AND
+                    
+                        h_master.[src_column_name] = h_branch.[src_column_name] AND
                     
                     h_master.branch_id = 'master'
                     AND h_branch.branch_id = @branch_id
@@ -393,6 +460,33 @@ BEGIN
                     AND h_branch.valid_to IS NULL
                     AND (
                         0 = 1
+                        
+                            OR
+                            (
+                              (h_master.[src_table_name] IS NULL AND h_branch.[src_table_name] IS NOT NULL)
+                              OR
+                              (h_master.[src_table_name] IS NOT NULL AND h_branch.[src_table_name] IS NULL)
+                              OR
+                              (h_master.[src_table_name] <> h_branch.[src_table_name])
+                           )
+                        
+                            OR
+                            (
+                              (h_master.[dest_table_name] IS NULL AND h_branch.[dest_table_name] IS NOT NULL)
+                              OR
+                              (h_master.[dest_table_name] IS NOT NULL AND h_branch.[dest_table_name] IS NULL)
+                              OR
+                              (h_master.[dest_table_name] <> h_branch.[dest_table_name])
+                           )
+                        
+                            OR
+                            (
+                              (h_master.[dest_column_name] IS NULL AND h_branch.[dest_column_name] IS NOT NULL)
+                              OR
+                              (h_master.[dest_column_name] IS NOT NULL AND h_branch.[dest_column_name] IS NULL)
+                              OR
+                              (h_master.[dest_column_name] <> h_branch.[dest_column_name])
+                           )
                         
                     )
        END

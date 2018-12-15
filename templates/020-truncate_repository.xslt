@@ -3,7 +3,7 @@
     <xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
 	<xsl:strip-space elements="*"/>
     <xsl:template match="tables">
-USE <xsl:value-of select="$metaDbName" />
+USE <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 
 IF OBJECT_ID ('dbo.truncate_repository') IS NOT NULL 
@@ -18,12 +18,12 @@ BEGIN
         EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
         delete from dbo.version;
         delete from dbo.branch;
-        <xsl:for-each select="//_table" >
-            delete from dbo.[<xsl:value-of select="@_table" />];
-            delete from dbo.conflicts_<xsl:value-of select="@_table" />;
+        <xsl:for-each select="//table" >
+            delete from dbo.[<xsl:value-of select="@table_name" />];
+            delete from dbo.conflicts_<xsl:value-of select="@table_name" />;
         </xsl:for-each>
-        <xsl:for-each select="//_table" >
-            delete from dbo.hist_<xsl:value-of select="@_table" />;
+        <xsl:for-each select="//table" >
+            delete from dbo.hist_<xsl:value-of select="@table_name" />;
         </xsl:for-each>
         
         exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"

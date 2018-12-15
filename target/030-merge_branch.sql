@@ -77,11 +77,15 @@ BEGIN
 
        -- Conflict check
         
+            TRUNCATE TABLE dbo.conflicts_Table
             TRUNCATE TABLE dbo.conflicts_Column
             TRUNCATE TABLE dbo.conflicts_Reference
-            TRUNCATE TABLE dbo.conflicts_Table
+            TRUNCATE TABLE dbo.conflicts_ReferenceDetail
         IF @force_merge = 0 BEGIN
         DECLARE @number_of_conflicts int = 0, @number_of_conflicts_util int
+        
+            EXEC dbo.identify_conflicts_Table @branch_id, @merge_version_id, @min_version_order_master, @number_of_conflicts_util output
+            set @number_of_conflicts = @number_of_conflicts + @number_of_conflicts_util
         
             EXEC dbo.identify_conflicts_Column @branch_id, @merge_version_id, @min_version_order_master, @number_of_conflicts_util output
             set @number_of_conflicts = @number_of_conflicts + @number_of_conflicts_util
@@ -89,7 +93,7 @@ BEGIN
             EXEC dbo.identify_conflicts_Reference @branch_id, @merge_version_id, @min_version_order_master, @number_of_conflicts_util output
             set @number_of_conflicts = @number_of_conflicts + @number_of_conflicts_util
         
-            EXEC dbo.identify_conflicts_Table @branch_id, @merge_version_id, @min_version_order_master, @number_of_conflicts_util output
+            EXEC dbo.identify_conflicts_ReferenceDetail @branch_id, @merge_version_id, @min_version_order_master, @number_of_conflicts_util output
             set @number_of_conflicts = @number_of_conflicts + @number_of_conflicts_util
              
         COMMIT TRANSACTION
@@ -104,11 +108,13 @@ BEGIN
        declare @current_datetime datetime = getdate()
        EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
         
+            EXEC dbo.perform_merge_Table @branch_id, @merge_version_id, @current_datetime
+        
             EXEC dbo.perform_merge_Column @branch_id, @merge_version_id, @current_datetime
         
             EXEC dbo.perform_merge_Reference @branch_id, @merge_version_id, @current_datetime
         
-            EXEC dbo.perform_merge_Table @branch_id, @merge_version_id, @current_datetime
+            EXEC dbo.perform_merge_ReferenceDetail @branch_id, @merge_version_id, @current_datetime
            
        exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
     
