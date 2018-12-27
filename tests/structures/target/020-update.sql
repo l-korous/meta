@@ -6,14 +6,21 @@ GO
 IF OBJECT_ID ('dbo.upd_Column') IS NOT NULL 
      DROP PROCEDURE dbo.upd_Column
 GO
-CREATE PROCEDURE dbo.upd_Column(@branch_id NVARCHAR(50)
+CREATE PROCEDURE dbo.upd_Column(
 
-    , @column_name nvarchar(255)
-    , @table_name nvarchar(255)
-    , @datatype nvarchar(255)
-    , @is_primary_key BIT
-    , @is_unique BIT
-    , @is_nullable BIT
+    @column_name nvarchar(255),
+
+    @table_name nvarchar(255),
+
+    @datatype nvarchar(255),
+
+    @is_primary_key BIT,
+
+    @is_unique BIT,
+
+    @is_nullable BIT,
+
+@branch_id NVARCHAR(50) ='master'
 )
 AS
 BEGIN
@@ -196,12 +203,17 @@ END
 IF OBJECT_ID ('dbo.upd_Reference') IS NOT NULL 
      DROP PROCEDURE dbo.upd_Reference
 GO
-CREATE PROCEDURE dbo.upd_Reference(@branch_id NVARCHAR(50)
+CREATE PROCEDURE dbo.upd_Reference(
 
-    , @reference_name nvarchar(255)
-    , @src_table_name nvarchar(255)
-    , @dest_table_name nvarchar(255)
-    , @on_delete nvarchar(255)
+    @reference_name nvarchar(255),
+
+    @src_table_name nvarchar(255),
+
+    @dest_table_name nvarchar(255),
+
+    @on_delete nvarchar(255),
+
+@branch_id NVARCHAR(50) ='master'
 )
 AS
 BEGIN
@@ -353,13 +365,19 @@ END
 IF OBJECT_ID ('dbo.upd_ReferenceDetail') IS NOT NULL 
      DROP PROCEDURE dbo.upd_ReferenceDetail
 GO
-CREATE PROCEDURE dbo.upd_ReferenceDetail(@branch_id NVARCHAR(50)
+CREATE PROCEDURE dbo.upd_ReferenceDetail(
 
-    , @reference_name nvarchar(255)
-    , @src_table_name nvarchar(255)
-    , @src_column_name nvarchar(255)
-    , @dest_table_name nvarchar(255)
-    , @dest_column_name nvarchar(255)
+    @reference_name nvarchar(255),
+
+    @src_table_name nvarchar(255),
+
+    @src_column_name nvarchar(255),
+
+    @dest_table_name nvarchar(255),
+
+    @dest_column_name nvarchar(255),
+
+@branch_id NVARCHAR(50) ='master'
 )
 AS
 BEGIN

@@ -6,9 +6,11 @@ GO
 IF OBJECT_ID ('dbo.ins_Table') IS NOT NULL 
      DROP PROCEDURE dbo.ins_Table
 GO
-CREATE PROCEDURE dbo.ins_Table(@branch_id NVARCHAR(50)
+CREATE PROCEDURE dbo.ins_Table(
 
-    , @table_name nvarchar(255)
+    @table_name nvarchar(255),
+
+@branch_id NVARCHAR(50)
 )
 AS
 BEGIN
@@ -88,14 +90,21 @@ END
 IF OBJECT_ID ('dbo.ins_Column') IS NOT NULL 
      DROP PROCEDURE dbo.ins_Column
 GO
-CREATE PROCEDURE dbo.ins_Column(@branch_id NVARCHAR(50)
+CREATE PROCEDURE dbo.ins_Column(
 
-    , @column_name nvarchar(255)
-    , @table_name nvarchar(255)
-    , @datatype nvarchar(255)
-    , @is_primary_key BIT
-    , @is_unique BIT
-    , @is_nullable BIT
+    @column_name nvarchar(255),
+
+    @table_name nvarchar(255),
+
+    @datatype nvarchar(255),
+
+    @is_primary_key BIT,
+
+    @is_unique BIT,
+
+    @is_nullable BIT,
+
+@branch_id NVARCHAR(50)
 )
 AS
 BEGIN
@@ -201,12 +210,17 @@ END
 IF OBJECT_ID ('dbo.ins_Reference') IS NOT NULL 
      DROP PROCEDURE dbo.ins_Reference
 GO
-CREATE PROCEDURE dbo.ins_Reference(@branch_id NVARCHAR(50)
+CREATE PROCEDURE dbo.ins_Reference(
 
-    , @reference_name nvarchar(255)
-    , @src_table_name nvarchar(255)
-    , @dest_table_name nvarchar(255)
-    , @on_delete nvarchar(255)
+    @reference_name nvarchar(255),
+
+    @src_table_name nvarchar(255),
+
+    @dest_table_name nvarchar(255),
+
+    @on_delete nvarchar(255),
+
+@branch_id NVARCHAR(50)
 )
 AS
 BEGIN
@@ -298,13 +312,19 @@ END
 IF OBJECT_ID ('dbo.ins_ReferenceDetail') IS NOT NULL 
      DROP PROCEDURE dbo.ins_ReferenceDetail
 GO
-CREATE PROCEDURE dbo.ins_ReferenceDetail(@branch_id NVARCHAR(50)
+CREATE PROCEDURE dbo.ins_ReferenceDetail(
 
-    , @reference_name nvarchar(255)
-    , @src_table_name nvarchar(255)
-    , @src_column_name nvarchar(255)
-    , @dest_table_name nvarchar(255)
-    , @dest_column_name nvarchar(255)
+    @reference_name nvarchar(255),
+
+    @src_table_name nvarchar(255),
+
+    @src_column_name nvarchar(255),
+
+    @dest_table_name nvarchar(255),
+
+    @dest_column_name nvarchar(255),
+
+@branch_id NVARCHAR(50)
 )
 AS
 BEGIN

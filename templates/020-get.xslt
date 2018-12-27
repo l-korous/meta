@@ -6,11 +6,12 @@
     
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
-IF OBJECT_ID ('dbo.[get]') IS NOT NULL 
-     DROP PROCEDURE dbo.[get]
+<xsl:for-each select="//table" >
+IF OBJECT_ID ('dbo.get_<xsl:value-of select="@table_name" />') IS NOT NULL 
+     DROP PROCEDURE dbo.get_<xsl:value-of select="@table_name" />
 GO
-CREATE PROCEDURE dbo.[get]
-(@table NVARCHAR(255), @branch_id NVARCHAR(50), @jsonParams nvarchar(max) = '{}')
+CREATE PROCEDURE dbo.get_<xsl:value-of select="@table_name" />
+(@branch_id NVARCHAR(50) = 'master', @jsonParams nvarchar(max) = '{}')
 AS
 BEGIN
     SET XACT_ABORT, NOCOUNT ON
@@ -30,14 +31,14 @@ BEGIN
 		  col NVARCHAR(255), 
 		  dir NVARCHAR(4)
 	   )
-	   INSERT INTO @SortBy SELECT [key], value FROM OPENJSON(@jsonParams,'$.SortBy')
+	   --INSERT INTO @SortBy SELECT [key], value FROM OPENJSON(@jsonParams,'$.SortBy')
 	  
 	   DECLARE @FilterBy TABLE (
 		  _id int IDENTITY(1,1) PRIMARY KEY,
 		  col NVARCHAR(255), 
 		  regex NVARCHAR(MAX)
 	   )
-	   INSERT INTO @FilterBy SELECT [key], value FROM OPENJSON(@jsonParams,'$.Filter')
+	   --INSERT INTO @FilterBy SELECT [key], value FROM OPENJSON(@jsonParams,'$.Filter')
 
 	   -- Input check
 	   DECLARE @i_s int = 1, @col_name_s nvarchar(255), @dir nvarchar(4)
@@ -49,7 +50,7 @@ BEGIN
 			 set @msg = 'ERROR: Dir must be either ASC or DESC';
 			 THROW 50000, @msg, 1
 		  END
-		  EXEC('declare @temp nvarchar(1) = (SELECT top 1 left(cast(' + @col_name_s + ' as nvarchar(max)), 1) FROM dbo.[' + @table + '])')
+		  EXEC('declare @temp nvarchar(1) = (SELECT top 1 left(cast(' + @col_name_s + ' as nvarchar(max)), 1) FROM dbo.[<xsl:value-of select="@table_name" />])')
 		  set @i_s = @i_s + 1
 	   END
 	   
@@ -58,12 +59,12 @@ BEGIN
 	   BEGIN
 		  set @col_name_f = (select col from @FilterBy where _id = @i_f)
 		  set @regex = (select regex from @FilterBy where _id = @i_f)
-		  EXEC('declare @temp nvarchar(1) = (SELECT top 1 left(cast(' + @col_name_f + ' as nvarchar(max)), 1) FROM dbo.[' + @table + '] WHERE branch_id like ''' + @regex + ''')')
+		  EXEC('declare @temp nvarchar(1) = (SELECT top 1 left(cast(' + @col_name_f + ' as nvarchar(max)), 1) FROM dbo.[<xsl:value-of select="@table_name" />] WHERE branch_id like ''' + @regex + ''')')
 		  set @i_f = @i_f + 1
 	   END
 
 	   -- Build query
-	   DECLARE @select nvarchar(max) = 'SELECT * FROM dbo.[' + @table + ']';
+	   DECLARE @select nvarchar(max) = 'SELECT * FROM dbo.[<xsl:value-of select="@table_name" />]';
        IF (select count(*) from @FilterBy) > 0 BEGIN
            set @select = @select + ' where ';
            set @i_f = 1
@@ -100,5 +101,6 @@ BEGIN
 	   THROW
     END CATCH 
 END
+</xsl:for-each>
 </xsl:template>
 </xsl:stylesheet>

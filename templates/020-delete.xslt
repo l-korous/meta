@@ -13,11 +13,10 @@ IF OBJECT_ID ('dbo.del_<xsl:value-of select="@table_name" />') IS NOT NULL
 GO
 CREATE PROCEDURE dbo.del_<xsl:value-of select="@table_name" />
 (
-    @branch_id NVARCHAR(50)
 <xsl:for-each select="columns/column[@is_primary_key=1]" >
-    , @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />
+    @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />,
 </xsl:for-each>
-
+    @branch_id NVARCHAR(50)
 )
 AS
 BEGIN

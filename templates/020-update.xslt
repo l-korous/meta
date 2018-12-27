@@ -12,10 +12,11 @@ GO
 IF OBJECT_ID ('dbo.upd_<xsl:value-of select="@table_name" />') IS NOT NULL 
      DROP PROCEDURE dbo.upd_<xsl:value-of select="@table_name" />
 GO
-CREATE PROCEDURE dbo.upd_<xsl:value-of select="@table_name" />(@branch_id NVARCHAR(50)
+CREATE PROCEDURE dbo.upd_<xsl:value-of select="@table_name" />(
 <xsl:for-each select="columns/column" >
-    , @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />
+    @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />,
 </xsl:for-each>
+@branch_id NVARCHAR(50) ='master'
 )
 AS
 BEGIN

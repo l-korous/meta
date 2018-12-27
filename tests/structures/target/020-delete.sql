@@ -8,10 +8,10 @@ IF OBJECT_ID ('dbo.del_Table') IS NOT NULL
 GO
 CREATE PROCEDURE dbo.del_Table
 (
+
+    @table_name nvarchar(255),
+
     @branch_id NVARCHAR(50)
-
-    , @table_name nvarchar(255)
-
 )
 AS
 BEGIN
@@ -131,11 +131,12 @@ IF OBJECT_ID ('dbo.del_Column') IS NOT NULL
 GO
 CREATE PROCEDURE dbo.del_Column
 (
+
+    @column_name nvarchar(255),
+
+    @table_name nvarchar(255),
+
     @branch_id NVARCHAR(50)
-
-    , @column_name nvarchar(255)
-    , @table_name nvarchar(255)
-
 )
 AS
 BEGIN
@@ -287,10 +288,10 @@ IF OBJECT_ID ('dbo.del_Reference') IS NOT NULL
 GO
 CREATE PROCEDURE dbo.del_Reference
 (
+
+    @reference_name nvarchar(255),
+
     @branch_id NVARCHAR(50)
-
-    , @reference_name nvarchar(255)
-
 )
 AS
 BEGIN
@@ -422,11 +423,12 @@ IF OBJECT_ID ('dbo.del_ReferenceDetail') IS NOT NULL
 GO
 CREATE PROCEDURE dbo.del_ReferenceDetail
 (
+
+    @reference_name nvarchar(255),
+
+    @src_column_name nvarchar(255),
+
     @branch_id NVARCHAR(50)
-
-    , @reference_name nvarchar(255)
-    , @src_column_name nvarchar(255)
-
 )
 AS
 BEGIN

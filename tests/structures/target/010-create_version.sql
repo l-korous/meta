@@ -6,7 +6,7 @@ IF OBJECT_ID ('dbo.create_version') IS NOT NULL
      DROP PROCEDURE dbo.create_version
 GO
 CREATE PROCEDURE dbo.create_version
-(@branch_id NVARCHAR(50), @version_id NVARCHAR(50))
+(@version_id NVARCHAR(50), @branch_id NVARCHAR(50) = 'master')
 AS
 BEGIN
     SET XACT_ABORT, NOCOUNT ON
