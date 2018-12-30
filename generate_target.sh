@@ -1,7 +1,7 @@
 #!/bin/bash  
 #=================
 # $1 Model XML path
-templatesPath=${pwd}templates
+templatesPath=${pwd}templates/sql
 #=================
 if [ $# -lt 2 ] 
 then
