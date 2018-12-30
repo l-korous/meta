@@ -1,7 +1,7 @@
 #!/bin/bash  
 #=================
 # $1 Model XML path
-templatesPath=${pwd}templates/sql
+templatesPath=${pwd}templates
 #=================
 if [ $# -lt 2 ] 
 then
@@ -17,11 +17,15 @@ targetPath=$2
 # Delete target
 rm -rf ${targetPath}*
 
-for f in ${templatesPath}*.xslt;
+for f in $(find ${templatesPath} -name "*.xslt")
 do
+    fullPath=$(dirname "${f/$templatesPath/""}")
+    extension=$(echo "$fullPath" | cut -d "/" -f1)
+    mkdir -p ${targetPath}${fullPath}
     printf "."
     filename=${f##*/}
     filename=${filename%".xslt"}
-	xsltproc $f $1 > ${targetPath}$filename.sql
+    xsltproc $f $1 > ${targetPath}${fullPath}/${filename}.${extension}
 done
+
 echo  Generation successful.

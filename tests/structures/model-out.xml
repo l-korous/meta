@@ -1,6 +1,12 @@
 <root>
     <configurations>
         <configuration key="DbName" value="meta3"/>
+        <configuration key="hostname" value="localhost"/>
+        <configuration key="port" value="3000"/>
+        <configuration key="DbUser" value="sa"/>
+        <configuration key="DbPassword" value="asdf"/>
+        <configuration key="DbHostName" value="LK-HP-NEW"/>
+        <configuration key="DbInstanceName" value="SQLEXPRESS"/>
     </configurations>
     <tables>
         <table table_name="Table">

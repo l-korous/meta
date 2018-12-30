@@ -1,7 +1,7 @@
 #!/bin/bash  
 #=================
 # SQL credentials (! no quotes)
-sqlCredentials="-S LKOROUS01\\SQLEXPRESS"
+sqlCredentials="-S localhost\\SQLEXPRESS"
 logDir=${pwd}deployment_log
 #=================
 if [ $# -lt 1 ] 
@@ -16,8 +16,9 @@ targetPath=$1
 mkdir -p ${logDir}
 [[ "${targetPath}" != */ ]] && targetPath="${targetPath}/"
 
-# Deploy
-for f in ${targetPath}*;
+# Deploy SQL
+echo Deploying DB
+for f in ${targetPath}sql/*;
 do
     printf "."
     filename=${f##*/}
@@ -33,4 +34,17 @@ do
 		exit $?
 	fi 
 done
-echo  Deployment successful.
+echo SQL Deployment successful.
+
+# Deploy JS
+echo Setting up NodeJS directory
+cp -r resources/* ${targetPath}js/
+cd ${targetPath}js/
+echo Installing NodeJS modules
+tar -zxf node_modules.tar.gz
+npm install
+echo Installing NodeMon
+npm install -g nodemon
+echo Starting NodeJS
+nodemon npm start
+
