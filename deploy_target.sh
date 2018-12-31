@@ -7,11 +7,14 @@ logDir=${pwd}deployment_log
 if [ $# -lt 1 ] 
 then
     echo "usage: ${0##*/} <targetPath>"
-    exit
+    targetPath="/b/sw/meta/tests/structures/target"
+    #exit
+else
+    targetPath=$1
 fi
 
 # Add trailing slash
-targetPath=$1
+
 [[ "${logDir}" != */ ]] && logDir="${logDir}/"
 mkdir -p ${logDir}
 [[ "${targetPath}" != */ ]] && targetPath="${targetPath}/"
@@ -35,6 +38,7 @@ do
 	fi 
 done
 echo SQL Deployment successful.
+exit
 
 # Deploy JS
 echo Setting up NodeJS directory

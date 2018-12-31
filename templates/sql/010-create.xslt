@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xsl:stylesheet [<!ENTITY s "&#160;">]>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:meta="meta">
+    <xsl:import href="../utilities.xsl"/>
+	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
@@ -11,7 +12,7 @@ GO
 CREATE TABLE dbo.[<xsl:value-of select="@table_name" />]
 (
     <xsl:for-each select="columns/column" >
-        [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="@datatype" /> <xsl:if test="@is_nullable = 0">&s;NOT NULL</xsl:if>,
+        [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" /> <xsl:if test="@is_nullable = 0">&s;NOT NULL</xsl:if>,
     </xsl:for-each>
     branch_id NVARCHAR(50),
     PRIMARY KEY (
@@ -25,7 +26,7 @@ CREATE TABLE dbo.[<xsl:value-of select="@table_name" />]
 CREATE TABLE dbo.hist_<xsl:value-of select="@table_name" />
 (
     <xsl:for-each select="columns/column" >
-        [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="@datatype" />,
+        [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
     branch_id NVARCHAR(50),
     version_id NVARCHAR(50),
@@ -39,15 +40,15 @@ CREATE TABLE dbo.conflicts_<xsl:value-of select="@table_name" />
 (
     merge_version_id NVARCHAR(50),
     <xsl:for-each select="columns/column[@is_primary_key=1]" >
-        [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="@datatype" />,
+        [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
     is_del_master BIT,
     is_del_branch BIT,
     <xsl:for-each select="columns/column[@is_primary_key=0]" >
-        <xsl:value-of select="@column_name" />_master &s; <xsl:value-of select="@datatype" />,
+        <xsl:value-of select="@column_name" />_master &s; <xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
     <xsl:for-each select="columns/column[@is_primary_key=0]" >
-        <xsl:value-of select="@column_name" />_branch &s; <xsl:value-of select="@datatype" />,
+        <xsl:value-of select="@column_name" />_branch &s; <xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
     last_author_master NVARCHAR(255),
     last_version_id_master NVARCHAR(50),

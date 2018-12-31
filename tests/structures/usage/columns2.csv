@@ -1,0 +1,4 @@
+"column_name", "table_name", "datatype", "is_primary_key", "is_unique", "is_nullable"
+sloupec_prvni, prvni, NVARCHAR(200), 1, 1, 0
+sloupec_treti, treti, INT, 1, 1, 0
+sloupec_treti2, treti, INT, 0, 1, 0

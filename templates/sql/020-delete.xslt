@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xsl:stylesheet [<!ENTITY s "&#160;">]>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:meta="meta">
+    <xsl:import href="../utilities.xsl"/>
+	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
@@ -14,7 +15,7 @@ GO
 CREATE PROCEDURE dbo.del_<xsl:value-of select="@table_name" />
 (
 <xsl:for-each select="columns/column[@is_primary_key=1]" >
-    @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />,
+    @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
 </xsl:for-each>
     @branch_id NVARCHAR(50)
 )

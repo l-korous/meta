@@ -1,16 +1,19 @@
 #!/bin/bash  
 #=================
-# $1 Model XML path
 templatesPath=${pwd}templates
 #=================
 if [ $# -lt 2 ] 
 then
     echo "usage: ${0##*/} <xmlModelFile> <targetPath>"
-    exit
+    xmlModelFile="/b/sw/meta/tests/structures/input/model-out.xml"
+    targetPath="/b/sw/meta/tests/structures/target"
+    # exit
+else
+    xmlModelFile=$1
+    targetPath=$2
 fi
 
 # Add trailing slash
-targetPath=$2
 [[ "${templatesPath}" != */ ]] && templatesPath="${templatesPath}/"
 [[ "${targetPath}" != */ ]] && targetPath="${targetPath}/"
 
@@ -25,7 +28,7 @@ do
     printf "."
     filename=${f##*/}
     filename=${filename%".xslt"}
-    xsltproc $f $1 > ${targetPath}${fullPath}/${filename}.${extension}
+    java -jar saxon9he.jar -s:$xmlModelFile -xsl:$f -o:${targetPath}${fullPath}/${filename}.${extension}
 done
 
 echo  Generation successful.

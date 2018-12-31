@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xsl:stylesheet [<!ENTITY s "&#160;">]>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:meta="meta">
+    <xsl:import href="../utilities.xsl"/>
+	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
@@ -38,30 +39,40 @@ BEGIN
 		  THROW 50000, @msg, 1
 	   END
 	   
-		CREATE TABLE #tempTable (
+		CREATE TABLE #loadTable (
 		<xsl:for-each select="columns/column" >
-			<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />
-			<xsl:if test="position() != last()">
-				,
-			</xsl:if>
+			<xsl:value-of select="@column_name" /> NVARCHAR(MAX)
+			<xsl:if test="position() != last()">,</xsl:if>
 		</xsl:for-each>
 		);
 
 		-- This may fail (file may not exist)
 		declare @sql varchar(max)
-		set @sql = 'BULK INSERT #tempTable FROM ''' + @filepath + ''' WITH ( FIRSTROW = ' + cast(@firstrow AS nvarchar(255)) + ', FIELDTERMINATOR = ''' + @fieldterminator + ''', ROWTERMINATOR = ''' + @rowterminator + '''  );'
+		set @sql = 'BULK INSERT #loadTable FROM ''' + @filepath + ''' WITH ( FIRSTROW = ' + cast(@firstrow AS nvarchar(255)) + ', FIELDTERMINATOR = ''' + @fieldterminator + ''', ROWTERMINATOR = ''' + @rowterminator + '''  );'
 		exec (@sql);
+        	   
+		CREATE TABLE #tempTable (
+		<xsl:for-each select="columns/column" >
+			<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
+			<xsl:if test="position() != last()">,</xsl:if>
+		</xsl:for-each>
+		);
+        
+        INSERT INTO #tempTable
+        SELECT
+        <xsl:for-each select="columns/column" >
+			CAST(TRIM(<xsl:value-of select="@column_name" />) AS <xsl:value-of select="meta:datatype_to_sql(@datatype)" />)
+			<xsl:if test="position() != last()">,</xsl:if>
+		</xsl:for-each>
+        FROM #loadTable;
 	   
 		CREATE TABLE #mergeResultTable (
 			action_type VARCHAR(50),
+			is_delete BIT,
 			<xsl:for-each select="columns/column" >
-				inserted_<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />,
-			</xsl:for-each>
-			<xsl:for-each select="columns/column" >
-				deleted_<xsl:value-of select="@column_name" />&s;<xsl:value-of select="@datatype" />
-				<xsl:if test="position() != last()">
-					,
-				</xsl:if>
+				inserted_<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
+                deleted_<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
+				<xsl:if test="position() != last()">,</xsl:if>
 			</xsl:for-each>
 		);
 
@@ -77,9 +88,7 @@ BEGIN
 			SELECT
 				<xsl:for-each select="columns/column" >
 					<xsl:value-of select="@column_name" />
-					<xsl:if test="position() != last()">
-						,
-					</xsl:if>
+					<xsl:if test="position() != last()">,</xsl:if>
 				</xsl:for-each>
 			FROM dbo.hist_<xsl:value-of select="@table_name" />
 			WHERE branch_id = @branch_id AND valid_to IS NULL )
@@ -120,17 +129,13 @@ BEGIN
 					</xsl:for-each>
 					<xsl:for-each select="columns/column" >
 						h.<xsl:value-of select="@column_name" /> h_<xsl:value-of select="@column_name" />
-						<xsl:if test="position() != last()">
-							,
-						</xsl:if>
+						<xsl:if test="position() != last()">,</xsl:if>
 					</xsl:for-each>
 				FROM #tempTable i 
 					FULL OUTER JOIN currentHistory h ON
 					<xsl:for-each select="columns/column[@is_primary_key=1]" >
 						i.[<xsl:value-of select="@column_name" />] = h.[<xsl:value-of select="@column_name" />]
-						<xsl:if test="position() != last()">
-							AND
-						</xsl:if>
+						<xsl:if test="position() != last()"> AND </xsl:if>
 					</xsl:for-each>
 			) MyData
 			INNER JOIN historyReaction on historyReaction.[action] = MyData.[action]
@@ -167,9 +172,54 @@ BEGIN
 			CURRENT_USER
 		)  OUTPUT
 		   $action,
-		   inserted.table_name,
-		   deleted.table_name
+           IIF([input].[action] = 'D', 1, 0),
+           <xsl:for-each select="columns/column" >
+				inserted.[<xsl:value-of select="@column_name" />],
+                deleted.[<xsl:value-of select="@column_name" />]
+                <xsl:if test="position() != last()">,</xsl:if>
+			</xsl:for-each>
 		   into #mergeResultTable;
+           
+        DELETE a
+        FROM 
+            dbo.[<xsl:value-of select="@table_name" />] a
+            INNER JOIN #mergeResultTable m
+            ON <xsl:for-each select="columns/column[@is_primary_key=1]" >
+				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
+                AND
+			</xsl:for-each>
+            m.is_delete = 1 AND a.branch_id = @branch_id;
+           
+       <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
+        UPDATE a SET 
+            <xsl:for-each select="columns/column[@is_primary_key=0]" >
+				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
+                <xsl:if test="position() != last()">,</xsl:if>
+			</xsl:for-each>
+        FROM 
+            dbo.[<xsl:value-of select="@table_name" />] a
+            INNER JOIN #mergeResultTable m
+            ON <xsl:for-each select="columns/column[@is_primary_key=1]" >
+				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
+                AND
+			</xsl:for-each>
+            m.is_delete = 0 AND m.action_type = 'INSERT' AND a.branch_id = @branch_id;
+        </xsl:if>
+        
+        INSERT INTO dbo.[<xsl:value-of select="@table_name" />]
+        SELECT
+        <xsl:for-each select="columns/column" >
+				m.inserted_<xsl:value-of select="@column_name" />,
+			</xsl:for-each>
+            @branch_id
+        FROM #mergeResultTable m
+            LEFT JOIN dbo.[<xsl:value-of select="@table_name" />] a
+            ON <xsl:for-each select="columns/column[@is_primary_key=1]" >
+				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
+                <xsl:if test="position() != last()"> AND </xsl:if>
+			</xsl:for-each>
+        WHERE a.[<xsl:value-of select="columns/column[@is_primary_key=1][1]/@column_name" />] IS NULL AND m.is_delete = 0 AND m.action_type = 'INSERT';
+        
 		COMMIT TRANSACTION;
     END TRY 
     BEGIN CATCH 
@@ -177,6 +227,7 @@ BEGIN
 	   THROW
     END CATCH 
 END
+GO
 </xsl:for-each>
 </xsl:template>
 </xsl:stylesheet>

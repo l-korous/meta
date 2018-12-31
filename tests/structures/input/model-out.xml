@@ -1,0 +1,83 @@
+<root>
+    <configurations>
+        <configuration key="DbName" value="meta3"/>
+        <configuration key="hostname" value="localhost"/>
+        <configuration key="port" value="3000"/>
+        <configuration key="DbUser" value="sa"/>
+        <configuration key="DbPassword" value="asdf"/>
+        <configuration key="DbHostName" value="LK-HP-NEW"/>
+        <configuration key="DbInstanceName" value="SQLEXPRESS"/>
+    </configurations>
+    <tables>
+        <table table_name="Table">
+            <columns>
+                <column column_name="table_name" datatype="string" is_primary_key="1" is_unique="1" is_nullable="0"/>
+            </columns>
+        </table>
+        <table table_name="Column">
+            <columns>
+                <column column_name="column_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
+                <column column_name="table_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
+                <column column_name="datatype" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
+                <column column_name="is_primary_key" datatype="boolean" is_primary_key="0" is_unique="0" is_nullable="0"/>
+                <column column_name="is_unique" datatype="boolean" is_primary_key="0" is_unique="0" is_nullable="0"/>
+                <column column_name="is_nullable" datatype="boolean" is_primary_key="0" is_unique="0" is_nullable="0"/>
+            </columns>
+            <references>
+                <reference reference_name="col_to_table" src_table_name="Column" dest_table_name="Table" on_delete="CASCADE">
+                    <reference_details>
+                        <reference_detail src_column_name="table_name" dest_column_name="table_name" src_table_name="Column" dest_table_name="Table"/>
+                    </reference_details>
+                </reference>
+            </references>
+        </table>
+        <table table_name="Reference">
+            <columns>
+                <column column_name="reference_name" datatype="string" is_primary_key="1" is_unique="1" is_nullable="0"/>
+                <column column_name="src_table_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
+                <column column_name="dest_table_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
+                <column column_name="on_delete" datatype="string" is_primary_key="0" is_unique="0" is_nullable="1"/>
+            </columns>
+            <references>
+                <reference reference_name="ref_to_src_table" src_table_name="Reference" dest_table_name="Table" on_delete="NULL">
+                    <reference_details>
+                        <reference_detail src_column_name="src_table_name" dest_column_name="table_name" src_table_name="Reference" dest_table_name="Table"/>
+                    </reference_details>
+                </reference>
+                <reference reference_name="ref_to_dest_table" src_table_name="Reference" dest_table_name="Table" on_delete="NULL">
+                    <reference_details>
+                        <reference_detail src_column_name="dest_table_name" dest_column_name="table_name" src_table_name="Reference" dest_table_name="Table"/>
+                    </reference_details>
+                </reference>
+            </references>
+        </table>
+        <table table_name="ReferenceDetail">
+            <columns>
+                <column column_name="reference_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
+                <column column_name="src_table_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
+                <column column_name="src_column_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
+                <column column_name="dest_table_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
+                <column column_name="dest_column_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
+            </columns>
+            <references>
+                <reference reference_name="ref_detail_to_src" src_table_name="ReferenceDetail" dest_table_name="Column" on_delete="NULL">
+                    <reference_details>
+                        <reference_detail src_column_name="src_column_name" dest_column_name="column_name" src_table_name="ReferenceDetail" dest_table_name="Column"/>
+                        <reference_detail src_column_name="src_table_name" dest_column_name="table_name" src_table_name="ReferenceDetail" dest_table_name="Column"/>
+                    </reference_details>
+                </reference>
+                <reference reference_name="ref_detail_to_dest" src_table_name="ReferenceDetail" dest_table_name="Column" on_delete="NULL">
+                    <reference_details>
+                        <reference_detail src_column_name="dest_column_name" dest_column_name="column_name" src_table_name="ReferenceDetail" dest_table_name="Column"/>
+                        <reference_detail src_column_name="dest_table_name" dest_column_name="table_name" src_table_name="ReferenceDetail" dest_table_name="Column"/>
+                    </reference_details>
+                </reference>
+                <reference reference_name="ref_detail_to_ref" src_table_name="ReferenceDetail" dest_table_name="Reference" on_delete="NULL">
+                    <reference_details>
+                        <reference_detail src_column_name="reference_name" dest_column_name="reference_name" src_table_name="ReferenceDetail" dest_table_name="Reference"/>
+                    </reference_details>
+                </reference>
+            </references>
+        </table>
+    </tables>
+</root>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
+<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:meta="meta">
+    <xsl:import href="../utilities.xsl"/>
+	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
     
@@ -64,7 +65,7 @@ BEGIN
 	   END
 
 	   -- Build query
-	   DECLARE @select nvarchar(max) = 'SELECT * FROM dbo.[<xsl:value-of select="@table_name" />]';
+	   DECLARE @select nvarchar(max) = 'SELECT <xsl:for-each select="columns/column" >[<xsl:value-of select="@column_name" />]<xsl:if test="position() != last()">, </xsl:if></xsl:for-each> FROM dbo.[<xsl:value-of select="@table_name" />]';
        IF (select count(*) from @FilterBy) > 0 BEGIN
            set @select = @select + ' where ';
            set @i_f = 1
