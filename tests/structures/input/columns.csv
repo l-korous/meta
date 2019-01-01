@@ -4,8 +4,8 @@ column_name, Column, nvarchar(255), 1, 0, 0
 table_name, Column, nvarchar(255), 1, 0, 0
 datatype, Column, nvarchar(255), 0, 0, 0
 is_primary_key, Column, BIT, 0, 0, 0
-is_unique, Column, BIT, 0, 0, 0
-is_nullable, Column, BIT, 0, 0, 0
+is_unique, Column, BIT, 0, 0, 1
+is_nullable, Column, BIT, 0, 0, 1
 reference_name, Reference, nvarchar(255), 1, 1, 0
 src_table_name, Reference, nvarchar(255), 0, 0, 0
 dest_table_name, Reference, nvarchar(255), 0, 0, 0

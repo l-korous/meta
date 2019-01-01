@@ -12,7 +12,7 @@ IF OBJECT_ID ('dbo.identify_conflicts_<xsl:value-of select="@table_name" />') IS
      DROP PROCEDURE dbo.identify_conflicts_<xsl:value-of select="@table_name" />
 GO
 CREATE PROCEDURE dbo.identify_conflicts_<xsl:value-of select="@table_name" />
-(@branch_id NVARCHAR(50), @merge_version_id NVARCHAR(50), @min_version_order_master int, @number_of_conflicts int output)
+(@branch_name NVARCHAR(255), @merge_version_name NVARCHAR(255), @min_version_order_master int, @number_of_conflicts int output)
 AS
 BEGIN
     SET XACT_ABORT, NOCOUNT ON
@@ -28,9 +28,9 @@ BEGIN
                 <xsl:for-each select="columns/column[@is_primary_key=1]" >
                     h_master.[<xsl:value-of select="@column_name" />] = h_branch.[<xsl:value-of select="@column_name" />] AND
                 </xsl:for-each>
-                h_master.branch_id = 'master'
-                AND h_branch.branch_id = @branch_id
-                AND h_master.version_id in (SELECT version_id from dbo.[version] where version_order &gt; @min_version_order_master)
+                h_master.branch_name = 'master'
+                AND h_branch.branch_name = @branch_name
+                AND h_master.version_name in (SELECT version_name from dbo.[version] where version_order &gt; @min_version_order_master)
                 AND h_master.valid_to IS NULL
                 AND h_branch.valid_to IS NULL
                 AND (
@@ -50,7 +50,7 @@ BEGIN
        )
        IF @number_of_conflicts &gt; 0 BEGIN
           INSERT INTO dbo.conflicts_<xsl:value-of select="@table_name" />
-          SELECT @merge_version_id,
+          SELECT @merge_version_name,
           <xsl:for-each select="columns/column[@is_primary_key=1]" >
             h_master.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>
@@ -61,7 +61,7 @@ BEGIN
           <xsl:for-each select="columns/column[@is_primary_key=0]" >
             h_branch.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>
-          h_master.author, h_master.version_id, h_master.valid_from
+          h_master.author, h_master.version_name, h_master.valid_from
           FROM
              dbo.hist_<xsl:value-of select="@table_name" /> h_master
              INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> h_branch
@@ -69,9 +69,9 @@ BEGIN
                     <xsl:for-each select="columns/column[@is_primary_key=1]" >
                         h_master.[<xsl:value-of select="@column_name" />] = h_branch.[<xsl:value-of select="@column_name" />] AND
                     </xsl:for-each>
-                    h_master.branch_id = 'master'
-                    AND h_branch.branch_id = @branch_id
-                    AND h_master.version_id in (SELECT version_id from dbo.[version] where version_order &gt; @min_version_order_master)
+                    h_master.branch_name = 'master'
+                    AND h_branch.branch_name = @branch_name
+                    AND h_master.version_name in (SELECT version_name from dbo.[version] where version_order &gt; @min_version_order_master)
                     AND h_master.valid_to IS NULL
                     AND h_branch.valid_to IS NULL
                     AND (

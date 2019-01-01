@@ -25,6 +25,7 @@ app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, contentType,Content-Type, Accept, Authorization");
     next();
 });
+
  var server = app.listen(appConfig.port, function () {
     var port = server.address().port;
     console.log("App now running on port", port);
@@ -56,8 +57,18 @@ var swaggerSpec = swaggerJSDoc({
         },
         host: appConfig.hostName + ':' + appConfig.port,
         basePath: '/',
+        securityDefinitions: {
+            BasicAuth: {
+                type: "basic"
+            }
+        },
+        security: [
+            {
+                BasicAuth: []
+            }
+        ]
     },
-  apis: ['./routes.js'],
+  apis: ['./routes*.js'],
 });
 app.get('/swagger.json', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
@@ -67,6 +78,8 @@ app.get('/swagger.json', function(req, res) {
 app.use(express.static('public'))
 var routes = require('./routes.js');
 routes.initialize(app, appConfig, sql, pool);
+var routes_internal = require('./routes_internal.js');
+routes_internal.initialize(app, appConfig, sql, pool);
 
 </xsl:template>
 </xsl:stylesheet>

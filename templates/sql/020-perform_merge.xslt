@@ -12,7 +12,7 @@ IF OBJECT_ID ('dbo.perform_merge_<xsl:value-of select="@table_name" />') IS NOT 
      DROP PROCEDURE dbo.perform_merge_<xsl:value-of select="@table_name" />
 GO
 CREATE PROCEDURE dbo.perform_merge_<xsl:value-of select="@table_name" />
-(@branch_id NVARCHAR(50), @merge_version_id NVARCHAR(50), @current_datetime datetime)
+(@branch_name NVARCHAR(255), @merge_version_name NVARCHAR(255), @current_datetime datetime)
 AS
 BEGIN
     SET XACT_ABORT, NOCOUNT ON
@@ -26,17 +26,17 @@ BEGIN
        <xsl:for-each select="columns/column" >
             [<xsl:value-of select="@column_name" />],
         </xsl:for-each>
-        'master', @merge_version_id, @current_datetime, NULL, is_delete, CURRENT_USER
+        'master', @merge_version_name, @current_datetime, NULL, is_delete, CURRENT_USER
 	   FROM dbo.hist_<xsl:value-of select="@table_name" /> _hist
 	   WHERE
-		  branch_id = @branch_id
+		  branch_name = @branch_name
 		  AND valid_to IS NULL
 		  AND is_delete = 0
 		  AND NOT EXISTS(select * from dbo.[<xsl:value-of select="@table_name" />] _curr where
           <xsl:for-each select="columns/column[@is_primary_key=1]" >
             _curr.[<xsl:value-of select="@column_name" />] = _hist.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
-          _curr.branch_id = 'master')
+          _curr.branch_name = 'master')
 
        <xsl:if test="count(column[@is_primary_key=0]) &gt; 0">
 	   -- Updates (history)
@@ -45,23 +45,23 @@ BEGIN
        <xsl:for-each select="columns/column" >
             [<xsl:value-of select="@column_name" />],
         </xsl:for-each>
-       'master', @merge_version_id, @current_datetime, NULL, is_delete, CURRENT_USER
+       'master', @merge_version_name, @current_datetime, NULL, is_delete, CURRENT_USER
 	   FROM dbo.hist_<xsl:value-of select="@table_name" /> _hist
 	   WHERE
-		  branch_id = @branch_id
+		  branch_name = @branch_name
 		  AND valid_to IS NULL
 		  AND is_delete = 0
 		  AND EXISTS(select * from dbo.[<xsl:value-of select="@table_name" />] _curr where
           <xsl:for-each select="columns/column[@is_primary_key=1]" >
             _curr.[<xsl:value-of select="@column_name" />] = _hist.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
-          _curr.branch_id = 'master')
+          _curr.branch_name = 'master')
 		  AND (
               <xsl:for-each select="columns/column[@is_primary_key=0]" >
                    (_hist.[<xsl:value-of select="@column_name" />] &lt;&gt; (select [<xsl:value-of select="@column_name" />] from dbo.[<xsl:value-of select="../@table_name" />] _curr where <xsl:for-each select="columns/column[@is_primary_key=1]" >
                         _curr.[<xsl:value-of select="@column_name" />] = _hist.[<xsl:value-of select="@column_name" />] AND
                     </xsl:for-each>
-                   _curr.branch_id = 'master'))
+                   _curr.branch_name = 'master'))
                    <xsl:if test="position() != last()"> OR </xsl:if>
                 </xsl:for-each>
 		  )
@@ -80,14 +80,14 @@ BEGIN
             <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 _branch_hist.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />] AND
             </xsl:for-each>
-			 _branch_hist.branch_id = @branch_id
+			 _branch_hist.branch_name = @branch_name
 			 AND valid_to IS NULL
-	   WHERE _branch.branch_id = @branch_id
+	   WHERE _branch.branch_name = @branch_name
 		  AND NOT EXISTS(select * from dbo.[<xsl:value-of select="@table_name" />] _curr where
           <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 _curr.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />] AND
             </xsl:for-each>
-          _curr.branch_id = 'master')
+          _curr.branch_name = 'master')
 		  
        <xsl:if test="count(column[@is_primary_key=0]) &gt; 0">
 	   -- Updates (current)
@@ -103,14 +103,14 @@ BEGIN
           <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 _curr.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />] AND
             </xsl:for-each>
-            _curr.branch_id = 'master'
-			 AND _branch.branch_id = @branch_id
+            _curr.branch_name = 'master'
+			 AND _branch.branch_name = @branch_name
 	   INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> _branch_hist
 		  ON
             <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 _branch_hist.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />] AND
             </xsl:for-each>
-            _branch_hist.branch_id = @branch_id
+            _branch_hist.branch_name = @branch_name
 			 AND valid_to IS NULL
 			 AND (
                 <xsl:for-each select="columns/column[@is_primary_key=0]" >
@@ -128,7 +128,7 @@ BEGIN
 	    <xsl:for-each select="columns/column[@is_primary_key=1]" >
             _d.[<xsl:value-of select="@column_name" />] = _h.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
-        _h.branch_id = @branch_id and _h.is_delete = 1 and _h.valid_to is null and _d.branch_id = 'master'
+        _h.branch_name = @branch_name and _h.is_delete = 1 and _h.valid_to is null and _d.branch_name = 'master'
 
 	   -- Fix previous master history
 	   UPDATE h_master
@@ -138,10 +138,10 @@ BEGIN
         <xsl:for-each select="columns/column[@is_primary_key=1]" >
             h_master.[<xsl:value-of select="@column_name" />] = h_branch.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
-            h_master.branch_id = 'master'
-            AND h_branch.branch_id = 'master'
-            AND (h_master.version_id &lt;&gt; @merge_version_id OR h_master.version_id IS NULL)
-            AND h_branch.version_id = @merge_version_id
+            h_master.branch_name = 'master'
+            AND h_branch.branch_name = 'master'
+            AND (h_master.version_name &lt;&gt; @merge_version_name OR h_master.version_name IS NULL)
+            AND h_branch.version_name = @merge_version_name
             AND h_master.valid_to IS NULL
 
 	   COMMIT TRANSACTION;

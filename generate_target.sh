@@ -18,7 +18,7 @@ fi
 [[ "${targetPath}" != */ ]] && targetPath="${targetPath}/"
 
 # Delete target
-rm -rf ${targetPath}*
+# rm -rf ${targetPath}*
 
 for f in $(find ${templatesPath} -name "*.xslt")
 do

@@ -14,7 +14,7 @@ IF OBJECT_ID ('dbo.bulk_insert_<xsl:value-of select="@table_name" />') IS NOT NU
 GO
 
 create PROCEDURE dbo.bulk_insert_<xsl:value-of select="@table_name" />
-(@filepath nvarchar(max), @is_full_import bit = 0, @branch_id NVARCHAR(50) = 'master', @firstrow int = 2, @fieldterminator nvarchar(1) = ',', @rowterminator nvarchar(3) = '\n')
+(@filepath nvarchar(max), @is_full_import bit = 0, @branch_name NVARCHAR(255) = 'master', @firstrow int = 2, @fieldterminator nvarchar(1) = ',', @rowterminator nvarchar(3) = '\n')
 AS
 BEGIN
 	SET XACT_ABORT, NOCOUNT ON
@@ -24,18 +24,18 @@ BEGIN
 		-- SANITY CHECKS
 		-- TODO: Check that file exists
 		-- Branch exists
-	   IF NOT EXISTS (select * from dbo.branch where branch_id = @branch_id) BEGIN
-		  set @msg = 'ERROR: Branch ' + @branch_id + ' does not exist';
+	   IF NOT EXISTS (select * from dbo.branch where branch_name = @branch_name) BEGIN
+		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not exist';
 		  THROW 50000, @msg, 1
 	   END
 	   -- Branch has a current version
-	   IF NOT EXISTS (select * from dbo.branch _b inner join dbo.version _v on _b.branch_id = @branch_id and _v.version_id = _b.current_version_id) BEGIN
-		  set @msg = 'ERROR: Branch ' + @branch_id + ' does not have a current version';
+	   IF NOT EXISTS (select * from dbo.branch _b inner join dbo.version _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) BEGIN
+		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not have a current version';
 		  THROW 50000, @msg, 1
 	   END
 	   -- Branch's current version is open
-	   IF (select _v.version_status from dbo.branch _b inner join dbo.[version] _v on _b.branch_id = @branch_id and _v.version_id = _b.current_version_id) &lt;&gt; 'open' BEGIN
-		  set @msg = 'ERROR: Branch ' + @branch_id + ' has a current version, but it is not open';
+	   IF (select _v.version_status from dbo.branch _b inner join dbo.[version] _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) &lt;&gt; 'OPEN' BEGIN
+		  set @msg = 'ERROR: Branch ' + @branch_name + ' has a current version, but it is not open';
 		  THROW 50000, @msg, 1
 	   END
 	   
@@ -91,7 +91,7 @@ BEGIN
 					<xsl:if test="position() != last()">,</xsl:if>
 				</xsl:for-each>
 			FROM dbo.hist_<xsl:value-of select="@table_name" />
-			WHERE branch_id = @branch_id AND valid_to IS NULL )
+			WHERE branch_name = @branch_name AND valid_to IS NULL )
 		MERGE INTO dbo.hist_<xsl:value-of select="@table_name" /> historyTable USING ( 
 			SELECT
 				historyReaction.[action],
@@ -102,7 +102,7 @@ BEGIN
 				<xsl:for-each select="columns/column" >
 					h_<xsl:value-of select="@column_name" />,
 				</xsl:for-each>
-				_b.current_version_id
+				_b.current_version_name
 			FROM ( 
 				SELECT
 					CASE WHEN
@@ -139,20 +139,20 @@ BEGIN
 					</xsl:for-each>
 			) MyData
 			INNER JOIN historyReaction on historyReaction.[action] = MyData.[action]
-			INNER JOIN [branch] _b ON @branch_id = _b.branch_id
+			INNER JOIN [branch] _b ON @branch_name = _b.branch_name
 		) [input]
 		ON
 			<xsl:for-each select="columns/column[@is_primary_key=1]" >
 				[input].[h_<xsl:value-of select="@column_name" />] = historyTable.[<xsl:value-of select="@column_name" />] AND
 			</xsl:for-each>
-			historyTable.branch_id = @branch_id AND historyTable.valid_to IS NULL AND [input].[reaction] = 'D'
+			historyTable.branch_name = @branch_name AND historyTable.valid_to IS NULL AND [input].[reaction] = 'D'
 		WHEN MATCHED THEN UPDATE SET historyTable.valid_to = @current_datetime
 		WHEN NOT MATCHED THEN INSERT (
 			<xsl:for-each select="columns/column" >
 				[<xsl:value-of select="@column_name" />],
 			</xsl:for-each>
-			branch_id,
-			version_id,
+			branch_name,
+			version_name,
 			valid_from,
 			valid_to,
 			is_delete,
@@ -164,8 +164,8 @@ BEGIN
 			<xsl:for-each select="columns/column[@is_primary_key=0]" >
 				IIF([input].[action] = 'D', NULL, [input].[i_<xsl:value-of select="@column_name" />]),
 			</xsl:for-each>
-			@branch_id,
-			[input].current_version_id,
+			@branch_name,
+			[input].current_version_name,
 			@current_datetime, 
 			NULL,
 			IIF([input].[action] = 'D', 1, 0),
@@ -188,7 +188,7 @@ BEGIN
 				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
                 AND
 			</xsl:for-each>
-            m.is_delete = 1 AND a.branch_id = @branch_id;
+            m.is_delete = 1 AND a.branch_name = @branch_name;
            
        <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
         UPDATE a SET 
@@ -203,7 +203,7 @@ BEGIN
 				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
                 AND
 			</xsl:for-each>
-            m.is_delete = 0 AND m.action_type = 'INSERT' AND a.branch_id = @branch_id;
+            m.is_delete = 0 AND m.action_type = 'INSERT' AND a.branch_name = @branch_name;
         </xsl:if>
         
         INSERT INTO dbo.[<xsl:value-of select="@table_name" />]
@@ -211,7 +211,7 @@ BEGIN
         <xsl:for-each select="columns/column" >
 				m.inserted_<xsl:value-of select="@column_name" />,
 			</xsl:for-each>
-            @branch_id
+            @branch_name
         FROM #mergeResultTable m
             LEFT JOIN dbo.[<xsl:value-of select="@table_name" />] a
             ON <xsl:for-each select="columns/column[@is_primary_key=1]" >

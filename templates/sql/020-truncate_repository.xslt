@@ -29,8 +29,8 @@ BEGIN
         
         exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
         INSERT INTO dbo.[branch] VALUES ('master', NULL, NULL, NULL)
-        INSERT INTO dbo.[version] VALUES ('empty', 'master', NULL, 0, 'closed')
-        UPDATE dbo.[branch] SET last_closed_version_id = (select top 1 version_id from dbo.[version] where version_id = 'empty')
+        INSERT INTO dbo.[version] VALUES ('empty', 'master', NULL, 0, 'CLOSED')
+        UPDATE dbo.[branch] SET last_closed_version_name = (select top 1 version_name from dbo.[version] where version_name = 'empty')
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH 

@@ -38,17 +38,15 @@ do
 	fi 
 done
 echo SQL Deployment successful.
-exit
 
 # Deploy JS
-echo Setting up NodeJS directory
-cp -r resources/* ${targetPath}js/
+#echo Setting up NodeJS directory
+#cp -r resources/* ${targetPath}js/
 cd ${targetPath}js/
-echo Installing NodeJS modules
-tar -zxf node_modules.tar.gz
-npm install
-echo Installing NodeMon
-npm install -g nodemon
-echo Starting NodeJS
+#echo Installing NodeJS modules
+#npm install
+#echo Installing NodeMon
+#npm install -g nodemon
+#echo Starting NodeJS
 nodemon npm start
 

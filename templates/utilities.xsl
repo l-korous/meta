@@ -45,5 +45,35 @@
             <xsl:otherwise><xsl:value-of select="$dt" /></xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+        
+    <xsl:function name="meta:datatype_to_node_mssql">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'">sql.NVarChar</xsl:when>
+            <xsl:when test="$dt = 'long_string'">sql.NVarChar</xsl:when>
+            <xsl:when test="$dt = 'int'">sql.Int</xsl:when>
+            <xsl:when test="$dt = 'float'">sql.Int</xsl:when>
+            <xsl:when test="$dt = 'datetime'">sql.DateTime</xsl:when>
+            <xsl:when test="$dt = 'date'">sql.DateTime</xsl:when>
+            <xsl:when test="$dt = 'boolean'">sql.Bit</xsl:when>
+            <xsl:when test="$dt = 'time'">sql.DateTime</xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+        
+    <xsl:function name="meta:datatype_to_swagger_example">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'">13-efg-41-ahs</xsl:when>
+            <xsl:when test="$dt = 'long_string'">This is a looong text</xsl:when>
+            <xsl:when test="$dt = 'int'">13</xsl:when>
+            <xsl:when test="$dt = 'float'">258.89</xsl:when>
+            <xsl:when test="$dt = 'datetime'">'2020-10-20 10:20:10.123'</xsl:when>
+            <xsl:when test="$dt = 'date'">'2020-10-20'</xsl:when>
+            <xsl:when test="$dt = 'boolean'">true</xsl:when>
+            <xsl:when test="$dt = 'time'">'10:20:10.123'</xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
 
 </xsl:stylesheet>

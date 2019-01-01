@@ -15,43 +15,43 @@ CREATE DATABASE <xsl:value-of select="//configuration[@key='DbName']/@value" />;
 GO
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
-CREATE FUNCTION dbo.is_version_closed (@version_id NVARCHAR(50)) RETURNS BIT
+CREATE FUNCTION dbo.is_version_closed (@version_name NVARCHAR(255)) RETURNS BIT
 AS
 BEGIN
-    IF @version_id IS NULL
+    IF @version_name IS NULL
 	   RETURN 1
-    IF (SELECT version_status FROM dbo.[version] WHERE version_id = @version_id) = 'closed'
+    IF (SELECT version_status FROM dbo.[version] WHERE version_name = @version_name) = 'CLOSED'
         return 1
     return 0
 END
 GO
 CREATE TABLE dbo.[branch]
 (
-    branch_id NVARCHAR(50) PRIMARY KEY,
-    start_master_version_id NVARCHAR(50),
-    last_closed_version_id NVARCHAR(50),
-    current_version_id NVARCHAR(50)
+    branch_name NVARCHAR(255) PRIMARY KEY,
+    start_master_version_name NVARCHAR(255),
+    last_closed_version_name NVARCHAR(255),
+    current_version_name NVARCHAR(255)
 )
 
 CREATE TABLE dbo.[version]
 (
-    version_id NVARCHAR(50) PRIMARY KEY,
-    branch_id NVARCHAR(50),
-    previous_version_id NVARCHAR(50),
+    version_name NVARCHAR(255) PRIMARY KEY,
+    branch_name NVARCHAR(255),
+    previous_version_name NVARCHAR(255),
     version_order int, -- Internal, only gives order on a particular branch
     version_status nvarchar(255)
 )
 
-ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_start_master_version_id FOREIGN KEY (start_master_version_id) REFERENCES dbo.[version] (version_id)
-ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_last_closed_version_id FOREIGN KEY (last_closed_version_id) REFERENCES dbo.[version] (version_id)
-ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_current_version_id FOREIGN KEY (current_version_id) REFERENCES dbo.[version] (version_id)
-ALTER TABLE dbo.[branch] ADD CONSTRAINT CHK_branch_last_closed_version_id CHECK (dbo.is_version_closed(last_closed_version_id) = 1)
+ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_start_master_version_name FOREIGN KEY (start_master_version_name) REFERENCES dbo.[version] (version_name)
+ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_last_closed_version_name FOREIGN KEY (last_closed_version_name) REFERENCES dbo.[version] (version_name)
+ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_current_version_name FOREIGN KEY (current_version_name) REFERENCES dbo.[version] (version_name)
+ALTER TABLE dbo.[branch] ADD CONSTRAINT CHK_branch_last_closed_version_name CHECK (dbo.is_version_closed(last_closed_version_name) = 1)
 
-ALTER TABLE dbo.[version] ADD CONSTRAINT FK_version_previous_version_id FOREIGN KEY (previous_version_id) REFERENCES dbo.[version] (version_id)
-ALTER TABLE dbo.[version] ADD CONSTRAINT FK_version_branch_id FOREIGN KEY (branch_id) REFERENCES dbo.[branch] (branch_id)
+ALTER TABLE dbo.[version] ADD CONSTRAINT FK_version_previous_version_name FOREIGN KEY (previous_version_name) REFERENCES dbo.[version] (version_name)
+ALTER TABLE dbo.[version] ADD CONSTRAINT FK_version_branch_name FOREIGN KEY (branch_name) REFERENCES dbo.[branch] (branch_name)
 
 INSERT INTO dbo.[branch] VALUES ('master', NULL, NULL, NULL)
-INSERT INTO dbo.[version] VALUES ('empty', 'master', NULL, 0, 'closed')
-UPDATE dbo.[branch] SET last_closed_version_id = (select top 1 version_id from dbo.[version] where version_id = 'empty')
+INSERT INTO dbo.[version] VALUES ('empty', 'master', NULL, 0, 'CLOSED')
+UPDATE dbo.[branch] SET last_closed_version_name = (select top 1 version_name from dbo.[version] where version_name = 'empty')
 </xsl:template>
 </xsl:stylesheet>

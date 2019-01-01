@@ -12,7 +12,7 @@ IF OBJECT_ID ('dbo.get_<xsl:value-of select="@table_name" />') IS NOT NULL
      DROP PROCEDURE dbo.get_<xsl:value-of select="@table_name" />
 GO
 CREATE PROCEDURE dbo.get_<xsl:value-of select="@table_name" />
-(@branch_id NVARCHAR(50) = 'master', @jsonParams nvarchar(max) = '{}')
+(@branch_name NVARCHAR(255) = 'master', @jsonParams nvarchar(max) = '{}')
 AS
 BEGIN
     SET XACT_ABORT, NOCOUNT ON
@@ -21,8 +21,8 @@ BEGIN
     BEGIN TRANSACTION
 	   -- SANITY CHECKS
 	   -- Branch exists
-	   IF NOT EXISTS (select * from dbo.branch where branch_id = @branch_id) BEGIN
-		  set @msg = 'ERROR: Branch ' + @branch_id + ' does not exist';
+	   IF NOT EXISTS (select * from dbo.branch where branch_name = @branch_name) BEGIN
+		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not exist';
 		  THROW 50000, @msg, 1
 	   END
 	  
@@ -60,7 +60,7 @@ BEGIN
 	   BEGIN
 		  set @col_name_f = (select col from @FilterBy where _id = @i_f)
 		  set @regex = (select regex from @FilterBy where _id = @i_f)
-		  EXEC('declare @temp nvarchar(1) = (SELECT top 1 left(cast(' + @col_name_f + ' as nvarchar(max)), 1) FROM dbo.[<xsl:value-of select="@table_name" />] WHERE branch_id like ''' + @regex + ''')')
+		  EXEC('declare @temp nvarchar(1) = (SELECT top 1 left(cast(' + @col_name_f + ' as nvarchar(max)), 1) FROM dbo.[<xsl:value-of select="@table_name" />] WHERE branch_name like ''' + @regex + ''')')
 		  set @i_f = @i_f + 1
 	   END
 
