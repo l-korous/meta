@@ -41,7 +41,7 @@ echo SQL Deployment successful.
 
 # Deploy JS
 #echo Setting up NodeJS directory
-#cp -r resources/* ${targetPath}js/
+#cp -r resources/nodejs/* ${targetPath}js/
 cd ${targetPath}js/
 #echo Installing NodeJS modules
 #npm install

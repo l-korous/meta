@@ -36,7 +36,7 @@ CREATE TABLE dbo.hist_<xsl:value-of select="@table_name" />
     author NVARCHAR(255)
 )
 
-CREATE TABLE dbo.conflicts_<xsl:value-of select="@table_name" />
+CREATE TABLE meta.conflicts_<xsl:value-of select="@table_name" />
 (
     merge_version_name NVARCHAR(255),
     <xsl:for-each select="columns/column[@is_primary_key=1]" >
@@ -56,11 +56,11 @@ CREATE TABLE dbo.conflicts_<xsl:value-of select="@table_name" />
 )
 GO
 
-ALTER TABLE dbo.[<xsl:value-of select="@table_name" />] ADD CONSTRAINT FK_<xsl:value-of select="@table_name" />_branch_name FOREIGN KEY (branch_name) REFERENCES dbo.[branch] (branch_name)
-ALTER TABLE dbo.hist_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_hist_<xsl:value-of select="@table_name" />_branch_name FOREIGN KEY (branch_name) REFERENCES dbo.[branch] (branch_name)
-ALTER TABLE dbo.hist_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_hist_<xsl:value-of select="@table_name" />_version_name FOREIGN KEY (version_name) REFERENCES dbo.[version] (version_name)
-ALTER TABLE dbo.conflicts_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_conflicts_<xsl:value-of select="@table_name" />_merge_version_name FOREIGN KEY (merge_version_name) REFERENCES dbo.[version] (version_name)
-ALTER TABLE dbo.conflicts_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_conflicts_<xsl:value-of select="@table_name" />_last_version_name_master FOREIGN KEY (last_version_name_master) REFERENCES dbo.[version] (version_name)
+ALTER TABLE dbo.[<xsl:value-of select="@table_name" />] ADD CONSTRAINT FK_<xsl:value-of select="@table_name" />_branch_name FOREIGN KEY (branch_name) REFERENCES meta.branch (branch_name)
+ALTER TABLE dbo.hist_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_hist_<xsl:value-of select="@table_name" />_branch_name FOREIGN KEY (branch_name) REFERENCES meta.branch (branch_name)
+ALTER TABLE dbo.hist_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_hist_<xsl:value-of select="@table_name" />_version_name FOREIGN KEY (version_name) REFERENCES meta.[version] (version_name)
+ALTER TABLE meta.conflicts_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_conflicts_<xsl:value-of select="@table_name" />_merge_version_name FOREIGN KEY (merge_version_name) REFERENCES meta.[version] (version_name)
+ALTER TABLE meta.conflicts_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_conflicts_<xsl:value-of select="@table_name" />_last_version_name_master FOREIGN KEY (last_version_name_master) REFERENCES meta.[version] (version_name)
 </xsl:for-each>
 </xsl:template>
 </xsl:stylesheet>

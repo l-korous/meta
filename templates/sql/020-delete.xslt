@@ -17,7 +17,7 @@ CREATE PROCEDURE dbo.delete_<xsl:value-of select="@table_name" />
 <xsl:for-each select="columns/column[@is_primary_key=1]" >
     @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
 </xsl:for-each>
-    @branch_name NVARCHAR(255)
+    @branch_name NVARCHAR(255) = 'master'
 )
 AS
 BEGIN
@@ -27,17 +27,17 @@ BEGIN
     BEGIN TRANSACTION
        -- SANITY CHECKS
 	   -- Branch exists
-	   IF NOT EXISTS (select * from dbo.branch where branch_name = @branch_name) BEGIN
+	   IF NOT EXISTS (select * from meta.branch where branch_name = @branch_name) BEGIN
 		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not exist';
 		  THROW 50000, @msg, 1
 	   END
 	   -- Branch has a current version
-	   IF NOT EXISTS (select * from dbo.branch _b inner join dbo.version _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) BEGIN
+	   IF NOT EXISTS (select * from meta.branch _b inner join meta.[version] _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) BEGIN
 		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not have a current version';
 		  THROW 50000, @msg, 1
 	   END
 	   -- Branch's current version is open
-	   IF (select _v.version_status from dbo.branch _b inner join dbo.version _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) &lt;&gt; 'OPEN' BEGIN
+	   IF (select _v.version_status from meta.branch _b inner join meta.[version] _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) &lt;&gt; 'OPEN' BEGIN
 		  set @msg = 'ERROR: Branch ' + @branch_name + ' has a current version, but it is not open';
 		  THROW 50000, @msg, 1
 	   END

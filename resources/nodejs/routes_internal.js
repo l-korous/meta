@@ -144,7 +144,7 @@ app.post("/api/:branch/version/:version_name", function(req , res) {
     if(req.body['branch'])
         request.input('branch_name', sql.NVarChar, req.params['branch']);
     request.input('version_name', sql.NVarChar, req.params['version_name']);
-    request.execute('dbo.create_version', (err, result) => {
+    request.execute('meta.create_version', (err, result) => {
         if(err) {
             console.log(err);
             res.status(400).send(err);
@@ -161,7 +161,7 @@ app.post("/api/:branch/version/:version_name", function(req , res) {
 
 app.get("/api/truncate_repository", function(req , res) {          
     const request = new sql.Request(pool);
-    request.execute('dbo.truncate_repository', (err, result) => {
+    request.execute('meta.truncate_repository', (err, result) => {
         if(err) {
             console.log(err);
             res.status(400).send(err);

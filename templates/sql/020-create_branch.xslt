@@ -7,10 +7,10 @@
     
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
-IF OBJECT_ID ('dbo.create_branch') IS NOT NULL 
-     DROP PROCEDURE dbo.create_branch
+IF OBJECT_ID ('meta.create_branch') IS NOT NULL 
+     DROP PROCEDURE meta.create_branch
 GO
-CREATE PROCEDURE dbo.create_branch
+CREATE PROCEDURE meta.create_branch
 (@branch_name NVARCHAR(255))
 AS
 BEGIN
@@ -20,16 +20,16 @@ BEGIN
     BEGIN TRANSACTION
 	   -- SANITY CHECKS
 	   -- Branch does not exist
-	   IF EXISTS (select * from dbo.branch where branch_name = @branch_name)
+	   IF EXISTS (select * from meta.branch where branch_name = @branch_name)
 		  BEGIN
 			 set @msg = 'ERROR: Branch "' + @branch_name + '" already exists';
 			 THROW 50000, @msg, 1
 		  END
           
-	   declare @start_master_version_name NVARCHAR(255) = (select last_closed_version_name from dbo.branch where branch_name = 'master')
-	   declare @max_version_order_plus_one int = (SELECT MAX(version_order) from dbo.version) + 1
+	   declare @start_master_version_name NVARCHAR(255) = (select last_closed_version_name from meta.branch where branch_name = 'master')
+	   declare @max_version_order_plus_one int = (SELECT MAX(version_order) from meta.[version]) + 1
 		  
-	   insert into dbo.branch values (@branch_name, @start_master_version_name, NULL, NULL)
+	   insert into meta.branch values (@branch_name, @start_master_version_name, NULL, NULL)
 	   update branch set last_closed_version_name = @start_master_version_name where branch_name = @branch_name
 	   
 	   EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"

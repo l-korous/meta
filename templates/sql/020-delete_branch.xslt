@@ -7,10 +7,10 @@
     
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
-IF OBJECT_ID ('dbo.delete_branch') IS NOT NULL 
-     DROP PROCEDURE dbo.delete_branch
+IF OBJECT_ID ('meta.delete_branch') IS NOT NULL 
+     DROP PROCEDURE meta.delete_branch
 GO
-CREATE PROCEDURE dbo.delete_branch
+CREATE PROCEDURE meta.delete_branch
 (@branch_name NVARCHAR(255))
 AS
 BEGIN
@@ -22,7 +22,7 @@ BEGIN
 
 	   -- SANITY CHECKS
 	   -- Branch exists
-	   IF NOT EXISTS (select * from dbo.branch where branch_name = @branch_name)
+	   IF NOT EXISTS (select * from meta.branch where branch_name = @branch_name)
 		  BEGIN
 			 set @msg = 'ERROR: Branch "' + @branch_name + '" does not exist';
 			 THROW 50000, @msg, 1
@@ -35,10 +35,10 @@ BEGIN
             DELETE FROM dbo.hist_<xsl:value-of select="@table_name" />
        </xsl:for-each>
 
-	   DELETE FROM dbo.[version]
+	   DELETE FROM meta.[version]
 	   WHERE branch_name = @branch_name
 
-	   DELETE FROM dbo.[branch]
+	   DELETE FROM meta.branch
 	   WHERE branch_name = @branch_name
 
 	   exec sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
