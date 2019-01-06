@@ -31,4 +31,6 @@ do
     java -jar saxon9he.jar -s:$xmlModelFile -xsl:$f -o:${targetPath}${fullPath}/${filename}.${extension}
 done
 
+cp -r resources/* ${targetPath}
+
 echo  Generation successful.
