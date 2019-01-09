@@ -1,4 +1,0 @@
-"column_name", "table_name", "datatype", "is_primary_key", "is_unique", "is_nullable"
-sloupec_prvni, prvni, INT, 1, 1, 0
-sloupec_druhy, druha, INT, 1, 1, 0
-sloupec_treti, treti, INT, 1, 1, 0

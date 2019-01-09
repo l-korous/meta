@@ -1,6 +1,8 @@
 #!/bin/bash  
 #=================
+# Should run in the folder with sqls (../sql)
 # SQL credentials (! no quotes)
+# This needs to come from a file in the target directory (generated)
 sqlCredentials="-S localhost\\SQLEXPRESS -Usa -Pasdf"
 logDir=${pwd}deployment_log
 #=================
@@ -11,7 +13,7 @@ mkdir -p ${logDir}
 
 # Deploy SQL
 echo Deploying DB
-for f in sql/*;
+for f in *;
 do
     printf "."
     filename=${f##*/}
@@ -28,9 +30,3 @@ do
 	fi 
 done
 echo SQL Deployment successful.
-
-# Deploy JS
-#echo Executing 'npm install'
-npm install
-#echo Installing NodeMon
-npm install -g nodemon

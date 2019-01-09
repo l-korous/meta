@@ -5,8 +5,8 @@ templatesPath=${pwd}templates
 if [ $# -lt 2 ] 
 then
     echo "usage: ${0##*/} <xmlModelFile> <targetPath>"
-    xmlModelFile="/b/sw/meta/tests/structures/input/model-out.xml"
-    targetPath="/b/sw/meta/tests/structures/target"
+    xmlModelFile="/c/sw/meta/main/input/model-out.xml"
+    targetPath="/c/sw/meta/main/target"
     # exit
 else
     xmlModelFile=$1
@@ -31,6 +31,6 @@ do
     java -jar saxon9he.jar -s:$xmlModelFile -xsl:$f -o:${targetPath}${fullPath}/${filename}.${extension}
 done
 
-cp -r resources/* ${targetPath}
+#cp -r resources/* ${targetPath}
 
 echo  Generation successful.
