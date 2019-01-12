@@ -9,12 +9,12 @@
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 <xsl:for-each select="//table" >
-IF OBJECT_ID ('dbo.bulk_insert_<xsl:value-of select="@table_name" />') IS NOT NULL 
-     DROP PROCEDURE dbo.bulk_insert_<xsl:value-of select="@table_name" />
+IF OBJECT_ID ('dbo.bulk_insert_csv_<xsl:value-of select="@table_name" />') IS NOT NULL 
+     DROP PROCEDURE dbo.bulk_insert_csv_<xsl:value-of select="@table_name" />
 GO
 
-create PROCEDURE dbo.bulk_insert_<xsl:value-of select="@table_name" />
-(@table_full_name nvarchar(max), @is_full_import bit = 0, @branch_name NVARCHAR(255) = 'master')
+create PROCEDURE dbo.bulk_insert_csv_<xsl:value-of select="@table_name" />
+(@filepath nvarchar(max), @is_full_import bit = 0, @branch_name NVARCHAR(255) = 'master', @firstrow int = 2, @fieldterminator nvarchar(1) = ',', @rowterminator nvarchar(3) = '\n')
 AS
 BEGIN
 	SET XACT_ABORT, NOCOUNT ON
@@ -22,6 +22,7 @@ BEGIN
     BEGIN TRY
     BEGIN TRANSACTION
 		-- SANITY CHECKS
+		-- TODO: Check that file exists
 		-- Branch exists
 	   IF NOT EXISTS (select * from meta.branch where branch_name = @branch_name) BEGIN
 		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not exist';
@@ -37,17 +38,34 @@ BEGIN
 		  set @msg = 'ERROR: Branch ' + @branch_name + ' has a current version, but it is not open';
 		  THROW 50000, @msg, 1
 	   END
-		-- Check that table exists and has the proper structure
-        -- TODO Check that the table_full_name has the proper syntax (against SQL injection). 
-        -- Will throw an error
-        declare @sqlCheckTableExists varchar(max)
-		set @sqlCheckTableExists = 'SELECT TOP 1 <xsl:for-each select="columns/column" ><xsl:value-of select="@column_name" /><xsl:if test="position() != last()">,</xsl:if></xsl:for-each> FROM ' + @table_full_name
-		exec (@sqlCheckTableExists);
+	   
+		CREATE TABLE #loadTable (
+		<xsl:for-each select="columns/column" >
+			<xsl:value-of select="@column_name" /> NVARCHAR(MAX)
+			<xsl:if test="position() != last()">,</xsl:if>
+		</xsl:for-each>
+		);
+
+		-- This may fail (file may not exist)
+		declare @sql varchar(max)
+		set @sql = 'BULK INSERT #loadTable FROM ''' + @filepath + ''' WITH ( FIRSTROW = ' + cast(@firstrow AS nvarchar(255)) + ', FIELDTERMINATOR = ''' + @fieldterminator + ''', ROWTERMINATOR = ''' + @rowterminator + '''  );'
+		exec (@sql);
+        	   
+		CREATE TABLE #tempTable (
+		<xsl:for-each select="columns/column" >
+			<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
+			<xsl:if test="position() != last()">,</xsl:if>
+		</xsl:for-each>
+		);
         
-        declare @sqlImportToTempTable varchar(max)
-		set @sqlImportToTempTable = 'SELECT * INTO #tempTable FROM ' + @table_full_name
-		exec (@sqlImportToTempTable);
-        	
+        INSERT INTO #tempTable
+        SELECT
+        <xsl:for-each select="columns/column" >
+			CAST(TRIM(<xsl:value-of select="@column_name" />) AS <xsl:value-of select="meta:datatype_to_sql(@datatype)" />)
+			<xsl:if test="position() != last()">,</xsl:if>
+		</xsl:for-each>
+        FROM #loadTable;
+	   
 		CREATE TABLE #mergeResultTable (
 			action_type VARCHAR(50),
 			is_delete BIT,

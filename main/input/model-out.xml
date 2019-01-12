@@ -1,15 +1,16 @@
 <root>
     <configurations>
-        <configuration key="DbName" value="meta3"/>
-        <configuration key="hostname" value="localhost"/>
-        <configuration key="port" value="3000"/>
-        <configuration key="DbUser" value="sa"/>
-        <configuration key="DbPassword" value="asdf"/>
+        <configuration key="UseEmbeddedDb" value="0"/>
         <configuration key="DbHostName" value="LK-HP-NEW"/>
         <configuration key="DbPort" value="1433"/>
         <configuration key="DbInstanceName" value="SQLEXPRESS"/>
+        <configuration key="DbName" value="meta3"/>
+        <configuration key="DbUser" value="sa"/>
+        <configuration key="DbPassword" value="asdf"/>
+        <configuration key="UseEmbeddedKafka" value="0"/>
         <configuration key="ZookeeperHostAndPort" value="localhost:2181"/>
         <configuration key="KafkaBrokerHostAndPort" value="localhost:9092"/>
+        <configuration key="NodeJsPort" value="3000"/>
     </configurations>
     <tables>
         <table table_name="Table">

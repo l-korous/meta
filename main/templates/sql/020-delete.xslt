@@ -130,7 +130,7 @@ DELETED.branch_name,
 	   1,
 	   CURRENT_USER
     FROM DELETED
-    INNER JOIN [branch] _b
+    INNER JOIN meta.[branch] _b
 	   ON DELETED.branch_name = _b.branch_name
 END
 GO

@@ -56,7 +56,7 @@ BEGIN
 	   END
        
 	   declare @current_datetime datetime = getdate()
-	   declare @current_version NVARCHAR(255) = (SELECT current_version_name from [branch] where branch_name = @branch_name)
+	   declare @current_version NVARCHAR(255) = (SELECT current_version_name from meta.[branch] where branch_name = @branch_name)
        
          -- EQUALITY CHECK
          <xsl:for-each select="columns/column[@is_primary_key=0]" >

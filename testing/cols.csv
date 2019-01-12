@@ -1,0 +1,7 @@
+column_name, table_name, datatype, is_primary_key, is_unique, is_nullable
+a, tab1, INT, 1, 1, 0
+a_char, tab1, STRING, 0, 0, 0
+b, tab2, INT, 1, 1, 0
+b_char, tab2, STRING, 0, 0, 0
+c, tab3, INT, 1, 1, 0
+c_char, tab3, STRING, 0, 0, 0

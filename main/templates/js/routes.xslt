@@ -7,7 +7,7 @@
     <xsl:template match="tables">
     
 const qs = require('qs');
-exports.initialize = function (app, appConfig, sql, pool) {
+exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
 
 <xsl:for-each select="//table" >
 var <xsl:value-of select="@table_name" />_field_to_node_mssql_datatype = function (column_name){
@@ -275,10 +275,92 @@ app.put("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each select
     });
 });
 
-//
-//request.bulk(table, (err, result) =&gt; {
-    // ... error checks
-//})
+/**
+ * @swagger
+ * /api/{branch}/bulk-csv/<xsl:value-of select="@table_name" />:
+ *   post:
+ *     tags:
+ *       - <xsl:value-of select="@table_name" />
+ *     description: Bulk insert of <xsl:value-of select="@table_name" /> records (via CSV)
+ *     content: multipart/form-data
+ *     consumes:
+ *       - multipart/form-data
+ *     parameters:
+ *       - name: data
+ *         in: formData
+ *         required: true
+ *         type: file
+ *         description: "A CSV file with the structure: <xsl:for-each select="columns/column">__<xsl:value-of select="@column_name" />__<xsl:if test="position() != last()">, </xsl:if></xsl:for-each>"
+ *       - name: branch
+ *         description: name of the branch (e.g. 'master')
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: is_full_import
+ *         description: if it is a full import, all previous records not present in this import are marked as deleted
+ *         in: query
+ *         required: false
+ *         type: boolean
+ *       - name: firstrow
+ *         description: First row with data in the CSV (e.g. 2 if there is a header row in the CSV)
+ *         in: query
+ *         required: false
+ *         type: number
+ *       - name: fieldterminator
+ *         description: "Field terminator used in the CSV, e.g. '__,__'"
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: rowterminator
+ *         description: "Row terminator used in the CSV, e.g. '__\\r\\n__'"
+ *         in: query
+ *         required: false
+ *         type: string
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: 'OK'
+
+ */
+app.post("/api/:branch/bulk-csv/<xsl:value-of select="@table_name" />", function(req , res) {
+    var busboy = new Busboy({ headers: req.headers });
+    var full_path = '';
+    
+    busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+      full_path = path.join(__dirname, 'tmp', filename);
+      file.pipe(fs.createWriteStream(full_path));
+    });
+    
+    busboy.on('finish', function() {
+      const request = new sql.Request(pool);
+      request.input('branch_name', sql.NVarChar, req.params['branch']);
+      if(req.query.is_full_import)
+        request.input('is_full_import', sql.Bit, req.query.is_full_import);
+      if(req.query.first_row)
+        request.input('first_row', sql.Int, req.query.first_row);
+      if(req.query.fieldterminator)
+        request.input('fieldterminator', sql.NVarChar, req.query.fieldterminator);
+      if(req.query.row_terminator)
+        request.input('row_terminator', sql.NVarChar, req.query.row_terminator);
+      request.input('filepath', sql.NVarChar, full_path);
+      
+      request.execute('dbo.bulk_insert_csv_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
+            }
+        });
+    });
+    return req.pipe(busboy);
+});
 </xsl:for-each>
 };
 </xsl:template>

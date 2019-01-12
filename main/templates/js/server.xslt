@@ -9,11 +9,15 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var sql = require("mssql");
 var swaggerJSDoc = require('swagger-jsdoc');
+var Busboy = require('busboy');
+var fs = require('fs');
+var path = require('path');
+var os = require('os');
 
 const appConfig = {
-    hostName: '<xsl:value-of select="//configuration[@key='hostname']/@value" />',
+    hostName: 'localhost',
     version: '1.0.0',
-    port: <xsl:value-of select="//configuration[@key='port']/@value" />
+    port: <xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />
 };
 
 var app = express();
@@ -77,9 +81,9 @@ app.get('/swagger.json', function(req, res) {
 
 app.use(express.static('public'))
 var routes = require('./routes.js');
-routes.initialize(app, appConfig, sql, pool);
+routes.initialize(app, appConfig, sql, pool, Busboy, path, fs);
 var routes_internal = require('./routes_internal.js');
-routes_internal.initialize(app, appConfig, sql, pool);
+routes_internal.initialize(app, appConfig, sql, pool, Busboy, path, fs);
 
 </xsl:template>
 </xsl:stylesheet>
