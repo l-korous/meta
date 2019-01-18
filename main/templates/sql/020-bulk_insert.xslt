@@ -43,9 +43,16 @@ BEGIN
         declare @sqlCheckTableExists varchar(max)
 		set @sqlCheckTableExists = 'SELECT TOP 1 <xsl:for-each select="columns/column" ><xsl:value-of select="@column_name" /><xsl:if test="position() != last()">,</xsl:if></xsl:for-each> FROM ' + @table_full_name
 		exec (@sqlCheckTableExists);
+        	
+		CREATE TABLE #tempTable (
+			<xsl:for-each select="columns/column" >
+				<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
+				<xsl:if test="position() != last()">,</xsl:if>
+			</xsl:for-each>
+		);
         
         declare @sqlImportToTempTable varchar(max)
-		set @sqlImportToTempTable = 'SELECT * INTO #tempTable FROM ' + @table_full_name
+		set @sqlImportToTempTable = 'INSERT INTO #tempTable SELECT * FROM ' + @table_full_name
 		exec (@sqlImportToTempTable);
         	
 		CREATE TABLE #mergeResultTable (
