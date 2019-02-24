@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0, width=device-width">
+        <title>Contracts</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    </head>
+<body>
+    <nav>
+        <div onmouseover="$('#new_contract').toggle();" onmouseout="$('#new_contract').toggle();">
+            <a class="currentPage" href="contracts.html">Contracts</a>
+            <a class="hiddenNavLink" id="new_contract" href="new-contract.html">New Contract</a>
+        </div>
+        <div onmouseover="$('#new_task').toggle();" onmouseout="$('#new_task').toggle();">
+            <a href="tasks.html">Tasks</a>
+            <a class="hiddenNavLink"  id="new_task" href="new-task.html">New Task</a>
+        </div>
+        <div onmouseover="$('#new_asset').toggle();" onmouseout="$('#new_asset').toggle();">
+            <a href="assets.html">Assets</a>
+            <a class="hiddenNavLink"  id="new_asset" href="new-asset.html">New Asset</a>
+        </div>
+    </nav>
+    <div class="flex">
+        <div class="entry bubblar">
+            <h2 class="entryIdentifierField">Komerční banka</h2>
+            <div class="entryField">+420800521521</div>
+            <div class="entryLinks">
+                <h3 class="entryLinksType">Tasks</h3>
+                <a href="task.html?id=123"><div class="entryLink">Cancel Gold card (because of McKinsey insurance coverage)</div></a>
+                <a href=""><div class="entryLink">Get gold card discount</div></a>
+                <a href=""><div class="entryLink">Obtain masterpass for Airport lounge</div></a>
+                <a href=""><div class="addEntryLink">Add Task</div></a>
+            </div>
+            <div class="entryLinks">
+                <h3 class="entryLinksType">Assets</h3>
+                <div class="entryLink">
+                    <a href=""><h4 class="entryLinkIdentifierField">Enterpreneur Card</h4></a>
+                    <div class="entryLinkField">Expires 06/20</div>
+                    <div class="entryLinkField">Internet payments No</div>
+                    <div class="entryLinkField">https://www.kb.cz/cs/podnikatele-a-male-firmy/karty/debetni-karty/profi-karta</div>
+                </div>
+                <div class="entryLink">
+                    <a href=""><h4 class="entryLinkIdentifierField">Gold Personal Card</h4></a>
+                    <div class="entryLinkField">Expires 02/22</div>
+                    <div class="entryLinkField">Internet payments Yes</div>
+                    <div class="entryLinkField">https://www.kb.cz/cs/obcane/ucty/debetni-karty-rozcestnik/zlata-karta</div>
+                    <div class="entryLinkField">Conditions:<br /> - Výběr hotovosti z cizího bankomatu v ČR Zdarma<br /> - Výběr hotovosti z bankomatu v zahraničí Zdarma</div>
+                </div>
+                <div class="entryLink">
+                    <a href=""><h4 class="entryLinkIdentifierField">Travel Insurance</h4></a>
+                    <div class="entryLinkField">+420272101030</div>
+                    <div class="entryLinkField">Conditions: Healthcare, injury, legal assistance, liability, plane travel</div>
+                    <div class="entryLinkField">Relates to (bundled with): Gold Personal Card</div>
+                </div>
+                <div class="entryLink">
+                    <a href=""><h4 class="entryLinkIdentifierField">Car travel Insurance</h4></a>
+                    <div class="entryLinkField">+420266799787</div>
+                    <div class="entryLinkField">Conditions:<br /> - Non stop organizace služby dispečinkem a tlumočení při zásahu v zahraničí Zdarma<br /> - Příjezd a odjezd vozidla asistenční služby s mechanikem k zákazníkovi na místo poruchy či nehody Zdarma<br /> - Práce mechanika silniční služby Zdarma do 60 minut práce mechanika<br /> - Odtažení nepojízdného vozidla do servisu nebo jiného místa podle přání zákazníka Zdarma do vzdálenosti 50 km</div>
+                    <div class="entryLinkField">Relates to (bundled with): Gold Personal Card</div>
+                </div>
+                <div class="entryLink">
+                    <a href=""><h4 class="entryLinkIdentifierField">Prague &amp; Wien Airport lounge</h4></a>
+                    <div class="entryLinkField">Relates to (bundled with): Enterpreneur Card</div>
+                </div>
+                <a href=""><div class="addEntryLink">Add Asset</div></a>
+            </div>
+        </div>
+        <div class="entry bubblar">
+            <h2 class="entryIdentifierField">Na Cisarce 3224</h2>
+            <div class="entryLinks">
+                <h3 class="entryLinksType">Tasks</h3>
+                <a href=""><div class="entryLink">Establish regular payments</div></a>
+                <a href=""><div class="entryLink">Get box for the terrace</div></a>
+                <a href=""><div class="addEntryLink">Add Task</div></a>
+            </div>
+            <div class="entryLinks">
+                <h3 class="entryLinksType">Assets</h3>
+                <a href=""><div class="addEntryLink">Add Asset</div></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

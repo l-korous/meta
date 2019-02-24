@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0, width=device-width">
+        <title>XYZ</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        
+        <script>
+            function getParameterByName(name, url) {
+                if (!url) url = window.location.href;
+                name = name.replace(/[\[\]]/g, '\\$&');
+                var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                    results = regex.exec(url);
+                if (!results) return null;
+                if (!results[2]) return '';
+                return decodeURIComponent(results[2].replace(/\+/g, ' '));
+            }
+
+            async function loadData() {
+                const listResponse = await fetch('XYZ');
+                const jsonList = await response.json();
+                jsonList.array.forEach(function(child) {
+                    const detailResponse = await fetch('XYZ/' + childXYZ.id);
+                    const jsonDetail = await detailResponse.json();
+                    document.getElementById("XYZ").innerHTML = jsonDetail.origin;
+                });
+            }
+        </script>
+    </head>
+<body onload="loadData()">
+    <nav>
+        <div onmouseover="$('#new_XYZ').toggle();" onmouseout="$('#new_XYZ').toggle();">
+            <a href="XYZ.html">XYZ</a>
+            <a class="hiddenNavLink" id="new_XYZ" href="new-XYZ.html">New XYZ</a>
+        </div>
+    </nav>
+    <div class="flex">
+        <div class="entry bubblar">
+            <h2 class="entryIdentifierField" id="entryIdentifierField">Loading...</h2>
+            <div class="entryField" id="entryFieldXYZ">Loading...</div>
+            <div class="entryLinks">
+                <h3 class="entryLinksType" id="entryLinksTypeXYZ">XYZ</h3>
+                <div class="entryLink" id="entryLinkXYZID">
+                    <a href="XYZ.html?XYZ_id=ID">
+                        <div class="entryLinkIdentifierField" id="entryLinkXYZIDIdentifierField">Loading...</div>
+                    </a>
+                    <div class="entryLinkField" id="entryLinkXYZIDFieldXYZ">Loading...</div>
+                </div>
+                <a href=""><div class="addEntryLinkXYZ">Add XYZ</div></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
