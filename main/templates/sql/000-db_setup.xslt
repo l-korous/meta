@@ -72,8 +72,8 @@ ALTER TABLE meta.[version] ADD CONSTRAINT FK_version_previous_version_name FOREI
 ALTER TABLE meta.[version] ADD CONSTRAINT FK_version_branch_name FOREIGN KEY (branch_name) REFERENCES meta.[branch] (branch_name)
 
 INSERT INTO meta.[branch] VALUES ('master', NULL, NULL, NULL)
-INSERT INTO meta.[version] VALUES ('empty', 'master', NULL, 0, 'CLOSED')
-UPDATE meta.[branch] SET last_closed_version_name = (select top 1 version_name from meta.[version] where version_name = 'empty')
+INSERT INTO meta.[version] VALUES ('initial_version', 'master', NULL, 0, 'OPEN')
+UPDATE meta.[branch] SET current_version_name = (select top 1 version_name from meta.[version] where version_name = 'initial_version')
 
 CREATE TABLE meta.[datatype] (
     datatype_name nvarchar(255) primary key

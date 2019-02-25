@@ -6,7 +6,7 @@
     <xsl:template match="configurations">
 #!/bin/bash  
 #=================
-# Should run in the folder with sqls (../sql)
+# Should run in the folder with sqls
 # SQL credentials (! no quotes)
 <xsl:if test="//configuration[@key='UseEmbeddedDb']/@value = 1">
 sqlCredentials="-S localhost\\SQLEXPRESS"

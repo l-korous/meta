@@ -17,12 +17,13 @@ fi
 [[ "${templatesPath}" != */ ]] && templatesPath="${templatesPath}/"
 [[ "${targetPath}" != */ ]] && targetPath="${targetPath}/"
 
+# TODO: this should be uncommented together with adding cp from resources to target >>>
 # Delete target
 # rm -rf ${targetPath}*
+# <<<
 
-
-
-for ext in sql kafka js
+# All templates for the target technology
+for ext in sql kafka js html
 do
     for f in $(find ${templatesPath}${ext} -name "*.xslt")
     do
@@ -34,6 +35,7 @@ do
     done
 done
 
-java -jar saxon9he.jar -s:$xmlModelFile -xsl:templates/deploy_mssql.xslt -o:${targetPath}/sql/deploy_mssql.sh
+# Deployment etc. templates that require custom handling
+java -jar saxon9he.jar -s:$xmlModelFile -xsl:templates/deploy_mssql.xslt -o:${targetPath}/sql/deploy_mssql.s
 echo
-echo  Generation successful.
+echo  Generation done.

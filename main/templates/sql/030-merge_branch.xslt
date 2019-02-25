@@ -46,7 +46,7 @@ BEGIN
                     and _v.branch_name = @branch_name
                     AND _v.branch_name = _b.branch_name
                     and (
-                          (_b.current_version_name IS NULL AND _v.version_name &lt;&gt; _b.last_closed_version_name)
+                          (_b.current_version_name IS NULL AND (_b.last_closed_version_name IS NULL OR _v.version_name &lt;&gt; _b.last_closed_version_name))
                           OR
                           (_b.current_version_name IS NOT NULL AND _v.version_name &lt;&gt; _b.current_version_name)
                        )
@@ -64,8 +64,10 @@ BEGIN
           INSERT INTO meta.[version] VALUES (@merge_version_name, @branch_name, @previous_version_name, @max_version_order_plus_one, 'MERGING')
           UPDATE meta.branch SET current_version_name = @merge_version_name where branch_name = @branch_name
           -- NOTE: This closes the previous version
-          UPDATE meta.[version] SET version_status = 'CLOSED' where version_name = @previous_version_name
-          UPDATE meta.branch SET last_closed_version_name = @previous_version_name where branch_name = @branch_name
+          IF @previous_version_name &lt;&gt; NULL BEGIN
+              UPDATE meta.[version] SET version_status = 'CLOSED' where version_name = @previous_version_name
+              UPDATE meta.branch SET last_closed_version_name = @previous_version_name where branch_name = @branch_name
+          END
        END
        -- If the version does exist, make its status 'MERGING'
        ELSE BEGIN
