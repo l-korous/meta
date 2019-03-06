@@ -1,12 +1,16 @@
 #!/bin/bash  
 #=================
-(cd sql && exec ./deploy_mssql.sh)
-(cd js && exec ./deploy_nodejs.sh)
+# Add trailing slash
+metaHome=$META_HOME
+[[ "${metaHome}" != */ ]] && metaHome="${metaHome}/"
+
+${metaHome}main/target/sql/deploy_mssql.sh
+(cd ${metaHome}main/target/js && ./deploy_nodejs.sh)
 # Must be done after Nodejs (goes to public folder)
-(cd js && exec ./deploy_html.sh)
+${metaHome}main/target/sql/deploy_html.sh
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-    (cd kafka && exec ./deploy_kafka.sh)
+	${metaHome}main/target/kafka/deploy_kafka.sh
 fi
 
 echo Deployment done.

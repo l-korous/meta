@@ -1,12 +1,12 @@
 #!/bin/bash  
 #=================
 # Should run in the folder with kafka commands (../kafka)
-logDir=${pwd}deployment_log
-#=================
-
 # Add trailing slash
-[[ "${logDir}" != */ ]] && logDir="${logDir}/"
-mkdir -p ${logDir}
+metaHome=$META_HOME
+[[ "${metaHome}" != */ ]] && metaHome="${metaHome}/"
+# This should have a trailing slash
+logDir=${metaHome}deployment_log/
+#=================
 
 # Deploy SQL
 echo Deploying Kafka

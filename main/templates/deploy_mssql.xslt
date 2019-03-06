@@ -14,25 +14,35 @@ sqlCredentials="-S localhost\\SQLEXPRESS"
 <xsl:if test="//configuration[@key='UseEmbeddedDb']/@value = 0">
 sqlCredentials="-S <xsl:value-of select="//configuration[@key='DbHostName']/@value" /><xsl:if test="//configuration[@key='DbInstanceName']/@value != ''">\\<xsl:value-of select="//configuration[@key='DbInstanceName']/@value" />"</xsl:if>
 </xsl:if>
-logDir=${pwd}deployment_log
-#=================
-
 # Add trailing slash
-[[ "${logDir}" != */ ]] &amp;&amp; logDir="${logDir}/"
-mkdir -p ${logDir}
+metaHome=$META_HOME
+[[ "${metaHome}" != */ ]] &amp;&amp; metaHome="${metaHome}/"
+# This MUST have a trailing slash
+logDir=${metaHome}deployment_log/
+#=================
 
 # Deploy SQL
 echo Deploying DB
-for f in *.sql;
+for f in ${metaHome}main/target/sql/*.sql;
 do
     printf "."
-    sqlcmd -b -C -o ${logDir}$f.txt $sqlCredentials -i "$f" -f 65001
+	filename=${f##*/}
+	filename=${filename%".sql"}
+	logfile=${logDir}$filename.txt
+	
+	if [[ "$OSTYPE" != "linux-gnu" ]]; then
+		f=$(echo "$f" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
+		logfile=$(echo "$logfile" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
+	fi
+	
+	sqlcmd -b -C -o ${logfile} $sqlCredentials -i "$f" -f 65001
+	
 	if [ "$?" -ne 0 ] ; then
 		cat ${logDir}$filename.txt
 		exit $?
-	fi 
+	fi
 done
 echo
 echo SQL Deployment successful.
-    </xsl:template>
+	</xsl:template>
 </xsl:stylesheet>

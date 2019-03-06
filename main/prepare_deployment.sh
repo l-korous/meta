@@ -1,12 +1,15 @@
 #!/bin/bash  
 #=================
-templatesPath=${pwd}templates
+# Add trailing slash
+metaHome=$META_HOME
+[[ "${metaHome}" != */ ]] && metaHome="${metaHome}/"
+templatesPath=${metaHome}main/templates
 #=================
 if [ $# -lt 2 ] 
 then
     echo "usage: ${0##*/} <xmlModelFile> <targetPath>"
-    xmlModelFile="/b/sw/meta/main/input/model-out.xml"
-    targetPath="/b/sw/meta/main/target"
+	xmlModelFile="${metaHome}main/input/model-out.xml"
+    targetPath="${metaHome}main/target"
     # exit
 else
     xmlModelFile=$1
@@ -17,8 +20,8 @@ fi
 [[ "${targetPath}" != */ ]] && targetPath="${targetPath}/"
 
 echo Generating artefacts
-./generate_artefacts.sh $xmlModelFile $targetPath
+${metaHome}main/generate_artefacts.sh $xmlModelFile $targetPath
 echo Copying resources
-cp -r resources/* $targetPath
+cp -r ${metaHome}main/resources/* $targetPath
 
 echo Preparation successful, run deploy.sh.

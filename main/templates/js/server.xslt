@@ -15,7 +15,7 @@ var path = require('path');
 var os = require('os');
 
 const appConfig = {
-    hostName: 'localhost',
+    hostName: '<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />',
     version: '1.0.0',
     port: <xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />
 };

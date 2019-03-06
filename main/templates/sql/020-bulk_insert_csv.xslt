@@ -61,7 +61,7 @@ BEGIN
         INSERT INTO #tempTable
         SELECT
         <xsl:for-each select="columns/column" >
-			CAST(TRIM(<xsl:value-of select="@column_name" />) AS <xsl:value-of select="meta:datatype_to_sql(@datatype)" />)
+			CAST(LTRIM(RTRIM(<xsl:value-of select="@column_name" />)) AS <xsl:value-of select="meta:datatype_to_sql(@datatype)" />)
 			<xsl:if test="position() != last()">,</xsl:if>
 		</xsl:for-each>
         FROM #loadTable;

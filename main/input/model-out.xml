@@ -1,7 +1,7 @@
 <root>
     <configurations>
         <configuration key="UseEmbeddedDb" value="0"/>
-        <configuration key="DbHostName" value="LK-HP-NEW"/>
+        <configuration key="DbHostName" value="localhost"/>
         <configuration key="DbPort" value="1433"/>
         <configuration key="DbInstanceName" value="SQLEXPRESS"/>
         <configuration key="DbName" value="meta3"/>
@@ -10,6 +10,7 @@
         <configuration key="UseEmbeddedKafka" value="0"/>
         <configuration key="ZookeeperHostAndPort" value="localhost:2181"/>
         <configuration key="KafkaBrokerHostAndPort" value="localhost:9092"/>
+        <configuration key="NodeJsHostname" value="localhost"/>
         <configuration key="NodeJsPort" value="3000"/>
     </configurations>
     <tables>
