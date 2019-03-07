@@ -27,6 +27,36 @@
 					<xsl:for-each select="columns/column[@is_primary_key=0]" >
 						$(newElement).find('.entryField<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + item.<xsl:value-of select="@column_name" />;
 					</xsl:for-each>
+					
+					// For each reference, where this table is src or dest
+					<xsl:for-each select="//references/reference[@dest_table_name=$table_name or @src_table_name=$table_name]" >
+						// 	take the other table
+						<xsl:choose>
+							<xsl:when test="@dest_table_name = $table_name"><xsl:variable name="ref_table_name" select="@src_table_name" /></xsl:when>
+							<xsl:otherwise><xsl:variable name="ref_table_name" select="@dest_table_name" /></xsl:otherwise>
+						</xsl:choose>
+						
+						// 	fire a get for it
+						loadListData('http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$ref_table_name" />?FilterBy=', function(childItem) {
+							var newChildElement = $($(newElement).find('.entryLinks<xsl:value-of select="@reference_name" />')[0].appendChild(document.getElementById("entryLink-dummy").cloneNode(true)));
+								
+							newChildElement.attr("id", "entryLink<xsl:value-of select="@reference_name" />" + i);
+							<xsl:for-each select="reference_details/reference_detail">
+								<xsl:choose>
+									<xsl:when test="@dest_table_name = $table_name"><xsl:variable name="ref_column_name" select="@src_column_name" /></xsl:when>
+									<xsl:otherwise><xsl:variable name="ref_column_name" select="@dest_column_name" /></xsl:otherwise>
+								</xsl:choose>
+							
+								$(newChildElement).find('.entryLinkIdentifierField<xsl:value-of select="$ref_column_name" />')[0].innerHTML = '<xsl:value-of select="$ref_column_name" />: ' + childItem.<xsl:value-of select="$ref_column_name" />;
+							
+								$(newChildElement).find('.entryLinkIdentifierField<xsl:value-of select="$ref_column_name" />')[0].href = '<xsl:value-of select="$ref_column_name" />: ' + childItem.<xsl:value-of select="$ref_column_name" />;
+							</xsl:for-each>
+							
+							<!--
+							<xsl:attribute name="href">'http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="@dest_table_name" />.html?<xsl:for-each select="reference_details/reference_detail" ><xsl:value-of select="@dest_column_name" /><xsl:if test="position() != last()">&amp;</xsl:if></xsl:for-each></xsl:attribute>
+							-->
+						});
+					</xsl:for-each>
 					i++;
 				}, function() {
 					$('#entry-dummy').remove();
@@ -66,37 +96,45 @@
 					<xsl:attribute name="class">entryField<xsl:value-of select="@column_name" /></xsl:attribute>
 					<xsl:value-of select="@column_name" />:</xsl:element>
 			</xsl:for-each>
-            <div class="entryLinks">
-				<xsl:for-each select="references/reference" >
-					<xsl:variable name="dest_table_name" select="@dest_table_name"/>
+            <xsl:for-each select="//references/reference[@dest_table_name=$table_name or @src_table_name=$table_name]" >
+				<xsl:choose>
+					<xsl:when test="@dest_table_name = $table_name"><xsl:variable name="ref_table_name" select="@src_table_name" /></xsl:when>
+					<xsl:otherwise><xsl:variable name="ref_table_name" select="@dest_table_name" /></xsl:otherwise>
+				</xsl:choose>
+					
+				<xsl:element name="div">
+					<xsl:attribute name="class">entryLinks<xsl:value-of select="@reference_name" /></xsl:attribute>
+					
 					<xsl:element name="h3">
 						<xsl:attribute name="class">entryLinksType</xsl:attribute>
-						<xsl:value-of select="@dest_table_name" /> (<xsl:value-of select="@reference_name" />)</xsl:element>
-					
-					<xsl:element name="a">
-						<xsl:attribute name="class">entryLink</xsl:attribute>
-						<xsl:attribute name="id">entryLink<xsl:value-of select="@reference_name" /></xsl:attribute>
-						<xsl:attribute name="href">'http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="@dest_table_name" />.html?<xsl:for-each select="reference_details/reference_detail" ><xsl:value-of select="@dest_column_name" /><xsl:if test="position() != last()">&amp;</xsl:if>
-							</xsl:for-each>
-						</xsl:attribute>
-						<xsl:for-each select="reference_details/reference_detail" >
-							<xsl:element name="div">
-								<xsl:attribute name="class">entryLinkIdentifierField</xsl:attribute>
-								<xsl:attribute name="id">entryLinkIdentifierField<xsl:value-of select="@dest_column_name" /></xsl:attribute>
-								<xsl:value-of select="@dest_column_name" />
-							</xsl:element>
-						</xsl:for-each>
-					</xsl:element>
+						<xsl:value-of select="$ref_table_name" /> (<xsl:value-of select="@reference_name" />)</xsl:element>
 					
 					<a href="">
 						<xsl:element name="div">
 							<xsl:attribute name="class">addEntryLink</xsl:attribute>
 							<xsl:attribute name="id">addEntryLink<xsl:value-of select="@reference_name" /></xsl:attribute>
-							Add <xsl:value-of select="@dest_table_name" />(<xsl:value-of select="@reference_name" />)
+							Add <xsl:value-of select="$ref_table_name" />(<xsl:value-of select="@reference_name" />)
 						</xsl:element>
 					</a>
-				</xsl:for-each>
-            </div>
+					
+					<xsl:element name="a">
+						<xsl:attribute name="class">entryLink<xsl:value-of select="@reference_name" /></xsl:attribute>
+						<xsl:attribute name="id">entryLink<xsl:value-of select="@reference_name" />-dummy</xsl:attribute>
+						
+						<xsl:for-each select="reference_details/reference_detail" >
+							<xsl:choose>
+								<xsl:when test="@dest_table_name = $table_name"><xsl:variable name="ref_column_name" select="@src_column_name" /></xsl:when>
+								<xsl:otherwise><xsl:variable name="ref_column_name" select="@dest_column_name" /></xsl:otherwise>
+							</xsl:choose>
+							
+							<xsl:element name="div">
+								<xsl:attribute name="class">entryLinkIdentifierField<xsl:value-of select="$ref_column_name" /></xsl:attribute>
+								<xsl:value-of select="$ref_column_name" />
+							</xsl:element>
+						</xsl:for-each>
+					</xsl:element>
+				</xsl:element>
+			</xsl:for-each>
         </div>
     </div>
 </body>

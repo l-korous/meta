@@ -20,7 +20,7 @@ fi
 [[ "${targetPath}" != */ ]] && targetPath="${targetPath}/"
 
 echo Generating artefacts
-${metaHome}main/generate_artefacts.sh $xmlModelFile $targetPath
+${metaHome}main/bin/generate_artefacts.sh $xmlModelFile $targetPath
 echo Copying resources
 cp -r ${metaHome}main/resources/* $targetPath
 
