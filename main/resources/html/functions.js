@@ -19,6 +19,15 @@ async function loadListData(endpoint, itemCallback, globalCallback) {
 	globalCallback();
 }
 
+async function delete_item(endpoint, callback) {
+	const response = await fetch(endpoint, {
+        method: "DELETE",
+		mode: "cors"
+    });
+	await response;
+	callback();
+}
+
 async function loadDetailData(endpoint, queryString, itemCallback) {
 	const response = await fetch(endpoint + '/?' + queryString);
 	const myJson = await response.json();
