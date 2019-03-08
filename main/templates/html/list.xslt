@@ -28,7 +28,7 @@
 							deleteHref = deleteHref + '/' +  item.<xsl:value-of select="@column_name" />;
 						</xsl:for-each>
 						delete_item(deleteHref, function() {
-							window.reload();
+							location.reload();
 						});
 					}
 					
