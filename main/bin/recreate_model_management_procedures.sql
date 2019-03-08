@@ -19,4 +19,3 @@ CREATE PROCEDURE meta.model_diff_migration_generator
 AS
 BEGIN
 END
-

@@ -36,11 +36,10 @@
 							http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:
 							<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />
 							/api/master/<xsl:value-of select="$ref_table_name" />?
-							FilterBy
 							<xsl:for-each select="reference_details/reference_detail">
 								<xsl:variable name="ref_column_name" select="if(@dest_table_name = $table_name) then @src_column_name else @dest_column_name" />
 								<xsl:variable name="this_column_name" select="if(@dest_table_name = $table_name) then @dest_column_name else @src_column_name" />
-								[<xsl:value-of select="position() - 1"/>][col]=<xsl:value-of select="$ref_column_name" />
+								FilterBy[<xsl:value-of select="position() - 1"/>][col]=<xsl:value-of select="$ref_column_name" />
 								<xsl:text disable-output-escaping="yes">&amp;FilterBy</xsl:text>[<xsl:value-of select="position() - 1"/>][regex]=` + 
 								item.<xsl:value-of select="$this_column_name" /> +
 								`<xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes">&amp;</xsl:text></xsl:if>

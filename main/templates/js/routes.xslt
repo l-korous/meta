@@ -61,7 +61,7 @@ switch(column_name) {
 app.get("/api/:branch/<xsl:value-of select="@table_name" />", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
-    request.input('jsonParams', sql.NVarChar, qs.parse(req.query.FilterBy) || '{}');
+    request.input('jsonParams', sql.NVarChar, JSON.stringify(qs.parse(req.query)) || '{}');
     request.execute('dbo.get_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
         if(err) {
             console.log(err);

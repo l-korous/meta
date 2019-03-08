@@ -32,14 +32,16 @@ BEGIN
 		  col NVARCHAR(255), 
 		  dir NVARCHAR(4)
 	   )
-	   --INSERT INTO @SortBy SELECT [key], value FROM OPENJSON(@jsonParams,'$.SortBy')
+	   INSERT INTO @SortBy (col, dir)
+	   SELECT col, dir FROM OPENJSON(@jsonParams, '$.SortBy') WITH (col nvarchar(max) '$.col', dir nvarchar(max) '$.dir')
 	  
 	   DECLARE @FilterBy TABLE (
 		  _id int IDENTITY(1,1) PRIMARY KEY,
 		  col NVARCHAR(255), 
 		  regex NVARCHAR(MAX)
 	   )
-	   --INSERT INTO @FilterBy SELECT [key], value FROM OPENJSON(@jsonParams,'$.Filter')
+		INSERT INTO @FilterBy (col, regex)
+	   SELECT col, regex FROM OPENJSON(@jsonParams, '$.FilterBy') WITH (col nvarchar(max) '$.col', regex nvarchar(max) '$.regex')
 
 	   -- Input check
 	   DECLARE @i_s int = 1, @col_name_s nvarchar(255), @dir nvarchar(4)
@@ -60,7 +62,7 @@ BEGIN
 	   BEGIN
 		  set @col_name_f = (select col from @FilterBy where _id = @i_f)
 		  set @regex = (select regex from @FilterBy where _id = @i_f)
-		  EXEC('declare @temp nvarchar(1) = (SELECT top 1 left(cast(' + @col_name_f + ' as nvarchar(max)), 1) FROM dbo.[<xsl:value-of select="@table_name" />] WHERE branch_name like ''' + @regex + ''')')
+		  EXEC('declare @temp nvarchar(1) = (SELECT top 1 left(cast(' + @col_name_f + ' as nvarchar(max)), 1) FROM dbo.[<xsl:value-of select="@table_name" />] WHERE ' + @col_name_f + ' like ''' + @regex + ''')')
 		  set @i_f = @i_f + 1
 	   END
 
