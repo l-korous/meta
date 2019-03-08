@@ -32,10 +32,6 @@
 						});
 					}
 					
-					console.log('<xsl:value-of select="@table_name" />');
-					console.log(i);
-					console.log(newElement);
-					
 					<xsl:for-each select="columns/column[@is_primary_key=1]">
 						$(newElement).find('.entryIdentifierField<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + item.<xsl:value-of select="@column_name" />;
 					</xsl:for-each>
@@ -68,10 +64,6 @@
 									var linkHref='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$ref_table_name" />.html?';
 								<xsl:for-each select="reference_details/reference_detail">
 									<xsl:variable name="ref_column_name" select="if(@dest_table_name = $table_name) then @src_column_name else @dest_column_name" />
-									console.log('<xsl:value-of select="$ref_table_name" />');
-									console.log(i_<xsl:value-of select="$reference_name" />);
-									console.log(newChildElement);
-									console.log($(newChildElement).find('.entryLinkIdentifierField<xsl:value-of select="$ref_column_name" />')[0]);
 									$(newChildElement).find('.entryLinkIdentifierField<xsl:value-of select="$ref_column_name" />')[0].innerHTML = '<xsl:value-of select="$ref_column_name" />: ' + childItem.<xsl:value-of select="$ref_column_name" />;
 									linkHref = linkHref + '<xsl:value-of select="$ref_column_name" />=' + childItem.<xsl:value-of select="$ref_column_name" /><xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes">+ '&amp;'</xsl:text></xsl:if>;
 								</xsl:for-each>
@@ -162,7 +154,7 @@
 						<xsl:for-each select="reference_details/reference_detail" >
 							<xsl:variable name="ref_column_name" select="if(@dest_table_name = $table_name) then @src_column_name else @dest_column_name" />
 							
-							<xsl:element name="div">
+							<xsl:element name="a">
 								<xsl:attribute name="class">entryLinkIdentifierField<xsl:value-of select="$ref_column_name" /></xsl:attribute>
 								<xsl:text disable-output-escaping="yes">&#160;</xsl:text>
 							</xsl:element>
