@@ -93,6 +93,15 @@ nav a.hiddenNavLink:hover {
     padding:.5em;
     margin:.1em;
 }
+
+.entryDeleter {
+	color:red;
+}
+
+.entryDeleter:before {
+	content: 'Delete';
+}
+
 .entry.tabular {
     width:100%;
 }
