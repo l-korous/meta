@@ -1,9 +1,0 @@
-Reference Name, Source Table, Source Column, Dest Table, Dest Column
-col_to_table, Column, table_name, Table, table_name
-ref_to_src_table, Reference, src_table_name, Table, table_name
-ref_to_dest_table, Reference, dest_table_name, Table, table_name
-ref_detail_to_src, ReferenceDetail, src_column_name, Column, column_name
-ref_detail_to_src, ReferenceDetail, src_table_name, Column, table_name
-ref_detail_to_dest, ReferenceDetail, dest_column_name, Column, column_name
-ref_detail_to_dest, ReferenceDetail, dest_table_name, Column, table_name
-ref_detail_to_ref, ReferenceDetail, reference_name, Reference, reference_name
