@@ -14,72 +14,37 @@
         <configuration key="NodeJsPort" value="3000"/>
     </configurations>
     <tables>
-        <table table_name="Table">
+        <table table_name="Contract">
             <columns>
-                <column column_name="table_name" datatype="string" is_primary_key="1" is_unique="1" is_nullable="0"/>
+                <column column_name="name" datatype="string" is_primary_key="1" is_unique="1" is_nullable="0"/>
+                <column column_name="description" datatype="long_string" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="since" datatype="datetime" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="until" datatype="datetime" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="auto_decomission" datatype="boolean" is_primary_key="0" is_unique="0" is_nullable="1"/>
             </columns>
         </table>
-        <table table_name="Column">
+        <table table_name="Asset">
             <columns>
-                <column column_name="column_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
-                <column column_name="table_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
-                <column column_name="datatype" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
-                <column column_name="is_primary_key" datatype="boolean" is_primary_key="0" is_unique="0" is_nullable="0"/>
-                <column column_name="is_unique" datatype="boolean" is_primary_key="0" is_unique="0" is_nullable="1"/>
-                <column column_name="is_nullable" datatype="boolean" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="name" datatype="string" is_primary_key="1" is_unique="1" is_nullable="0"/>
+                <column column_name="description" datatype="long_string" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="unit_value" datatype="float" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="count" datatype="int" is_primary_key="0" is_unique="0" is_nullable="1"/>
             </columns>
-            <references>
-                <reference reference_name="col_to_table" src_table_name="Column" dest_table_name="Table" on_delete="CASCADE">
-                    <reference_details>
-                        <reference_detail src_column_name="table_name" dest_column_name="table_name" src_table_name="Column" dest_table_name="Table"/>
-                    </reference_details>
-                </reference>
-            </references>
         </table>
-        <table table_name="Reference">
+        <table table_name="Asset_Contract">
             <columns>
-                <column column_name="reference_name" datatype="string" is_primary_key="1" is_unique="1" is_nullable="0"/>
-                <column column_name="src_table_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
-                <column column_name="dest_table_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
-                <column column_name="on_delete" datatype="string" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="asset_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
+                <column column_name="contract_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
             </columns>
             <references>
-                <reference reference_name="ref_to_src_table" src_table_name="Reference" dest_table_name="Table" on_delete="NULL">
+                <reference reference_name="Asset" src_table_name="Asset_Contract" dest_table_name="Asset" on_delete="CASCADE">
                     <reference_details>
-                        <reference_detail src_column_name="src_table_name" dest_column_name="table_name" src_table_name="Reference" dest_table_name="Table"/>
+                        <reference_detail src_column_name="asset_name" dest_column_name="name" src_table_name="Asset_Contract" dest_table_name="Asset"/>
                     </reference_details>
                 </reference>
-                <reference reference_name="ref_to_dest_table" src_table_name="Reference" dest_table_name="Table" on_delete="NULL">
+                <reference reference_name="Contract" src_table_name="Asset_Contract" dest_table_name="Contract" on_delete="CASCADE">
                     <reference_details>
-                        <reference_detail src_column_name="dest_table_name" dest_column_name="table_name" src_table_name="Reference" dest_table_name="Table"/>
-                    </reference_details>
-                </reference>
-            </references>
-        </table>
-        <table table_name="ReferenceDetail">
-            <columns>
-                <column column_name="reference_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
-                <column column_name="src_table_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
-                <column column_name="src_column_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
-                <column column_name="dest_table_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
-                <column column_name="dest_column_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="0"/>
-            </columns>
-            <references>
-                <reference reference_name="ref_detail_to_src" src_table_name="ReferenceDetail" dest_table_name="Column" on_delete="NULL">
-                    <reference_details>
-                        <reference_detail src_column_name="src_column_name" dest_column_name="column_name" src_table_name="ReferenceDetail" dest_table_name="Column"/>
-                        <reference_detail src_column_name="src_table_name" dest_column_name="table_name" src_table_name="ReferenceDetail" dest_table_name="Column"/>
-                    </reference_details>
-                </reference>
-                <reference reference_name="ref_detail_to_dest" src_table_name="ReferenceDetail" dest_table_name="Column" on_delete="NULL">
-                    <reference_details>
-                        <reference_detail src_column_name="dest_column_name" dest_column_name="column_name" src_table_name="ReferenceDetail" dest_table_name="Column"/>
-                        <reference_detail src_column_name="dest_table_name" dest_column_name="table_name" src_table_name="ReferenceDetail" dest_table_name="Column"/>
-                    </reference_details>
-                </reference>
-                <reference reference_name="ref_detail_to_ref" src_table_name="ReferenceDetail" dest_table_name="Reference" on_delete="NULL">
-                    <reference_details>
-                        <reference_detail src_column_name="reference_name" dest_column_name="reference_name" src_table_name="ReferenceDetail" dest_table_name="Reference"/>
+                        <reference_detail src_column_name="contract_name" dest_column_name="name" src_table_name="Asset_Contract" dest_table_name="Contract"/>
                     </reference_details>
                 </reference>
             </references>

@@ -41,12 +41,12 @@ BEGIN
         -- TODO Check that the table_full_name has the proper syntax (against SQL injection). 
         -- Will throw an error
         declare @sqlCheckTableExists varchar(max)
-		set @sqlCheckTableExists = 'SELECT TOP 1 <xsl:for-each select="columns/column" ><xsl:value-of select="@column_name" /><xsl:if test="position() != last()">,</xsl:if></xsl:for-each> FROM ' + @table_full_name
+		set @sqlCheckTableExists = 'SELECT TOP 1 <xsl:for-each select="columns/column" >[<xsl:value-of select="@column_name" />]<xsl:if test="position() != last()">,</xsl:if></xsl:for-each> FROM ' + @table_full_name
 		exec (@sqlCheckTableExists);
         	
 		CREATE TABLE #tempTable (
 			<xsl:for-each select="columns/column" >
-				<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
+				[<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
 				<xsl:if test="position() != last()">,</xsl:if>
 			</xsl:for-each>
 		);
@@ -76,7 +76,7 @@ BEGIN
 		currentHistory AS (
 			SELECT
 				<xsl:for-each select="columns/column" >
-					<xsl:value-of select="@column_name" />
+					[<xsl:value-of select="@column_name" />]
 					<xsl:if test="position() != last()">,</xsl:if>
 				</xsl:for-each>
 			FROM dbo.hist_<xsl:value-of select="@table_name" />

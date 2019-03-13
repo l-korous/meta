@@ -41,7 +41,7 @@ BEGIN
 	   
 		CREATE TABLE #loadTable (
 		<xsl:for-each select="columns/column" >
-			<xsl:value-of select="@column_name" /> NVARCHAR(MAX)
+			[<xsl:value-of select="@column_name" />] NVARCHAR(MAX)
 			<xsl:if test="position() != last()">,</xsl:if>
 		</xsl:for-each>
 		);
@@ -53,7 +53,7 @@ BEGIN
         	   
 		CREATE TABLE #tempTable (
 		<xsl:for-each select="columns/column" >
-			<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
+			[<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
 			<xsl:if test="position() != last()">,</xsl:if>
 		</xsl:for-each>
 		);
@@ -61,7 +61,7 @@ BEGIN
         INSERT INTO #tempTable
         SELECT
         <xsl:for-each select="columns/column" >
-			CAST(LTRIM(RTRIM(<xsl:value-of select="@column_name" />)) AS <xsl:value-of select="meta:datatype_to_sql(@datatype)" />)
+			CAST(LTRIM(RTRIM([<xsl:value-of select="@column_name" />])) AS <xsl:value-of select="meta:datatype_to_sql(@datatype)" />)
 			<xsl:if test="position() != last()">,</xsl:if>
 		</xsl:for-each>
         FROM #loadTable;
@@ -87,7 +87,7 @@ BEGIN
 		currentHistory AS (
 			SELECT
 				<xsl:for-each select="columns/column" >
-					<xsl:value-of select="@column_name" />
+					[<xsl:value-of select="@column_name" />]
 					<xsl:if test="position() != last()">,</xsl:if>
 				</xsl:for-each>
 			FROM dbo.hist_<xsl:value-of select="@table_name" />
@@ -125,10 +125,10 @@ BEGIN
 						ELSE NULL
 					end as [action],
 					<xsl:for-each select="columns/column" >
-						i.<xsl:value-of select="@column_name" /> i_<xsl:value-of select="@column_name" />,
+						i.[<xsl:value-of select="@column_name" />] i_<xsl:value-of select="@column_name" />,
 					</xsl:for-each>
 					<xsl:for-each select="columns/column" >
-						h.<xsl:value-of select="@column_name" /> h_<xsl:value-of select="@column_name" />
+						h.[<xsl:value-of select="@column_name" />] h_<xsl:value-of select="@column_name" />
 						<xsl:if test="position() != last()">,</xsl:if>
 					</xsl:for-each>
 				FROM #tempTable i 

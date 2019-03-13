@@ -23,10 +23,10 @@
             <xsl:when test="$dt = 'long_string'">string</xsl:when>
             <xsl:when test="$dt = 'int'">number</xsl:when>
             <xsl:when test="$dt = 'float'">number</xsl:when>
-            <xsl:when test="$dt = 'datetime'">string</xsl:when>
-            <xsl:when test="$dt = 'date'">string</xsl:when>
+            <xsl:when test="$dt = 'datetime'">Date</xsl:when>
+            <xsl:when test="$dt = 'date'">Date</xsl:when>
             <xsl:when test="$dt = 'boolean'">boolean</xsl:when>
-            <xsl:when test="$dt = 'time'">string</xsl:when>
+            <xsl:when test="$dt = 'time'">Date</xsl:when>
             <xsl:otherwise><xsl:value-of select="$dt" /></xsl:otherwise>
         </xsl:choose>
     </xsl:function>
