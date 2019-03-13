@@ -8,7 +8,7 @@ templatesPath=${metaHome}main/templates
 if [ $# -lt 3 ] 
 then
     echo "usage: ${0##*/} <xmlModelFile> <targetPath> <sql credentials>"
-    xmlModelFile="${metaHome}main/input/model-out.xml"
+    xmlModelFile="${metaHome}main/input/model.xml"
     targetPath="${metaHome}main/target"
 	sqlCredentials="-S localhost\\SQLEXPRESS"
     # exit
