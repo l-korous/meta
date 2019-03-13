@@ -94,11 +94,11 @@ nav a.hiddenNavLink:hover {
     margin:.1em;
 }
 
-.entryDeleter {
+.entryDeleter, .entryLinkDeleter {
 	color:red;
 }
 
-.entryDeleter:before {
+.entryDeleter:before, .entryLinkDeleter:before {
 	content: 'Delete';
 }
 
@@ -126,16 +126,14 @@ nav a.hiddenNavLink:hover {
     margin:.25em 0;
 }
 
-.entry .entryLinks .entryLink {
-    
+.entry .entryLinks .entryLinkDiv {
+    border:1px solid white;
+    margin:1px;
+    padding:5px;
 }
 
-.entry .entryLinks .entryLink h4.entryLinkIdentifierField{
+.entryLinkIdentifierField {
     margin:.5em 0;
-}
-
-.entry .entryLinks .entryLink .entryLinkField{
-    
 }
 
 .entry .entryLinks .addEntryLink {
