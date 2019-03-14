@@ -1,3 +1,6 @@
 #!/bin/bash
 # Usage: <script> <xml> <xslt> <outputName>
-java -jar saxon9he.jar -s:$1 -xsl:$2 -o:$3
+# Add trailing slash
+metaHome=$META_HOME
+[[ "${metaHome}" != */ ]] && metaHome="${metaHome}/"
+java -jar ${metaHome}main/bin/saxon9he.jar -s:$1 -xsl:$2 -o:$3

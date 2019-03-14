@@ -41,7 +41,7 @@ BEGIN
 	   
 		CREATE TABLE #loadTable (
 		<xsl:for-each select="columns/column" >
-			[<xsl:value-of select="@column_name" />] NVARCHAR(MAX)
+			[<xsl:value-of select="@column_name" />] NVARCHAR(MAX) COLLATE <xsl:value-of select="//configuration[@key='DbCollation']/@value" />
 			<xsl:if test="position() != last()">,</xsl:if>
 		</xsl:for-each>
 		);
@@ -53,7 +53,7 @@ BEGIN
         	   
 		CREATE TABLE #tempTable (
 		<xsl:for-each select="columns/column" >
-			[<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
+			[<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="matches(@datatype, '.*string')">&s;COLLATE <xsl:value-of select="//configuration[@key='DbCollation']/@value" /></xsl:if>
 			<xsl:if test="position() != last()">,</xsl:if>
 		</xsl:for-each>
 		);
@@ -70,8 +70,8 @@ BEGIN
 			action_type VARCHAR(50),
 			is_delete BIT,
 			<xsl:for-each select="columns/column" >
-				inserted_<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
-                deleted_<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />
+				inserted_<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="matches(@datatype, '.*string')">&s;COLLATE <xsl:value-of select="//configuration[@key='DbCollation']/@value" /></xsl:if>,
+                deleted_<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="matches(@datatype, '.*string')">&s;COLLATE <xsl:value-of select="//configuration[@key='DbCollation']/@value" /></xsl:if>
 				<xsl:if test="position() != last()">,</xsl:if>
 			</xsl:for-each>
 		);

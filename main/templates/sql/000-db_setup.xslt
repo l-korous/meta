@@ -11,7 +11,7 @@ IF (EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE ('[' + name + ']' = '
 	   DROP DATABASE <xsl:value-of select="//configuration[@key='DbName']/@value" />
     END
 GO
-CREATE DATABASE <xsl:value-of select="//configuration[@key='DbName']/@value" />;
+CREATE DATABASE <xsl:value-of select="//configuration[@key='DbName']/@value" /> COLLATE <xsl:value-of select="//configuration[@key='DbCollation']/@value" />;
 GO
 USE <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO

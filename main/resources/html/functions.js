@@ -10,7 +10,7 @@ function getParameterByName(name, url) {
 	return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
 
-async function loadListData(endpoint, itemCallback, globalCallback) {
+async function get(endpoint, itemCallback, globalCallback) {
 	const response = await fetch(endpoint);
 	const jsonList = await response.json();
 	jsonList.forEach(function(item) {
@@ -28,8 +28,28 @@ async function delete_item(endpoint, callback) {
 	callback();
 }
 
-async function loadDetailData(endpoint, queryString, itemCallback) {
-	const response = await fetch(endpoint + '/?' + queryString);
-	const myJson = await response.json();
-	itemCallback(myJson);
+async function post_item(endpoint, body, callback) {
+	const response = await fetch(endpoint, {
+        method: "POST",
+		mode: "cors",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+    });
+	await response;
+	callback();
+}
+
+async function put_item(endpoint, body, callback) {
+	const response = await fetch(endpoint, {
+        method: "PUT",
+		mode: "cors",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+    });
+	await response;
+	callback();
 }

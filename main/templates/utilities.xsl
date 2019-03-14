@@ -75,5 +75,35 @@
             <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+        
+    <xsl:function name="meta:datatype_to_html_element">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'">input</xsl:when>
+            <xsl:when test="$dt = 'long_string'">textarea</xsl:when>
+            <xsl:when test="$dt = 'int'">input</xsl:when>
+            <xsl:when test="$dt = 'float'">input</xsl:when>
+            <xsl:when test="$dt = 'datetime'">input</xsl:when>
+            <xsl:when test="$dt = 'date'">input</xsl:when>
+            <xsl:when test="$dt = 'boolean'">input</xsl:when>
+            <xsl:when test="$dt = 'time'">input</xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+        
+    <xsl:function name="meta:datatype_to_html_input_type">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'">text</xsl:when>
+            <xsl:when test="$dt = 'long_string'">#$!ERROR#$!</xsl:when>
+            <xsl:when test="$dt = 'int'">number</xsl:when>
+            <xsl:when test="$dt = 'float'">number</xsl:when>
+            <xsl:when test="$dt = 'datetime'">datetime-local</xsl:when>
+            <xsl:when test="$dt = 'date'">date</xsl:when>
+            <xsl:when test="$dt = 'boolean'">checkbox</xsl:when>
+            <xsl:when test="$dt = 'time'">time</xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
 
 </xsl:stylesheet>

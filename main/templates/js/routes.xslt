@@ -234,7 +234,6 @@ app.post("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each selec
             request.input(key, <xsl:value-of select="@table_name" />_field_to_node_mssql_datatype(key), req.body[key]);
         }
     }
-    console.dir(req.body);
     request.execute('dbo.insert_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
         if(err) {
             console.log(err);
