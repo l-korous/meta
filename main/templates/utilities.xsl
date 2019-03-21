@@ -49,10 +49,10 @@
     <xsl:function name="meta:datatype_to_node_mssql">
         <xsl:param name="dt"/>
         <xsl:choose>
-            <xsl:when test="$dt = 'string'">sql.NVarChar</xsl:when>
-            <xsl:when test="$dt = 'long_string'">sql.NVarChar</xsl:when>
+            <xsl:when test="$dt = 'string'">sql.NVarChar(255)</xsl:when>
+            <xsl:when test="$dt = 'long_string'">sql.NVarChar(sql.MAX)</xsl:when>
             <xsl:when test="$dt = 'int'">sql.Int</xsl:when>
-            <xsl:when test="$dt = 'float'">sql.Int</xsl:when>
+            <xsl:when test="$dt = 'float'">sql.Float</xsl:when>
             <xsl:when test="$dt = 'datetime'">sql.DateTime</xsl:when>
             <xsl:when test="$dt = 'date'">sql.DateTime</xsl:when>
             <xsl:when test="$dt = 'boolean'">sql.Bit</xsl:when>
@@ -105,5 +105,37 @@
             <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
         </xsl:choose>
     </xsl:function>
+        
+    <xsl:function name="meta:datatype_to_html_input_attribute_name">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'"></xsl:when>
+            <xsl:when test="$dt = 'long_string'"></xsl:when>
+            <xsl:when test="$dt = 'int'"></xsl:when>
+            <xsl:when test="$dt = 'float'">step</xsl:when>
+            <xsl:when test="$dt = 'datetime'"></xsl:when>
+            <xsl:when test="$dt = 'date'"></xsl:when>
+            <xsl:when test="$dt = 'boolean'"></xsl:when>
+            <xsl:when test="$dt = 'time'"></xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+        
+    <xsl:function name="meta:datatype_to_html_input_attribute_value">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'"></xsl:when>
+            <xsl:when test="$dt = 'long_string'"></xsl:when>
+            <xsl:when test="$dt = 'int'"></xsl:when>
+            <xsl:when test="$dt = 'float'">0.000000000001</xsl:when>
+            <xsl:when test="$dt = 'datetime'"></xsl:when>
+            <xsl:when test="$dt = 'date'"></xsl:when>
+            <xsl:when test="$dt = 'boolean'"></xsl:when>
+            <xsl:when test="$dt = 'time'"></xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+    
+    
 
 </xsl:stylesheet>

@@ -50,6 +50,11 @@
                         <xsl:when test="meta:datatype_to_html_element(@datatype) = 'input'" >
                             <xsl:element name="input">
                                 <xsl:attribute name="type"><xsl:value-of select="meta:datatype_to_html_input_type(@datatype)" /></xsl:attribute>
+                                <xsl:if test="meta:datatype_to_html_input_attribute_name(@datatype) != ''">
+                                    <xsl:attribute name="{meta:datatype_to_html_input_attribute_name(@datatype)}">
+                                        <xsl:value-of select="meta:datatype_to_html_input_attribute_value(@datatype)" />
+                                    </xsl:attribute>
+                                </xsl:if>
                                 <xsl:attribute name="name">new_<xsl:value-of select="@column_name" /></xsl:attribute>
                             </xsl:element>
                         </xsl:when>

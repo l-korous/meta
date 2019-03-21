@@ -61,7 +61,7 @@ BEGIN
          -- EQUALITY CHECK
          <xsl:for-each select="columns/column[@is_primary_key=0]" >
             declare @<xsl:value-of select="@column_name" />_same bit = (select IIF([<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" />,1,0) FROM dbo.[<xsl:value-of select="../../@table_name" />] WHERE
-            <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            <xsl:for-each select="../../columns/column[@is_primary_key=1]" >
                 [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
             </xsl:for-each>
             branch_name = @branch_name)
