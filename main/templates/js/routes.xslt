@@ -10,16 +10,26 @@ const qs = require('qs');
 exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
 
 <xsl:for-each select="//table" >
-var <xsl:value-of select="@table_name" />_field_to_node_mssql_datatype = function (column_name){
+<xsl:variable name="table_name" select="@table_name"/>
+var <xsl:value-of select="$table_name" />_field_to_node_mssql_datatype = function (column_name){
 switch(column_name) {
 <xsl:for-each select="columns/column" >case "<xsl:value-of select="@column_name" />": return <xsl:value-of select="meta:datatype_to_node_mssql(@datatype)" />;break;
 </xsl:for-each>}
+}
+var <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion = function (column_name, column_value){
+    switch(column_name) {
+    <xsl:for-each select="columns/column" >
+    case "<xsl:value-of select="@column_name" />": 
+        var fieldValue = column_value;
+        return fieldValue ? <xsl:value-of select="meta:datatype_to_js_conversion(@datatype)" /> : null;
+        break;</xsl:for-each>
+    }
 }
 
 /**
  * @swagger
  * definitions:
- *   <xsl:value-of select="@table_name" />:
+ *   <xsl:value-of select="$table_name" />:
  *     required: [<xsl:for-each select="columns/column[@is_nullable=0 or @is_primary_key=1]" ><xsl:value-of select="@column_name" /><xsl:if test="position() != last()">, </xsl:if></xsl:for-each>]
  *     properties:
  *      <xsl:for-each select="columns/column" ><xsl:value-of select="@column_name" />:
@@ -29,11 +39,11 @@ switch(column_name) {
  *              "DB datatype: <xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="@is_primary_key = 1"> | PRIMARY KEY</xsl:if><xsl:if test="@is_unique = 1"> | UNIQUE</xsl:if><xsl:if test="@is_nullable = 0"> | REQUIRED</xsl:if>"
  *      </xsl:for-each>
  *
- * /api/{branch}/<xsl:value-of select="@table_name" />:
+ * /api/{branch}/<xsl:value-of select="$table_name" />:
  *   get:
  *     tags:
- *       - <xsl:value-of select="@table_name" />
- *     description: Returns all <xsl:value-of select="@table_name" /> records
+ *       - <xsl:value-of select="$table_name" />
+ *     description: Returns all <xsl:value-of select="$table_name" /> records
  *     parameters:
  *       - name: branch
  *         description: name of the branch (e.g. 'master')
@@ -54,15 +64,15 @@ switch(column_name) {
  *       - application/json
  *     responses:
  *       200:
- *         description: An array of <xsl:value-of select="@table_name" /> records
+ *         description: An array of <xsl:value-of select="$table_name" /> records
  *         schema:
- *           $ref: '#/definitions/<xsl:value-of select="@table_name" />'
+ *           $ref: '#/definitions/<xsl:value-of select="$table_name" />'
  */
-app.get("/api/:branch/<xsl:value-of select="@table_name" />", function(req , res) {          
+app.get("/api/:branch/<xsl:value-of select="$table_name" />", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     request.input('jsonParams', sql.NVarChar, JSON.stringify(qs.parse(req.query)) || '{}');
-    request.execute('dbo.get_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
+    request.execute('dbo.get_<xsl:value-of select="$table_name" />', (err, result) =&gt; {
         if(err) {
             console.log(err);
             res.status(400).send(err);
@@ -79,11 +89,11 @@ app.get("/api/:branch/<xsl:value-of select="@table_name" />", function(req , res
 
 /**
  * @swagger
- * /api/{branch}/<xsl:value-of select="@table_name" /><xsl:for-each select="columns/column[@is_primary_key=1]">/{<xsl:value-of select="@column_name" />}</xsl:for-each>:
+ * /api/{branch}/<xsl:value-of select="$table_name" /><xsl:for-each select="columns/column[@is_primary_key=1]">/{<xsl:value-of select="@column_name" />}</xsl:for-each>:
  *   get:
  *     tags:
- *       - <xsl:value-of select="@table_name" />
- *     description: Returns a single <xsl:value-of select="@table_name" /> record
+ *       - <xsl:value-of select="$table_name" />
+ *     description: Returns a single <xsl:value-of select="$table_name" /> record
  *     parameters:
  *       - name: branch
  *         description: name of the branch (e.g. 'master')
@@ -100,13 +110,13 @@ app.get("/api/:branch/<xsl:value-of select="@table_name" />", function(req , res
  *       - application/json
  *     responses:
  *       200:
- *         description: A <xsl:value-of select="@table_name" /> record
+ *         description: A <xsl:value-of select="$table_name" /> record
  *         schema:
- *           $ref: '#/definitions/<xsl:value-of select="@table_name" />'
+ *           $ref: '#/definitions/<xsl:value-of select="$table_name" />'
  *   post:
  *     tags:
- *       - <xsl:value-of select="@table_name" />
- *     description: Creates a single <xsl:value-of select="@table_name" /> record
+ *       - <xsl:value-of select="$table_name" />
+ *     description: Creates a single <xsl:value-of select="$table_name" /> record
  *     parameters:
  *       - name: branch
  *         description: name of the branch (e.g. 'master')
@@ -130,13 +140,13 @@ app.get("/api/:branch/<xsl:value-of select="@table_name" />", function(req , res
  *       - application/json
  *     responses:
  *       200:
- *         description: The created <xsl:value-of select="@table_name" /> record
+ *         description: The created <xsl:value-of select="$table_name" /> record
  *         schema:
- *           $ref: '#/definitions/<xsl:value-of select="@table_name" />'
+ *           $ref: '#/definitions/<xsl:value-of select="$table_name" />'
  <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">*   put:
  *     tags:
- *       - <xsl:value-of select="@table_name" />
- *     description: Updates a single <xsl:value-of select="@table_name" /> record
+ *       - <xsl:value-of select="$table_name" />
+ *     description: Updates a single <xsl:value-of select="$table_name" /> record
  *     parameters:
  *       - name: branch
  *         description: name of the branch (e.g. 'master')
@@ -160,13 +170,13 @@ app.get("/api/:branch/<xsl:value-of select="@table_name" />", function(req , res
  *       - application/json
  *     responses:
  *       200:
- *         description: The updated <xsl:value-of select="@table_name" /> record
+ *         description: The updated <xsl:value-of select="$table_name" /> record
  *         schema:
- *           $ref: '#/definitions/<xsl:value-of select="@table_name" />'</xsl:if>
+ *           $ref: '#/definitions/<xsl:value-of select="$table_name" />'</xsl:if>
  *   delete:
  *     tags:
- *       - <xsl:value-of select="@table_name" />
- *     description: Deletes a single <xsl:value-of select="@table_name" /> record
+ *       - <xsl:value-of select="$table_name" />
+ *     description: Deletes a single <xsl:value-of select="$table_name" /> record
  *     parameters:
  *       - name: branch
  *         description: name of the branch (e.g. 'master')
@@ -185,12 +195,12 @@ app.get("/api/:branch/<xsl:value-of select="@table_name" />", function(req , res
  *       200:
  *         description: Successfully deleted
  */
-app.get("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
+app.get("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     <xsl:for-each select="columns/column[@is_primary_key=1]">
     request.input('<xsl:value-of select="@column_name" />', <xsl:value-of select="meta:datatype_to_node_mssql(@datatype)" />, req.params['<xsl:value-of select="@column_name" />']);</xsl:for-each>
-    request.execute('dbo.get_single_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
+    request.execute('dbo.get_single_<xsl:value-of select="$table_name" />', (err, result) =&gt; {
         if(err) {
             console.log(err);
             res.status(400).send(err);
@@ -204,12 +214,12 @@ app.get("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each select
         }
     });
 });
-app.delete("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
+app.delete("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     <xsl:for-each select="columns/column[@is_primary_key=1]">
     request.input('<xsl:value-of select="@column_name" />', <xsl:value-of select="meta:datatype_to_node_mssql(@datatype)" />, req.params['<xsl:value-of select="@column_name" />']);</xsl:for-each>
-    request.execute('dbo.delete_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
+    request.execute('dbo.delete_<xsl:value-of select="$table_name" />', (err, result) =&gt; {
         if(err) {
             console.log(err);
             res.status(400).send(err);
@@ -223,18 +233,18 @@ app.delete("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each sel
         }
     });
 });
-app.post("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
+app.post("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     <xsl:for-each select="columns/column[@is_primary_key=1]">
-    request.input('<xsl:value-of select="@column_name" />', <xsl:value-of select="meta:datatype_to_node_mssql(@datatype)" />, req.params['<xsl:value-of select="@column_name" />']);</xsl:for-each>
+    request.input('<xsl:value-of select="@column_name" />', <xsl:value-of select="meta:datatype_to_node_mssql(@datatype)" />, <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion('<xsl:value-of select="@column_name" />', req.params['<xsl:value-of select="@column_name" />']));</xsl:for-each>
     
     for (var key in req.body) {
         if (req.body.hasOwnProperty(key)) {
-            request.input(key, <xsl:value-of select="@table_name" />_field_to_node_mssql_datatype(key), req.body[key]);
+            request.input(key, <xsl:value-of select="$table_name" />_field_to_node_mssql_datatype(key), <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion(key, req.body[key]));
         }
     }
-    request.execute('dbo.insert_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
+    request.execute('dbo.insert_<xsl:value-of select="$table_name" />', (err, result) =&gt; {
         if(err) {
             console.log(err);
             res.status(400).send(err);
@@ -248,18 +258,18 @@ app.post("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each selec
         }
     });
 });
-app.put("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
+app.put("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     <xsl:for-each select="columns/column[@is_primary_key=1]">
-    request.input('<xsl:value-of select="@column_name" />', <xsl:value-of select="meta:datatype_to_node_mssql(@datatype)" />, req.params['<xsl:value-of select="@column_name" />']);</xsl:for-each>
+    request.input('<xsl:value-of select="@column_name" />', <xsl:value-of select="meta:datatype_to_node_mssql(@datatype)" />, <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion('<xsl:value-of select="@column_name" />', req.params['<xsl:value-of select="@column_name" />']));</xsl:for-each>
     
     for (var key in req.body) {
         if (req.body.hasOwnProperty(key)) {
-            request.input(key, <xsl:value-of select="@table_name" />_field_to_node_mssql_datatype(key), req.body[key]);
+            request.input(key, <xsl:value-of select="$table_name" />_field_to_node_mssql_datatype(key), <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion(key, req.body[key]));
         }
     }
-    request.execute('dbo.update_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
+    request.execute('dbo.update_<xsl:value-of select="$table_name" />', (err, result) =&gt; {
         if(err) {
             console.log(err);
             res.status(400).send(err);
@@ -276,11 +286,11 @@ app.put("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each select
 
 /**
  * @swagger
- * /api/{branch}/bulk-csv/<xsl:value-of select="@table_name" />:
+ * /api/{branch}/bulk-csv/<xsl:value-of select="$table_name" />:
  *   post:
  *     tags:
- *       - <xsl:value-of select="@table_name" />
- *     description: Bulk insert of <xsl:value-of select="@table_name" /> records (via CSV)
+ *       - <xsl:value-of select="$table_name" />
+ *     description: Bulk insert of <xsl:value-of select="$table_name" /> records (via CSV)
  *     content: multipart/form-data
  *     consumes:
  *       - multipart/form-data
@@ -322,7 +332,7 @@ app.put("/api/:branch/<xsl:value-of select="@table_name" />/<xsl:for-each select
  *         description: 'OK'
 
  */
-app.post("/api/:branch/bulk-csv/<xsl:value-of select="@table_name" />", function(req , res) {
+app.post("/api/:branch/bulk-csv/<xsl:value-of select="$table_name" />", function(req , res) {
     var busboy = new Busboy({ headers: req.headers });
     var full_path = '';
     
@@ -344,7 +354,7 @@ app.post("/api/:branch/bulk-csv/<xsl:value-of select="@table_name" />", function
         request.input('row_terminator', sql.NVarChar, req.query.row_terminator);
       request.input('filepath', sql.NVarChar, full_path);
       
-      request.execute('dbo.bulk_insert_csv_<xsl:value-of select="@table_name" />', (err, result) =&gt; {
+      request.execute('dbo.bulk_insert_csv_<xsl:value-of select="$table_name" />', (err, result) =&gt; {
             if(err) {
                 console.log(err);
                 res.status(400).send(err);

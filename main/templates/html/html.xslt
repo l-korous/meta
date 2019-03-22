@@ -80,6 +80,9 @@
                                 <xsl:element name="input">
                                     <xsl:attribute name="type"><xsl:value-of select="meta:datatype_to_html_input_type(@datatype)" /></xsl:attribute>
                                     <xsl:attribute name="name">dummy_<xsl:value-of select="@column_name" /></xsl:attribute>
+                                    <xsl:if test="@is_primary_key=1">
+                                        <xsl:attribute name="readonly" />
+                                    </xsl:if>
                                 </xsl:element>
                             </xsl:when>
                             <xsl:when test="meta:datatype_to_html_element(@datatype) = 'textarea'" >

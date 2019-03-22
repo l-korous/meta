@@ -67,7 +67,7 @@ function getLink<xsl:value-of select="$table_name" />(item) {
 function saveNew() {
     var body = {
         <xsl:for-each select="columns/column" >
-        <xsl:value-of select="@column_name" />: $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=new_<xsl:value-of select="@column_name" />]').val()<xsl:if test="position() != last()">,
+        <xsl:value-of select="@column_name" />: $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=new_<xsl:value-of select="@column_name" />]').val() == '' ? null : $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=new_<xsl:value-of select="@column_name" />]').val()<xsl:if test="position() != last()">,
         </xsl:if></xsl:for-each>
     };
     post_item(getLink<xsl:value-of select="$table_name" />(body), body, function() {
@@ -78,7 +78,7 @@ function saveNew() {
 function save(i) {
     var body = {
         <xsl:for-each select="columns/column" >
-        <xsl:value-of select="@column_name" />: $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=' + i + '<xsl:value-of select="@column_name" />]').val()<xsl:if test="position() != last()">,
+        <xsl:value-of select="@column_name" />: $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=' + i + '<xsl:value-of select="@column_name" />]').val() == '' ? null : $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=' + i + '<xsl:value-of select="@column_name" />]').val()<xsl:if test="position() != last()">,
         </xsl:if></xsl:for-each>
     };
     put_item(getLink<xsl:value-of select="$table_name" />(body), body, function() {
@@ -92,6 +92,25 @@ function handleNew() {
         $('.entryNew').show();
     }
 }
+
+<xsl:for-each select="columns/column" >
+function <xsl:value-of select="@column_name" />_field_to_input_value(item, elem) {
+    var fieldValue = item.<xsl:value-of select="@column_name" />;
+    if(fieldValue)
+        <xsl:value-of select="meta:datatype_to_input_value_conversion(@datatype)" />;
+}</xsl:for-each>
+
+<xsl:for-each select="columns/column" >
+function <xsl:value-of select="@column_name" />_field_to_js_datatype_conversion(item) {
+    var fieldValue = item.<xsl:value-of select="@column_name" />;
+    return fieldValue ? <xsl:value-of select="meta:datatype_to_js_conversion(@datatype)" /> : null;
+}</xsl:for-each>
+
+<xsl:for-each select="columns/column" >
+function <xsl:value-of select="@column_name" />_field_to_html_conversion(item) {
+    var fieldValue = <xsl:value-of select="@column_name" />_field_to_js_datatype_conversion(item);
+    return fieldValue ? fieldValue<xsl:value-of select="meta:js_to_html_conversion(@datatype)" /> : null;
+}</xsl:for-each>
 
 function loadCall() {
     handleNew();
@@ -107,18 +126,14 @@ function loadCall() {
         }
         
         $(newElement).find('.editButton').attr('i', i);
-        <xsl:for-each select="columns/column[@is_primary_key=1]">
-        $(newElement).find('.entryIdentifierField<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + item.<xsl:value-of select="@column_name" />;
-        $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]').val(item.<xsl:value-of select="@column_name" />);
+        <!-- Read & Write -->
+        <xsl:for-each select="columns/column" >
+        $(newElement).find('.entry<xsl:if test="@is_primary_key=1">Identifier</xsl:if>Field<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + <xsl:value-of select="@column_name" />_field_to_html_conversion(item);
+        <xsl:value-of select="@column_name" />_field_to_input_value(item, $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]'));
         $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]').attr('name', i + '<xsl:value-of select="@column_name" />');
         $(newElement).find('[for=dummy_<xsl:value-of select="@column_name" />]').attr('for', i + '<xsl:value-of select="@column_name" />');
         </xsl:for-each>
-        <xsl:for-each select="columns/column[@is_primary_key=0]" >
-        $(newElement).find('.entryField<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + item.<xsl:value-of select="@column_name" />;
-        $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]').val(item.<xsl:value-of select="@column_name" />);
-        $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]').attr('name', i + '<xsl:value-of select="@column_name" />');
-        $(newElement).find('[for=dummy_<xsl:value-of select="@column_name" />]').attr('for', i + '<xsl:value-of select="@column_name" />');
-        </xsl:for-each>
+        
         <xsl:for-each select="//references/reference[@dest_table_name=$table_name or @src_table_name=$table_name]" >
         <!-- For each reference, where this table is src or dest take the other table and fire a GET for it -->
         var i_<xsl:value-of select="@reference_name" /> = 1;

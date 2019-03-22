@@ -27,7 +27,53 @@
             <xsl:when test="$dt = 'date'">Date</xsl:when>
             <xsl:when test="$dt = 'boolean'">boolean</xsl:when>
             <xsl:when test="$dt = 'time'">Date</xsl:when>
-            <xsl:otherwise><xsl:value-of select="$dt" /></xsl:otherwise>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
+    <!-- This is an expression operating on 'elem' and 'fieldValue' variable -->
+    <xsl:function name="meta:datatype_to_input_value_conversion">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'">elem.val(fieldValue)</xsl:when>
+            <xsl:when test="$dt = 'long_string'">elem.val(fieldValue)</xsl:when>
+            <xsl:when test="$dt = 'int'">elem.val(fieldValue)</xsl:when>
+            <xsl:when test="$dt = 'float'">elem.val(fieldValue)</xsl:when>
+            <xsl:when test="$dt = 'datetime'">elem.val(new Date(fieldValue).toJSON().slice(0,19))</xsl:when>
+            <xsl:when test="$dt = 'date'">elem.val(new Date(fieldValue).toJSON().slice(0,19))</xsl:when>
+            <xsl:when test="$dt = 'boolean'">if(fieldValue) elem.attr('checked', true)</xsl:when>
+            <xsl:when test="$dt = 'time'">elem.val(new Date(fieldValue).toJSON().slice(0,19))</xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
+    <xsl:function name="meta:js_to_html_conversion">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'"></xsl:when>
+            <xsl:when test="$dt = 'long_string'"></xsl:when>
+            <xsl:when test="$dt = 'int'"></xsl:when>
+            <xsl:when test="$dt = 'float'"></xsl:when>
+            <xsl:when test="$dt = 'datetime'">.toLocaleString()</xsl:when>
+            <xsl:when test="$dt = 'date'">.toLocaleString()</xsl:when>
+            <xsl:when test="$dt = 'boolean'"></xsl:when>
+            <xsl:when test="$dt = 'time'">.toLocaleString()</xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+
+    <xsl:function name="meta:datatype_to_js_conversion">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'">fieldValue</xsl:when>
+            <xsl:when test="$dt = 'long_string'">fieldValue</xsl:when>
+            <xsl:when test="$dt = 'int'">fieldValue</xsl:when>
+            <xsl:when test="$dt = 'float'">fieldValue</xsl:when>
+            <xsl:when test="$dt = 'datetime'">new Date(fieldValue)</xsl:when>
+            <xsl:when test="$dt = 'date'">new Date(fieldValue)</xsl:when>
+            <xsl:when test="$dt = 'boolean'">fieldValue</xsl:when>
+            <xsl:when test="$dt = 'time'">new Date(fieldValue)</xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
         </xsl:choose>
     </xsl:function>
         
@@ -42,21 +88,6 @@
             <xsl:when test="$dt = 'date'">date ('YYYY-MM-DD')</xsl:when>
             <xsl:when test="$dt = 'boolean'">boolean</xsl:when>
             <xsl:when test="$dt = 'time'">time ('HH:mm:ss.###')</xsl:when>
-            <xsl:otherwise><xsl:value-of select="$dt" /></xsl:otherwise>
-        </xsl:choose>
-    </xsl:function>
-        
-    <xsl:function name="meta:datatype_to_node_mssql">
-        <xsl:param name="dt"/>
-        <xsl:choose>
-            <xsl:when test="$dt = 'string'">sql.NVarChar(255)</xsl:when>
-            <xsl:when test="$dt = 'long_string'">sql.NVarChar(sql.MAX)</xsl:when>
-            <xsl:when test="$dt = 'int'">sql.Int</xsl:when>
-            <xsl:when test="$dt = 'float'">sql.Float</xsl:when>
-            <xsl:when test="$dt = 'datetime'">sql.DateTime</xsl:when>
-            <xsl:when test="$dt = 'date'">sql.DateTime</xsl:when>
-            <xsl:when test="$dt = 'boolean'">sql.Bit</xsl:when>
-            <xsl:when test="$dt = 'time'">sql.DateTime</xsl:when>
             <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
         </xsl:choose>
     </xsl:function>
@@ -72,6 +103,21 @@
             <xsl:when test="$dt = 'date'">'2020-10-20'</xsl:when>
             <xsl:when test="$dt = 'boolean'">true</xsl:when>
             <xsl:when test="$dt = 'time'">'10:20:10.123'</xsl:when>
+            <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
+        </xsl:choose>
+    </xsl:function>
+        
+    <xsl:function name="meta:datatype_to_node_mssql">
+        <xsl:param name="dt"/>
+        <xsl:choose>
+            <xsl:when test="$dt = 'string'">sql.NVarChar(255)</xsl:when>
+            <xsl:when test="$dt = 'long_string'">sql.NVarChar(sql.MAX)</xsl:when>
+            <xsl:when test="$dt = 'int'">sql.Int</xsl:when>
+            <xsl:when test="$dt = 'float'">sql.Float</xsl:when>
+            <xsl:when test="$dt = 'datetime'">sql.DateTime</xsl:when>
+            <xsl:when test="$dt = 'date'">sql.DateTime</xsl:when>
+            <xsl:when test="$dt = 'boolean'">sql.Bit</xsl:when>
+            <xsl:when test="$dt = 'time'">sql.DateTime</xsl:when>
             <xsl:otherwise>#$!ERROR#$!</xsl:otherwise>
         </xsl:choose>
     </xsl:function>
