@@ -67,6 +67,7 @@
             <button class="saveButton" type="button" onclick="saveNew()">Save</button>
         </div>
         <div class="entry bubblar" id="entry-dummy">
+            <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
             <div class="write" style="display:none">
                 <button class="editButton" onclick="$(this).parent().toggle();$(this).parent().next().toggle();save($(this).attr('i'));">Save</button>
                 <xsl:for-each select="columns/column" >
@@ -92,8 +93,10 @@
                     </div>
                 </xsl:for-each>
             </div>
+            </xsl:if>
             <div class="read">
-                <button class="editButton" onclick="$(this).parent().toggle();$(this).parent().prev().toggle();">Edit</button>
+                <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0"><button class="editButton" onclick="$(this).parent().toggle();$(this).parent().prev().toggle();">Edit</button></xsl:if>
+                <button class="entryDeleter">Delete</button>
                 <xsl:for-each select="columns/column[@is_primary_key=1]" >
                     <xsl:element name="h2">
                         <xsl:attribute name="class">entryIdentifierField entryIdentifierField<xsl:value-of select="@column_name" /></xsl:attribute>
@@ -106,9 +109,6 @@
                         &s;
                     </xsl:element>
                 </xsl:for-each>
-                
-                <a class="entryDeleter"><xsl:text disable-output-escaping="yes">&#160;</xsl:text></a>
-                
                 <xsl:for-each select="//references/reference[@dest_table_name=$table_name or @src_table_name=$table_name]" >
                     <xsl:variable name="ref_table_name" select="if(@dest_table_name = $table_name) then @src_table_name else @dest_table_name" />
                         
@@ -119,18 +119,16 @@
                             <xsl:attribute name="class">entryLinksType</xsl:attribute>
                             <xsl:value-of select="$ref_table_name" /> (<xsl:value-of select="@reference_name" />)</xsl:element>
                         
-                        <xsl:element name="a">
-                            <xsl:element name="div">
+                        <xsl:element name="button">
                                 <xsl:attribute name="class">addEntryLink</xsl:attribute>
                                 <xsl:attribute name="id">addEntryLink<xsl:value-of select="@reference_name" /></xsl:attribute>
                                 Add <xsl:value-of select="$ref_table_name" /> (<xsl:value-of select="@reference_name" />)
-                            </xsl:element>
                         </xsl:element>
                         
                         <xsl:element name="div">
                             <xsl:attribute name="class">entryLinkDiv entryLinkDiv<xsl:value-of select="@reference_name" /></xsl:attribute>
                             <xsl:attribute name="id">entryLinkDiv<xsl:value-of select="@reference_name" />-dummy</xsl:attribute>
-                            <a class="entryLinkDeleter"><xsl:text disable-output-escaping="yes">&#160;</xsl:text></a>
+                            <button class="entryLinkDeleter">Delete</button>
                             <xsl:element name="a">
                                 <xsl:attribute name="class">entryLinkA entryLinkA<xsl:value-of select="@reference_name" /></xsl:attribute>
                                 <xsl:for-each select="//tables/table[@table_name=$ref_table_name]/columns/column[@is_primary_key=1]">

@@ -16,7 +16,7 @@ function getApiQueryString() {
         return defaultQueryString;
     else {
     <xsl:for-each select="columns/column[@is_primary_key=1]">
-        if(urlParams.get('<xsl:value-of select="column_name" />') == null || urlParams.get('<xsl:value-of select="column_name" />') == '')
+        if(urlParams.get('<xsl:value-of select="@column_name" />') == null || urlParams.get('<xsl:value-of select="@column_name" />') == '')
             return defaultQueryString;
         queryString += 'FilterBy[<xsl:value-of select="position() - 1"/>][col]=<xsl:value-of select="@column_name" /><xsl:text disable-output-escaping="yes">&amp;FilterBy</xsl:text>[<xsl:value-of select="position() - 1"/>][regex]=' + urlParams.get('<xsl:value-of select="@column_name" />') + '<xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes">&amp;</xsl:text></xsl:if>';
     </xsl:for-each>
@@ -37,16 +37,28 @@ function getLinks<xsl:value-of select="@reference_name" />ApiUrl(item) {
     return toReturn;
 }
 
-function getRefLink<xsl:value-of select="@reference_name" />AppUrl(childItem) {
+function getPrimaryRefLink<xsl:value-of select="@reference_name" />AppUrl(linkedItem) {
     var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$ref_table_name" />.html?';
     <xsl:for-each select="//tables/table[@table_name=$ref_table_name]/columns/column[@is_primary_key=1]">
         toReturn += '<xsl:value-of select="@column_name" />=';
-        toReturn += childItem.<xsl:value-of select="@column_name" /><xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes">+ '&amp;'</xsl:text></xsl:if>;
+        toReturn += linkedItem.<xsl:value-of select="@column_name" /><xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes">+ '&amp;'</xsl:text></xsl:if>;
     </xsl:for-each>
     return toReturn;
 }
 
-function getRefLink<xsl:value-of select="@reference_name" />ApiUrl(childItem) {
+function getNewRefLink<xsl:value-of select="@reference_name" />AppUrl(linkedItem) {
+    var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$ref_table_name" />.html?new=1';
+    
+    Object.entries(linkedItem).forEach(entry =<xsl:text disable-output-escaping="yes">&gt;</xsl:text> {
+        let key = entry[0];
+        let value = entry[1];
+        toReturn += <xsl:text disable-output-escaping="yes">'&amp;'</xsl:text> + key + '=' + value;
+    });
+
+    return toReturn;
+}
+
+function getRefLink<xsl:value-of select="@reference_name" />ApiUrl(linkedItem) {
     var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$ref_table_name" />';
     <xsl:for-each select="reference_details/reference_detail">
         <xsl:variable name="ref_column_name" select="if(@dest_table_name = $table_name) then @src_column_name else @dest_column_name" />
@@ -82,7 +94,7 @@ function save(i) {
         </xsl:if></xsl:for-each>
     };
     put_item(getLink<xsl:value-of select="$table_name" />(body), body, function() {
-       location = 'http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$table_name" />.html';
+       location = window.location;
     });
 }
 
@@ -90,6 +102,14 @@ function handleNew() {
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.get('new') != null) {
         $('.entryNew').show();
+        var item = {};
+        <xsl:for-each select="columns/column">
+        if(urlParams.get('<xsl:value-of select="@column_name" />') <xsl:text disable-output-escaping="yes">&amp;&amp;</xsl:text> urlParams.get('<xsl:value-of select="@column_name" />') != '')
+            item['<xsl:value-of select="@column_name" />'] = urlParams.get('<xsl:value-of select="@column_name" />');
+        </xsl:for-each>
+        <xsl:for-each select="columns/column">
+        <xsl:value-of select="@column_name" />_field_to_input_value(item, $('.entryNew').find('[name=new_<xsl:value-of select="@column_name" />]'));
+        </xsl:for-each>
     }
 }
 
@@ -134,19 +154,30 @@ function loadCall() {
         $(newElement).find('[for=dummy_<xsl:value-of select="@column_name" />]').attr('for', i + '<xsl:value-of select="@column_name" />');
         </xsl:for-each>
         
+        <!-- For each reference, where this table is src or dest take the other table and: -->
         <xsl:for-each select="//references/reference[@dest_table_name=$table_name or @src_table_name=$table_name]" >
-        <!-- For each reference, where this table is src or dest take the other table and fire a GET for it -->
-        var i_<xsl:value-of select="@reference_name" /> = 1;
         <xsl:variable name="ref_table_name" select="if(@dest_table_name = $table_name) then @src_table_name else @dest_table_name" />
-        get(getLinks<xsl:value-of select="@reference_name" />ApiUrl(item), function(childItem) {
+        <!-- 1) create '+' handler -->
+        $(newElement).find('#addEntryLink<xsl:value-of select="@reference_name" />').click(function() {
+            var linkedItem = {};
+            <xsl:for-each select="reference_details/reference_detail">
+                <xsl:variable name="ref_column_name" select="if(@dest_table_name = $table_name) then @src_column_name else @dest_column_name" />
+                <xsl:variable name="this_column_name" select="if(@dest_table_name = $table_name) then @dest_column_name else @src_column_name" />
+                linkedItem.<xsl:value-of select="$ref_column_name" /> = item.<xsl:value-of select="$this_column_name" />;
+            </xsl:for-each>
+            window.location = getNewRefLink<xsl:value-of select="@reference_name" />AppUrl(linkedItem);
+        });
+        <!-- 2) fire a GET for populating the list -->
+        var i_<xsl:value-of select="@reference_name" /> = 1;
+        get(getLinks<xsl:value-of select="@reference_name" />ApiUrl(item), function(linkedItem) {
             var newChildElement = $($(newElement).find('.entryLinks<xsl:value-of select="@reference_name" />')[0].appendChild(document.getElementById("entryLinkDiv<xsl:value-of select="@reference_name" />-dummy").cloneNode(true)));
             newChildElement.attr("id", newElement.attr("id") + "Link<xsl:value-of select="@reference_name" />" + i_<xsl:value-of select="@reference_name" />++);
             <xsl:for-each select="//tables/table[@table_name=$ref_table_name]/columns/column[@is_primary_key=1]">
-            $(newChildElement).find('.entryLinkIdentifierField<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + childItem.<xsl:value-of select="@column_name" />;
+            $(newChildElement).find('.entryLinkIdentifierField<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + linkedItem.<xsl:value-of select="@column_name" />;
             </xsl:for-each>
-            $(newChildElement).find('.entryLinkA')[0].href = getRefLink<xsl:value-of select="@reference_name" />AppUrl(childItem);
+            $(newChildElement).find('.entryLinkA')[0].href = getPrimaryRefLink<xsl:value-of select="@reference_name" />AppUrl(linkedItem);
             $(newChildElement).find('.entryLinkDeleter')[0].onclick = function() {
-                delete_item(getRefLink<xsl:value-of select="@reference_name" />ApiUrl(childItem), function() {
+                delete_item(getRefLink<xsl:value-of select="@reference_name" />ApiUrl(linkedItem), function() {
                     window.reload();
                 });
             }

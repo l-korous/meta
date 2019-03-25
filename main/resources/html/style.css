@@ -98,10 +98,6 @@ nav a.hiddenNavLink:hover {
 	color:red;
 }
 
-.entryDeleter:before, .entryLinkDeleter:before {
-	content: 'Delete';
-}
-
 .entry.tabular {
     width:100%;
 }
@@ -137,9 +133,8 @@ nav a.hiddenNavLink:hover {
 }
 
 .entry .entryLinks .addEntryLink {
-    color: #59df0a;
-    margin-top:.5em;
-    font-weight:bold;
+    color: #1cad00;
+    margin:5px 0 10px;
 }
 
 .entry .entryLinks .addEntryLink:before {
