@@ -11,16 +11,16 @@ CREATE TABLE #c (
 )
 CREATE TABLE #r (
     reference_name nvarchar(max),
-    src_table_name nvarchar(max),
-    dest_table_name nvarchar(max),
+    referencing_table_name nvarchar(max),
+    referenced_table_name nvarchar(max),
     on_delete nvarchar(max) 
 );
 CREATE TABLE #rd (
     reference_name nvarchar(max),
-    src_table_name nvarchar(max),
-    src_column_name nvarchar(max),
-    dest_table_name nvarchar(max),
-    dest_column_name nvarchar(max)
+    referencing_table_name nvarchar(max),
+    referencing_column_name nvarchar(max),
+    referenced_table_name nvarchar(max),
+    referenced_column_name nvarchar(max)
 ); 
 CREATE TABLE #conf (
     [key] nvarchar(max),
@@ -46,16 +46,16 @@ UPDATE #c SET
 
 UPDATE #r SET
     reference_name = replace(trim(reference_name), char(34), ''),
-    src_table_name = replace(trim(src_table_name), char(34), ''),
-    dest_table_name = replace(trim(dest_table_name), char(34), ''),
+    referencing_table_name = replace(trim(referencing_table_name), char(34), ''),
+    referenced_table_name = replace(trim(referenced_table_name), char(34), ''),
     on_delete = replace(trim(on_delete), char(34), '');
 
 UPDATE #rd SET
     reference_name = replace(trim(reference_name), char(34), ''),
-    src_column_name = replace(trim(src_column_name), char(34), ''),
-    dest_column_name = replace(trim(dest_column_name), char(34), ''),
-    src_table_name = replace(trim(src_table_name), char(34), ''),
-    dest_table_name = replace(trim(dest_table_name), char(34), '');
+    referencing_column_name = replace(trim(referencing_column_name), char(34), ''),
+    referenced_column_name = replace(trim(referenced_column_name), char(34), ''),
+    referencing_table_name = replace(trim(referencing_table_name), char(34), ''),
+    referenced_table_name = replace(trim(referenced_table_name), char(34), '');
 
 UPDATE #conf SET
     [key] = replace(trim([key]), char(34), ''),
@@ -85,14 +85,14 @@ SELECT
     ), 
     ( select
 	   reference_name,
-	   src_table_name,
-	   dest_table_name,
+	   referencing_table_name,
+	   referenced_table_name,
 	   on_delete,
 	   ( select
-		  src_column_name,
-		  dest_column_name,
-          src_table_name,
-          dest_table_name
+		  referencing_column_name,
+		  referenced_column_name,
+          referencing_table_name,
+          referenced_table_name
 	   FROM 
 		  #rd [reference_detail]
 	   where
@@ -102,7 +102,7 @@ SELECT
     FROM 
         #r [reference]
     where
-	   [reference].src_table_name = [table].table_name
+	   [reference].referencing_table_name = [table].table_name
     for xml auto, root ('references'), type
     )
 FROM

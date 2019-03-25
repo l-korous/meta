@@ -107,34 +107,34 @@ ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_datatype FOREIGN KEY (datatyp
 GO
 CREATE TABLE meta.[reference] (
     reference_name nvarchar(255),
-    src_table_name nvarchar(255),
-    dest_table_name nvarchar(255),
+    referencing_table_name nvarchar(255),
+    referenced_table_name nvarchar(255),
     on_delete nvarchar(255),
     PRIMARY KEY ([reference_name])
 );
 GO
-ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_src_table_name FOREIGN KEY (src_table_name) REFERENCES meta.[table] (table_name);
+ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referencing_table_name FOREIGN KEY (referencing_table_name) REFERENCES meta.[table] (table_name);
 GO
-ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_dest_table_name FOREIGN KEY (dest_table_name) REFERENCES meta.[table] (table_name);
+ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referenced_table_name FOREIGN KEY (referenced_table_name) REFERENCES meta.[table] (table_name);
 GO
 CREATE TABLE meta.[reference_detail] (
     reference_name nvarchar(255),
-    src_table_name nvarchar(255),
-    src_column_name nvarchar(255),
-    dest_table_name nvarchar(255),
-    dest_column_name nvarchar(255),
-    PRIMARY KEY ([reference_name], [src_table_name], [src_column_name], [dest_table_name], [dest_column_name])
+    referencing_table_name nvarchar(255),
+    referencing_column_name nvarchar(255),
+    referenced_table_name nvarchar(255),
+    referenced_column_name nvarchar(255),
+    PRIMARY KEY ([reference_name], [referencing_table_name], [referencing_column_name], [referenced_table_name], [referenced_column_name])
 );
 GO
 ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_reference_name FOREIGN KEY (reference_name) REFERENCES meta.[reference] (reference_name);
 GO
-ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_src_table_name FOREIGN KEY (src_table_name) REFERENCES meta.[table] (table_name);
+ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_referencing_table_name FOREIGN KEY (referencing_table_name) REFERENCES meta.[table] (table_name);
 GO
-ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_dest_table_name FOREIGN KEY (dest_table_name) REFERENCES meta.[table] (table_name);
+ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_referenced_table_name FOREIGN KEY (referenced_table_name) REFERENCES meta.[table] (table_name);
 GO
-ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_src_column_name FOREIGN KEY (src_table_name, src_column_name) REFERENCES meta.[column] (table_name, column_name);
+ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_referencing_column_name FOREIGN KEY (referencing_table_name, referencing_column_name) REFERENCES meta.[column] (table_name, column_name);
 GO
-ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_dest_column_name FOREIGN KEY (dest_table_name, dest_column_name) REFERENCES meta.[column] (table_name, column_name);
+ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_referenced_column_name FOREIGN KEY (referenced_table_name, referenced_column_name) REFERENCES meta.[column] (table_name, column_name);
 GO
     BEGIN TRY
         BEGIN TRANSACTION
@@ -150,15 +150,15 @@ GO
             </xsl:for-each>
             <xsl:for-each select="references/reference" >
                 INSERT INTO meta.[reference] VALUES ('<xsl:value-of select="@reference_name" />',
-                    '<xsl:value-of select="@src_table_name" />',
-                    '<xsl:value-of select="@dest_table_name" />',
+                    '<xsl:value-of select="@referencing_table_name" />',
+                    '<xsl:value-of select="@referenced_table_name" />',
                     '<xsl:value-of select="@on_delete" />')
                 <xsl:for-each select="reference_details/reference_detail" >
                     INSERT INTO meta.[reference_detail] VALUES ('<xsl:value-of select="../../@reference_name" />',
-                        '<xsl:value-of select="@src_table_name" />',
-                        '<xsl:value-of select="@src_column_name" />',
-                        '<xsl:value-of select="@dest_table_name" />',
-                        '<xsl:value-of select="@dest_column_name" />')
+                        '<xsl:value-of select="@referencing_table_name" />',
+                        '<xsl:value-of select="@referencing_column_name" />',
+                        '<xsl:value-of select="@referenced_table_name" />',
+                        '<xsl:value-of select="@referenced_column_name" />')
                 </xsl:for-each>
             </xsl:for-each>
         </xsl:for-each>

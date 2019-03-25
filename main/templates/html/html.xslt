@@ -109,20 +109,20 @@
                         &s;
                     </xsl:element>
                 </xsl:for-each>
-                <xsl:for-each select="//references/reference[@dest_table_name=$table_name or @src_table_name=$table_name]" >
-                    <xsl:variable name="ref_table_name" select="if(@dest_table_name = $table_name) then @src_table_name else @dest_table_name" />
+                <xsl:for-each select="//references/reference[@referenced_table_name=$table_name]" >
+                    <xsl:variable name="referencing_table_name" select="@referencing_table_name" />
                         
                     <xsl:element name="div">
                         <xsl:attribute name="class">entryLinks entryLinks<xsl:value-of select="@reference_name" /></xsl:attribute>
                         
                         <xsl:element name="h3">
                             <xsl:attribute name="class">entryLinksType</xsl:attribute>
-                            <xsl:value-of select="$ref_table_name" /> (<xsl:value-of select="@reference_name" />)</xsl:element>
+                            <xsl:value-of select="$referencing_table_name" /> (<xsl:value-of select="@reference_name" />)</xsl:element>
                         
                         <xsl:element name="button">
                                 <xsl:attribute name="class">addEntryLink</xsl:attribute>
                                 <xsl:attribute name="id">addEntryLink<xsl:value-of select="@reference_name" /></xsl:attribute>
-                                Add <xsl:value-of select="$ref_table_name" /> (<xsl:value-of select="@reference_name" />)
+                                Add <xsl:value-of select="$referencing_table_name" /> (<xsl:value-of select="@reference_name" />)
                         </xsl:element>
                         
                         <xsl:element name="div">
@@ -131,7 +131,7 @@
                             <button class="entryLinkDeleter">Delete</button>
                             <xsl:element name="a">
                                 <xsl:attribute name="class">entryLinkA entryLinkA<xsl:value-of select="@reference_name" /></xsl:attribute>
-                                <xsl:for-each select="//tables/table[@table_name=$ref_table_name]/columns/column[@is_primary_key=1]">
+                                <xsl:for-each select="//tables/table[@table_name=$referencing_table_name]/columns/column[@is_primary_key=1]">
                                     <xsl:element name="div">
                                         <xsl:attribute name="class">entryLinkIdentifierField<xsl:value-of select="@column_name" /></xsl:attribute>
                                         <xsl:text disable-output-escaping="yes">&#160;</xsl:text>
