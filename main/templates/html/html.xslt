@@ -14,11 +14,8 @@
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0, width=device-width" />
         <title id="title">Loading...</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
-        <script src="jquery-3.3.1.slim.min.js">;</script>
-        <script src="jquery.easy-autocomplete.min.js">;</script> 
-        <link rel="stylesheet" type="text/css" href="easy-autocomplete.min.css" /> 
-        <link rel="stylesheet" type="text/css" href="easy-autocomplete.themes.min.css" />
-		<script src="functions.js">;</script>
+        <script src="jquery-1.11.2.min.js">;</script>
+        <script src="functions.js">;</script>
         <xsl:element name="script"><xsl:attribute name="src">functions_<xsl:value-of select="@table_name" />.js</xsl:attribute>;</xsl:element>
     </head>
 <body onload="loadCall()" id="body">
@@ -66,14 +63,17 @@
                             <xsl:element name="textarea"><xsl:attribute name="name">new_<xsl:value-of select="@column_name" /></xsl:attribute>&s;</xsl:element>
                         </xsl:when>
                     </xsl:choose>
+                    <ul class="whisperer" style="display:none"> </ul>
                 </div>
 			</xsl:for-each>
             <button class="saveButton" type="button" onclick="saveNew()">Save</button>
+            <button class="cancelNewButton" type="button" onclick="$('.entryNew').hide()">Cancel</button>
         </div>
         <div class="entry bubblar" id="entry-dummy">
             <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
             <div class="write" style="display:none">
                 <button class="editButton" onclick="$(this).parent().toggle();$(this).parent().next().toggle();save($(this).attr('i'));">Save</button>
+                <button class="cancelEditButton" type="button" onclick="$(this).parent().toggle();$(this).parent().next().toggle();">Cancel</button>
                 <xsl:for-each select="columns/column" >
                     <div>
                         <xsl:element name="label">

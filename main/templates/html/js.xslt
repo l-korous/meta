@@ -118,7 +118,35 @@ function handleNew() {
             item['<xsl:value-of select="@column_name" />'] = urlParams.get('<xsl:value-of select="@column_name" />');
         </xsl:for-each>
         <xsl:for-each select="columns/column">
+        <xsl:variable name="column_name" select="@column_name"/>
         <xsl:value-of select="@column_name" />_field_to_input_value(item, $('.entryNew').find('[name=new_<xsl:value-of select="@column_name" />]'));
+        
+        <xsl:if test="count(//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]) &gt; 0" >
+        $("[name=new_<xsl:value-of select="@column_name" />]").keyup(function() {
+            $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').empty();
+            if($("[name=new_<xsl:value-of select="@column_name" />]").val().length <xsl:text disable-output-escaping="yes">&gt;</xsl:text> 0) {
+                meta_api_get('http://localhost:3000/api/master/<xsl:value-of select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/../../@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=new_<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
+                        $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').show();
+                        $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').append('<xsl:text disable-output-escaping="yes">&lt;</xsl:text>li \
+                        onclick=" \<xsl:for-each select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/../reference_detail">
+                        $(\'[name=new_<xsl:value-of select="@referencing_column_name" />]\').val(\'' + item.<xsl:value-of select="@referenced_column_name" /> + '\'); \
+                        </xsl:for-each>$(\'[name=new_<xsl:value-of select="@column_name" />]\').next(\'ul\').hide();" \
+                        <xsl:text disable-output-escaping="yes">&gt;</xsl:text>' + item.<xsl:value-of select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/@referenced_column_name" /> + '<xsl:text disable-output-escaping="yes">&lt;/li&gt;</xsl:text>');
+                    },
+                    function() {},
+                    errorHandler
+                );
+            }
+        });
+        
+        $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').blur(function() {
+            $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').hide();
+        });
+        
+        $("[name=new_<xsl:value-of select="@column_name" />]").focus(function() {
+            $("[name=new_<xsl:value-of select="@column_name" />]").keyup();
+        });
+        </xsl:if>
         </xsl:for-each>
     }
 }
@@ -152,7 +180,7 @@ function loadCall() {
         newElement.attr("id", "entry" + i);
         
         $(newElement).find('.entryDeleter')[0].onclick = function() {
-            delete_item(getLink<xsl:value-of select="$table_name" />(item), function() { location.reload(); });
+            meta_api_delete(getLink<xsl:value-of select="$table_name" />(item), function() { location.reload(); });
         }
         
         $(newElement).find('.editButton').attr('i', i);
