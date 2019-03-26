@@ -140,3 +140,9 @@ nav a.hiddenNavLink:hover {
 .entry .entryLinks .addEntryLink:before {
     content: '+ ';
 }
+
+#errorDiv {
+    border: 2px solid red;
+    padding: 10px;
+    margin: 10px;
+}

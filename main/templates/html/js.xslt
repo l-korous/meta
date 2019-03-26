@@ -7,6 +7,19 @@
 <xsl:for-each select="//table" >
 <xsl:variable name="table_name" select="@table_name"/>
 <xsl:result-document method="xml" href="functions_{@table_name}.js">
+async function errorHandler(error) {
+    var text = '';
+    if(Object.prototype.toString.call(error) == '[object Response]') {
+        var responseJson = await error.json();
+        text = responseJson.originalError ? responseJson.originalError.info.message : error.statusText;
+    }
+    else
+        text = error.toString();
+        
+    $('#errorDiv').text(text);
+    $('#errorDiv').show();
+}
+
 function getApiQueryString() {
     const defaultQueryString = '?';
     var queryString = '?';
@@ -79,9 +92,9 @@ function saveNew() {
         <xsl:value-of select="@column_name" />: $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=new_<xsl:value-of select="@column_name" />]').val() == '' ? null : $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=new_<xsl:value-of select="@column_name" />]').val()<xsl:if test="position() != last()">,
         </xsl:if></xsl:for-each>
     };
-    post_item(getLink<xsl:value-of select="$table_name" />(body), body, function() {
+    meta_api_post(getLink<xsl:value-of select="$table_name" />(body), body, function() {
        location = 'http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$table_name" />.html';
-    });
+    }, errorHandler);
 }
     
 function save(i) {
@@ -90,9 +103,9 @@ function save(i) {
         <xsl:value-of select="@column_name" />: $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=' + i + '<xsl:value-of select="@column_name" />]').val() == '' ? null : $('<xsl:value-of select="meta:datatype_to_html_element(@datatype)" />[name=' + i + '<xsl:value-of select="@column_name" />]').val()<xsl:if test="position() != last()">,
         </xsl:if></xsl:for-each>
     };
-    put_item(getLink<xsl:value-of select="$table_name" />(body), body, function() {
+    meta_api_put(getLink<xsl:value-of select="$table_name" />(body), body, function() {
        location = window.location;
-    });
+    }, errorHandler);
 }
 
 function handleNew() {
@@ -134,7 +147,7 @@ function loadCall() {
     
     var i = 1;
     var query = getApiQueryString();
-    get('http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="@table_name" />' + query, function(item) {
+    meta_api_get('http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="@table_name" />' + query, function(item) {
         var newElement = $(document.getElementById("body").appendChild(document.getElementById("entry-dummy").cloneNode(true)));
         newElement.attr("id", "entry" + i);
         
@@ -143,6 +156,7 @@ function loadCall() {
         }
         
         $(newElement).find('.editButton').attr('i', i);
+        
         <!-- Read & Write -->
         <xsl:for-each select="columns/column" >
         $(newElement).find('.entry<xsl:if test="@is_primary_key=1">Identifier</xsl:if>Field<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + <xsl:value-of select="@column_name" />_field_to_html_conversion(item);
@@ -164,7 +178,7 @@ function loadCall() {
         });
         <!-- 2) fire a GET for populating the list -->
         var i_<xsl:value-of select="@reference_name" /> = 1;
-        get(getLinks<xsl:value-of select="@reference_name" />ApiUrl(item), function(linkedItem) {
+        meta_api_get(getLinks<xsl:value-of select="@reference_name" />ApiUrl(item), function(linkedItem) {
             var newChildElement = $($(newElement).find('.entryLinks<xsl:value-of select="@reference_name" />')[0].appendChild(document.getElementById("entryLinkDiv<xsl:value-of select="@reference_name" />-dummy").cloneNode(true)));
             newChildElement.attr("id", newElement.attr("id") + "Link<xsl:value-of select="@reference_name" />" + i_<xsl:value-of select="@reference_name" />++);
             <xsl:for-each select="//tables/table[@table_name=$referencing_table_name]/columns/column[@is_primary_key=1]">
@@ -172,18 +186,21 @@ function loadCall() {
             </xsl:for-each>
             $(newChildElement).find('.entryLinkA')[0].href = getPrimaryRefLink<xsl:value-of select="@reference_name" />AppUrl(linkedItem);
             $(newChildElement).find('.entryLinkDeleter')[0].onclick = function() {
-                delete_item(getRefLink<xsl:value-of select="@reference_name" />ApiUrl(linkedItem), function() {
+                meta_api_delete(getRefLink<xsl:value-of select="@reference_name" />ApiUrl(linkedItem), function() {
                     window.reload();
-                });
+                }, errorHandler);
             }
         }, function() {
             $('#entryLinkDiv<xsl:value-of select="@reference_name" />-dummy').remove();
+        }, function(err) {
+            $('#errorDiv').innerHTML = err;
+            $('#errorDiv').show();
         });
         </xsl:for-each>
         i++;
     }, function() {
         $('#entry-dummy').remove();
-    });
+    }, errorHandler);
 }
 </xsl:result-document>
 </xsl:for-each>

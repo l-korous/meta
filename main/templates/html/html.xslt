@@ -14,7 +14,10 @@
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0, width=device-width" />
         <title id="title">Loading...</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js">;</script>
+        <script src="jquery-3.3.1.slim.min.js">;</script>
+        <script src="jquery.easy-autocomplete.min.js">;</script> 
+        <link rel="stylesheet" type="text/css" href="easy-autocomplete.min.css" /> 
+        <link rel="stylesheet" type="text/css" href="easy-autocomplete.themes.min.css" />
 		<script src="functions.js">;</script>
         <xsl:element name="script"><xsl:attribute name="src">functions_<xsl:value-of select="@table_name" />.js</xsl:attribute>;</xsl:element>
     </head>
@@ -38,6 +41,7 @@
         </div>
 		</xsl:for-each>
     </nav>
+    <div id="errorDiv" style="display:none;"><xsl:text disable-output-escaping="yes">&#160;</xsl:text></div>
     <div>
         <div class="entry bubblar entryNew" style="display:none">
             <xsl:for-each select="columns/column" >
