@@ -14,7 +14,7 @@
         <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=0, width=device-width" />
         <title id="title">Loading...</title>
         <link rel="stylesheet" type="text/css" href="style.css" />
-        <script src="jquery-1.11.2.min.js">;</script>
+        <script src="jquery-3.3.1.slim.min.js">;</script>
         <script src="functions.js">;</script>
         <xsl:element name="script"><xsl:attribute name="src">functions_<xsl:value-of select="@table_name" />.js</xsl:attribute>;</xsl:element>
     </head>
