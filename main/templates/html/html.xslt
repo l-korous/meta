@@ -22,28 +22,31 @@
     <nav>
 		<xsl:for-each select="//table" >
             <div class="navLinkBundle">
-                <xsl:element name="a">
+                <xsl:element name="button">
                     <xsl:attribute name="class">listNavButton<xsl:if test="@table_name = $table_name"> currentPage</xsl:if></xsl:attribute>
-                    <xsl:attribute name="href"><xsl:value-of select="@table_name" />.html</xsl:attribute>
+                    <xsl:attribute name="onclick">window.location = '<xsl:value-of select="@table_name" />.html'</xsl:attribute>
                     <xsl:value-of select="@table_name" />
-                </xsl:element><xsl:element name="a">
+                </xsl:element><xsl:element name="button">
                     <xsl:attribute name="class">newNavButton</xsl:attribute>
                     <xsl:attribute name="id">new_<xsl:value-of select="@table_name" /></xsl:attribute>
-                    <xsl:attribute name="href"><xsl:value-of select="@table_name" />.html?new=1</xsl:attribute>
+                    <xsl:attribute name="onclick">window.location = '<xsl:value-of select="@table_name" />.html?new=1'</xsl:attribute>
                     <span></span>
                 </xsl:element>
             </div>
 		</xsl:for-each>
     </nav>
     <div id="errorDiv" style="display:none;"><xsl:text disable-output-escaping="yes">&#160;</xsl:text></div>
-    <div>
+    <div class="flex" id="flex">
         <div class="entry bubblar entryNew" style="display:none">
+            <button class="saveButton" type="button" onclick="saveNew()">Save</button>
+            <button class="cancelButton" type="button" onclick="$('.entryNew').hide()">Cancel</button>
             <xsl:for-each select="columns/column" >
                 <div>
                     <xsl:element name="label">
                         <xsl:attribute name="for">new_<xsl:value-of select="@column_name" /></xsl:attribute>
                         <xsl:value-of select="@column_name" />
                     </xsl:element>
+                    <br />
                     <xsl:choose>
                         <xsl:when test="meta:datatype_to_html_element(@datatype) = 'input'" >
                             <xsl:element name="input">
@@ -63,20 +66,19 @@
                     <ul class="whisperer" style="display:none"> </ul>
                 </div>
 			</xsl:for-each>
-            <button class="saveButton" type="button" onclick="saveNew()">Save</button>
-            <button class="cancelNewButton" type="button" onclick="$('.entryNew').hide()">Cancel</button>
         </div>
         <div class="entry bubblar" id="entry-dummy">
             <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
             <div class="write" style="display:none">
-                <button class="editButton" onclick="$(this).parent().toggle();$(this).parent().next().toggle();save($(this).attr('i'));">Save</button>
-                <button class="cancelEditButton" type="button" onclick="$(this).parent().toggle();$(this).parent().next().toggle();">Cancel</button>
+                <button class="saveButton" onclick="$(this).parent().toggle();$(this).parent().next().toggle();save($(this).attr('i'));">Save</button>
+                <button class="cancelButton" type="button" onclick="$(this).parent().toggle();$(this).parent().next().toggle();">Cancel</button>
                 <xsl:for-each select="columns/column" >
                     <div>
                         <xsl:element name="label">
                             <xsl:attribute name="for">dummy_<xsl:value-of select="@column_name" /></xsl:attribute>
                             <xsl:value-of select="@column_name" />
                         </xsl:element>
+                        <br />
                         <xsl:choose>
                             <xsl:when test="meta:datatype_to_html_element(@datatype) = 'input'" >
                                 <xsl:element name="input">

@@ -269,6 +269,7 @@ app.put("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select
             request.input(key, <xsl:value-of select="$table_name" />_field_to_node_mssql_datatype(key), <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion(key, req.body[key]));
         }
     }
+    
     request.execute('dbo.update_<xsl:value-of select="$table_name" />', (err, result) =&gt; {
         if(err) {
             console.log(err);
