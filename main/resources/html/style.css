@@ -53,34 +53,48 @@ nav {
     background:#333;
 }
 
-nav a {
-    font-size:1.5em;
-    margin:0 .5em;
-    color:white;
-    text-decoration:none;
-}
-
 nav a.currentPage {
     color: #FF5D0B;
     font-weight:bold;
     
 }
 
-nav > div {
-    padding:.5em 0;
+.navLinkBundle {
+    white-space: nowrap;
     display:inline;
 }
 
-nav a:hover {
-    color: #FF5D0B;
+a.listNavButton, a.newNavButton {
+    background:white;
+    color:black;
+    padding:.25em;
+    line-height:1.75em;
 }
 
-nav a.hiddenNavLink {
-    display:none;
+a.listNavButton {
+    margin-right:0;
+    margin-left:5px;
+    border-radius:10px 0 0 10px;
 }
 
-nav a.hiddenNavLink:hover {
-    color: #59df0a;
+a.newNavButton {
+    margin-left:0;
+    margin-right:5px;
+    padding-left:5px;
+    padding-right:9px;
+    border-radius:0px 10px 10px 0;
+}
+
+a.newNavButton:before {
+    content: '+';
+    font-size: 1.75em;
+    font-weight: bold;
+    position: relative;
+    bottom: -.1em;
+}
+
+a.newNavButton:hover {
+    color:green ! important;
 }
 
 .entry {

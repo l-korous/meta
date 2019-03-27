@@ -2,7 +2,7 @@
 <!DOCTYPE xsl:stylesheet [<!ENTITY s "&#160;">]>
 <xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:meta="meta">
     <xsl:import href="../utilities.xsl"/>
-	<xsl:output method="text" indent="yes" encoding="UTF-8" omit-xml-declaration="yes" />
+	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
 <xsl:for-each select="//table" >
@@ -21,21 +21,18 @@
 <body onload="loadCall()" id="body">
     <nav>
 		<xsl:for-each select="//table" >
-        <div onmouseover="$('#new_{@table_name}').toggle()" onmouseout="$('#new_{@table_name}').toggle();" >
-			<xsl:element name="a">
-			  <xsl:if test="@table_name = $table_name">
-				 <xsl:attribute name="class">currentPage</xsl:attribute>
-			  </xsl:if>
-			  <xsl:attribute name="href"><xsl:value-of select="@table_name" />.html</xsl:attribute>
-			  <xsl:value-of select="@table_name" />
-			</xsl:element>
-            <xsl:element name="a">
-			  <xsl:attribute name="class">hiddenNavLink</xsl:attribute>
-			  <xsl:attribute name="id">new_<xsl:value-of select="@table_name" /></xsl:attribute>
-			  <xsl:attribute name="href"><xsl:value-of select="@table_name" />.html?new=1</xsl:attribute>
-			  New <xsl:value-of select="@table_name" /> 
-			</xsl:element>
-        </div>
+            <div class="navLinkBundle">
+                <xsl:element name="a">
+                    <xsl:attribute name="class">listNavButton<xsl:if test="@table_name = $table_name"> currentPage</xsl:if></xsl:attribute>
+                    <xsl:attribute name="href"><xsl:value-of select="@table_name" />.html</xsl:attribute>
+                    <xsl:value-of select="@table_name" />
+                </xsl:element><xsl:element name="a">
+                    <xsl:attribute name="class">newNavButton</xsl:attribute>
+                    <xsl:attribute name="id">new_<xsl:value-of select="@table_name" /></xsl:attribute>
+                    <xsl:attribute name="href"><xsl:value-of select="@table_name" />.html?new=1</xsl:attribute>
+                    <span></span>
+                </xsl:element>
+            </div>
 		</xsl:for-each>
     </nav>
     <div id="errorDiv" style="display:none;"><xsl:text disable-output-escaping="yes">&#160;</xsl:text></div>
@@ -94,6 +91,7 @@
                                 <xsl:element name="textarea"><xsl:attribute name="name">dummy_<xsl:value-of select="@column_name" /></xsl:attribute>&s;</xsl:element>
                             </xsl:when>
                         </xsl:choose>
+                        <ul class="whisperer" style="display:none"> </ul>
                     </div>
                 </xsl:for-each>
             </div>

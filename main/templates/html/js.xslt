@@ -112,6 +112,7 @@ function handleNew() {
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.get('new') != null) {
         $('.entryNew').show();
+        <!-- This fills the inputs with information already specified in the (app) URL -->
         var item = {};
         <xsl:for-each select="columns/column">
         if(urlParams.get('<xsl:value-of select="@column_name" />') <xsl:text disable-output-escaping="yes">&amp;&amp;</xsl:text> urlParams.get('<xsl:value-of select="@column_name" />') != '')
@@ -121,6 +122,7 @@ function handleNew() {
         <xsl:variable name="column_name" select="@column_name"/>
         <xsl:value-of select="@column_name" />_field_to_input_value(item, $('.entryNew').find('[name=new_<xsl:value-of select="@column_name" />]'));
         
+        <!-- This adds whispering for the relevant inputs -->
         <xsl:if test="count(//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]) &gt; 0" >
         $("[name=new_<xsl:value-of select="@column_name" />]").keyup(function() {
             $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').empty();
@@ -191,6 +193,36 @@ function loadCall() {
         <xsl:value-of select="@column_name" />_field_to_input_value(item, $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]'));
         $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]').attr('name', i + '<xsl:value-of select="@column_name" />');
         $(newElement).find('[for=dummy_<xsl:value-of select="@column_name" />]').attr('for', i + '<xsl:value-of select="@column_name" />');
+        <!-- Whispering -->
+        <xsl:variable name="column_name" select="@column_name"/>
+        <xsl:if test="count(//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]) &gt; 0" >
+        $("[name=" + i + "<xsl:value-of select="@column_name" />]").attr('i', i);
+        $("[name=" + i + "<xsl:value-of select="@column_name" />]").keyup(function() {
+            var i = $(this).attr('i');
+            $(this).next('ul').empty();
+            if($(this).val().length <xsl:text disable-output-escaping="yes">&gt;</xsl:text> 0) {
+                meta_api_get('http://localhost:3000/api/master/<xsl:value-of select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/../../@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=" + i + "<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
+                        $("[name=" + i + "<xsl:value-of select="@column_name" />]").next('ul').show();
+                        $("[name=" + i + "<xsl:value-of select="@column_name" />]").next('ul').append('<xsl:text disable-output-escaping="yes">&lt;</xsl:text>li \
+                        onclick=" \<xsl:for-each select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/../reference_detail">
+                        $(\'[name=\' + i + \'<xsl:value-of select="@referencing_column_name" />]\').val(\'' + item.<xsl:value-of select="@referenced_column_name" /> + '\'); \
+                        </xsl:for-each>$(\'[name=\' + i + \'<xsl:value-of select="@column_name" />]\').next(\'ul\').hide();" \
+                        <xsl:text disable-output-escaping="yes">&gt;</xsl:text>' + item.<xsl:value-of select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/@referenced_column_name" /> + '<xsl:text disable-output-escaping="yes">&lt;/li&gt;</xsl:text>');
+                    },
+                    function() {},
+                    errorHandler
+                );
+            }
+        });
+        
+        $("[name=" + i + "<xsl:value-of select="@column_name" />]").next('ul').blur(function() {
+            $(this).next('ul').hide();
+        });
+        
+        $("[name=" + i + "<xsl:value-of select="@column_name" />]").focus(function() {
+            $(this).keyup();
+        });
+        </xsl:if>
         </xsl:for-each>
         
         <!-- For each reference, where this table is src or dest take the other table and: -->

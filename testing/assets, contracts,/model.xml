@@ -5,6 +5,7 @@
         <configuration key="DbPort" value="1433"/>
         <configuration key="DbInstanceName" value="SQLEXPRESS"/>
         <configuration key="DbName" value="meta3"/>
+        <configuration key="DbCollation" value="SQL_Latin1_General_CP1_CI_AI"/>
         <configuration key="DbUser" value="sa"/>
         <configuration key="DbPassword" value="asdf"/>
         <configuration key="UseEmbeddedKafka" value="0"/>
@@ -31,23 +32,41 @@
                 <column column_name="count" datatype="int" is_primary_key="0" is_unique="0" is_nullable="1"/>
             </columns>
         </table>
+        <table table_name="Task">
+            <columns>
+                <column column_name="name" datatype="string" is_primary_key="1" is_unique="1" is_nullable="0"/>
+                <column column_name="asset_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="contract_name" datatype="string" is_primary_key="0" is_unique="0" is_nullable="1"/>
+                <column column_name="due" datatype="datetime" is_primary_key="0" is_unique="0" is_nullable="1"/>
+            </columns>
+        </table>
         <table table_name="Asset_Contract">
             <columns>
                 <column column_name="asset_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
                 <column column_name="contract_name" datatype="string" is_primary_key="1" is_unique="0" is_nullable="0"/>
             </columns>
-            <references>
-                <reference reference_name="Asset" referencing_table_name="Asset_Contract" referenced_table_name="Asset" on_delete="CASCADE">
-                    <reference_details>
-                        <reference_detail referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Asset"/>
-                    </reference_details>
-                </reference>
-                <reference reference_name="Contract" referencing_table_name="Asset_Contract" referenced_table_name="Contract" on_delete="CASCADE">
-                    <reference_details>
-                        <reference_detail referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Contract"/>
-                    </reference_details>
-                </reference>
-            </references>
         </table>
     </tables>
+    <references>
+        <reference reference_name="Asset_Contract_Asset" referencing_table_name="Task" referenced_table_name="Asset" on_delete="CASCADE">
+            <reference_details>
+                <reference_detail referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Task" referenced_table_name="Asset"/>
+            </reference_details>
+        </reference>
+        <reference reference_name="Asset_Contract_Contract" referencing_table_name="Task" referenced_table_name="Contract" on_delete="CASCADE">
+            <reference_details>
+                <reference_detail referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Task" referenced_table_name="Contract"/>
+            </reference_details>
+        </reference>
+            <reference reference_name="Task_Asset" referencing_table_name="Asset_Contract" referenced_table_name="Asset" on_delete="CASCADE">
+                <reference_details>
+                    <reference_detail referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Asset"/>
+                </reference_details>
+            </reference>
+            <reference reference_name="Task_Contract" referencing_table_name="Asset_Contract" referenced_table_name="Contract" on_delete="CASCADE">
+                <reference_details>
+                    <reference_detail referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Contract"/>
+                </reference_details>
+            </reference>
+    </references>
 </root>
