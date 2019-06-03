@@ -30,7 +30,7 @@
                     <xsl:attribute name="class">newNavButton</xsl:attribute>
                     <xsl:attribute name="id">new_<xsl:value-of select="@table_name" /></xsl:attribute>
                     <xsl:attribute name="onclick">window.location = '<xsl:value-of select="@table_name" />.html?new=1'</xsl:attribute>
-                    <span></span>
+                    <span>+</span>
                 </xsl:element>
             </div>
 		</xsl:for-each>

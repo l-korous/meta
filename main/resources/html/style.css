@@ -64,37 +64,8 @@ nav a.currentPage {
     display:inline;
 }
 
-a.listNavButton, a.newNavButton {
-    background:white;
-    color:black;
-    padding:.25em;
-    line-height:1.75em;
-}
-
-a.listNavButton {
-    margin-right:0;
-    margin-left:5px;
-    border-radius:10px 0 0 10px;
-}
-
-a.newNavButton {
-    margin-left:0;
-    margin-right:5px;
-    padding-left:5px;
-    padding-right:9px;
-    border-radius:0px 10px 10px 0;
-}
-
-a.newNavButton:before {
-    content: '+';
-    font-size: 1.75em;
-    font-weight: bold;
-    position: relative;
-    bottom: -.1em;
-}
-
-a.newNavButton:hover {
-    color:green ! important;
+.newNavButton {
+    margin-right:20px;
 }
 
 .entry {
