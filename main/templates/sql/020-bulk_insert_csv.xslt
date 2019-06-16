@@ -24,17 +24,17 @@ BEGIN
 		-- SANITY CHECKS
 		-- TODO: Check that file exists
 		-- Branch exists
-	   IF NOT EXISTS (select * from meta.branch where branch_name = @branch_name) BEGIN
+	   IF NOT EXISTS (select * from dbo.[branch] where branch_name = @branch_name) BEGIN
 		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not exist';
 		  THROW 50000, @msg, 1
 	   END
 	   -- Branch has a current version
-	   IF NOT EXISTS (select * from meta.branch _b inner join meta.[version] _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) BEGIN
+	   IF NOT EXISTS (select * from dbo.[branch] _b inner join dbo.[version] _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) BEGIN
 		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not have a current version';
 		  THROW 50000, @msg, 1
 	   END
 	   -- Branch's current version is open
-	   IF (select _v.version_status from meta.branch _b inner join meta.[version] _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) &lt;&gt; 'OPEN' BEGIN
+	   IF (select _v.version_status from dbo.[branch] _b inner join dbo.[version] _v on _b.branch_name = @branch_name and _v.version_name = _b.current_version_name) &lt;&gt; 'OPEN' BEGIN
 		  set @msg = 'ERROR: Branch ' + @branch_name + ' has a current version, but it is not open';
 		  THROW 50000, @msg, 1
 	   END
@@ -139,7 +139,7 @@ BEGIN
 					</xsl:for-each>
 			) MyData
 			INNER JOIN historyReaction on historyReaction.[action] = MyData.[action]
-			INNER JOIN meta.[branch] _b ON @branch_name = _b.branch_name
+			INNER JOIN dbo.[branch] _b ON @branch_name = _b.branch_name
 		) [input]
 		ON
 			<xsl:for-each select="columns/column[@is_primary_key=1]" >

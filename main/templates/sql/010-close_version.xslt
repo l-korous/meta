@@ -7,10 +7,10 @@
     
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
-IF OBJECT_ID ('meta.close_version') IS NOT NULL 
-     DROP PROCEDURE meta.close_version
+IF OBJECT_ID ('dbo.close_version') IS NOT NULL 
+     DROP PROCEDURE dbo.close_version
 GO
-CREATE PROCEDURE meta.close_version
+CREATE PROCEDURE dbo.close_version
 (@version_name NVARCHAR(255))
 AS
 BEGIN
@@ -20,30 +20,30 @@ BEGIN
     BEGIN TRANSACTION
 	   -- SANITY CHECKS
 	   -- Version exists
-	   IF NOT EXISTS (select * from meta.[version] where version_name = @version_name)
+	   IF NOT EXISTS (select * from dbo.[version] where version_name = @version_name)
 		  BEGIN
 			 set @msg = 'ERROR: Version ' + @version_name + ' does not exist';
 			 THROW 50000, @msg, 1
 		  END
 	   -- Version is not closed
-	   IF (select version_status from meta.[version] where version_name = @version_name) = 'CLOSED'
+	   IF (select version_status from dbo.[version] where version_name = @version_name) = 'CLOSED'
 		  BEGIN
 			 set @msg = 'ERROR: Version ' + @version_name + ' already closed';
 			 THROW 50000, @msg, 1
 		  END
 
        -- Close the version of the branch
-	   UPDATE meta.[version]
+	   UPDATE dbo.[version]
 	   SET version_status = 'CLOSED'
 	   WHERE version_name = @version_name
 	   
-	   UPDATE meta.branch
+	   UPDATE dbo.[branch]
 	   SET last_closed_version_name = @version_name
-	   WHERE branch_name = (select branch_name from meta.[version] where version_name = @version_name)
+	   WHERE branch_name = (select branch_name from dbo.[version] where version_name = @version_name)
 	   
-	   UPDATE meta.branch
+	   UPDATE dbo.[branch]
 	   SET current_version_name = NULL
-	   WHERE branch_name = (select branch_name from meta.[version] where version_name = @version_name)
+	   WHERE branch_name = (select branch_name from dbo.[version] where version_name = @version_name)
 
 	   COMMIT TRANSACTION;
     END TRY 

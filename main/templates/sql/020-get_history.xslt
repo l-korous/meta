@@ -21,7 +21,7 @@ BEGIN
     BEGIN TRANSACTION
 	   -- SANITY CHECKS
 	   -- Branch exists
-	   IF NOT EXISTS (select * from meta.branch where branch_name = @branch_name) BEGIN
+	   IF NOT EXISTS (select * from dbo.[branch] where branch_name = @branch_name) BEGIN
 		  set @msg = 'ERROR: Branch "' + @branch_name + '" does not exist';
 		  THROW 50000, @msg, 1
 	   END

@@ -9,11 +9,11 @@
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 
-IF OBJECT_ID ('dbo.bulk_insert_excel_internal') IS NOT NULL 
-     DROP PROCEDURE dbo.bulk_insert_excel_internal
+IF OBJECT_ID ('meta.bulk_insert_excel_internal') IS NOT NULL 
+     DROP PROCEDURE meta.bulk_insert_excel_internal
 GO
 
-create PROCEDURE dbo.bulk_insert_excel_internal
+create PROCEDURE meta.bulk_insert_excel_internal
 (@random_string nvarchar(max), @branch_name NVARCHAR(255) = 'master')
 AS
 BEGIN

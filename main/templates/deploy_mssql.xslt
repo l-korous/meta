@@ -17,8 +17,6 @@ sqlCredentials="-S <xsl:value-of select="//configuration[@key='DbHostName']/@val
 # Add trailing slash
 metaHome=$META_HOME
 [[ "${metaHome}" != */ ]] &amp;&amp; metaHome="${metaHome}/"
-# This MUST have a trailing slash
-logDir=${metaHome}deployment_log/
 #=================
 
 # Deploy SQL
@@ -28,18 +26,19 @@ do
     printf "."
 	filename=${f##*/}
 	filename=${filename%".sql"}
-	logfile=${logDir}$filename.txt
+	logfile=$filename.txt
 	
 	if [[ "$OSTYPE" != "linux-gnu" ]]; then
 		f=$(echo "$f" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
-		logfile=$(echo "$logfile" | sed -e 's/^\///' -e 's/\//\\/g' -e 's/^./\0:/')
 	fi
 	
 	sqlcmd -b -C -o ${logfile} $sqlCredentials -i "$f" -f 65001
 	
 	if [ "$?" -ne 0 ] ; then
-		cat ${logDir}$filename.txt
+		cat $filename.txt
 		exit $?
+    else
+        rm $filename.txt
 	fi
 done
 echo

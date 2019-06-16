@@ -8,10 +8,10 @@
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 <xsl:for-each select="//table" >
-IF OBJECT_ID ('meta.identify_conflicts_<xsl:value-of select="@table_name" />') IS NOT NULL 
-     DROP PROCEDURE meta.identify_conflicts_<xsl:value-of select="@table_name" />
+IF OBJECT_ID ('dbo.identify_conflicts_<xsl:value-of select="@table_name" />') IS NOT NULL 
+     DROP PROCEDURE dbo.identify_conflicts_<xsl:value-of select="@table_name" />
 GO
-CREATE PROCEDURE meta.identify_conflicts_<xsl:value-of select="@table_name" />
+CREATE PROCEDURE dbo.identify_conflicts_<xsl:value-of select="@table_name" />
 (@branch_name NVARCHAR(255), @merge_version_name NVARCHAR(255), @min_version_order_master int, @number_of_conflicts int output)
 AS
 BEGIN
@@ -30,7 +30,7 @@ BEGIN
                 </xsl:for-each>
                 h_master.branch_name = 'master'
                 AND h_branch.branch_name = @branch_name
-                AND h_master.version_name in (SELECT version_name from meta.[version] where version_order &gt; @min_version_order_master)
+                AND h_master.version_name in (SELECT version_name from dbo.[version] where version_order &gt; @min_version_order_master)
                 AND h_master.valid_to IS NULL
                 AND h_branch.valid_to IS NULL
                 AND (
@@ -71,7 +71,7 @@ BEGIN
                     </xsl:for-each>
                     h_master.branch_name = 'master'
                     AND h_branch.branch_name = @branch_name
-                    AND h_master.version_name in (SELECT version_name from meta.[version] where version_order &gt; @min_version_order_master)
+                    AND h_master.version_name in (SELECT version_name from dbo.[version] where version_order &gt; @min_version_order_master)
                     AND h_master.valid_to IS NULL
                     AND h_branch.valid_to IS NULL
                     AND (

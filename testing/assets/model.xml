@@ -4,7 +4,7 @@
         <configuration key="DbHostName" value="localhost"/>
         <configuration key="DbPort" value="1433"/>
         <configuration key="DbInstanceName" value="SQLEXPRESS"/>
-        <configuration key="DbName" value="meta3"/>
+        <configuration key="DbName" value="meta_target_3"/>
         <configuration key="DbCollation" value="SQL_Latin1_General_CP1_CI_AI"/>
         <configuration key="DbUser" value="sa"/>
         <configuration key="DbPassword" value="asdf"/>

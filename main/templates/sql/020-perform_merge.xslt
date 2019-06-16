@@ -8,10 +8,10 @@
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 <xsl:for-each select="//table" >
-IF OBJECT_ID ('meta.perform_merge_<xsl:value-of select="@table_name" />') IS NOT NULL 
-     DROP PROCEDURE meta.perform_merge_<xsl:value-of select="@table_name" />
+IF OBJECT_ID ('dbo.perform_merge_<xsl:value-of select="@table_name" />') IS NOT NULL 
+     DROP PROCEDURE dbo.perform_merge_<xsl:value-of select="@table_name" />
 GO
-CREATE PROCEDURE meta.perform_merge_<xsl:value-of select="@table_name" />
+CREATE PROCEDURE dbo.perform_merge_<xsl:value-of select="@table_name" />
 (@branch_name NVARCHAR(255), @merge_version_name NVARCHAR(255), @current_datetime datetime)
 AS
 BEGIN
