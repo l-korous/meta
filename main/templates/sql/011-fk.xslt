@@ -9,12 +9,12 @@ GO
 <xsl:for-each select="//table" >
 <xsl:variable name="table_name" select="@table_name"/>
     <xsl:for-each select="//references/reference[@referencing_table_name=$table_name]" >
-ALTER TABLE dbo.[<xsl:value-of select="$table_name" />] ADD CONSTRAINT FK_<xsl:value-of select="@reference_name" />_<xsl:value-of select="@referencing_table_name" />_<xsl:value-of select="@referenced_table_name" /> FOREIGN KEY (
+ALTER TABLE dbo.__new_<xsl:value-of select="$table_name" /> ADD CONSTRAINT FK__new__<xsl:value-of select="@reference_name" />_<xsl:value-of select="@referencing_table_name" />_<xsl:value-of select="@referenced_table_name" /> FOREIGN KEY (
     <xsl:for-each select="reference_details/reference_detail" >
         [<xsl:value-of select="@referencing_column_name" />],
     </xsl:for-each>
     [branch_name])
-    REFERENCES dbo.[<xsl:value-of select="@referenced_table_name" />] (
+    REFERENCES dbo.__new_<xsl:value-of select="@referenced_table_name" /> (
     <xsl:for-each select="reference_details/reference_detail" >
         [<xsl:value-of select="@referenced_column_name" />],
     </xsl:for-each>

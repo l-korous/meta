@@ -30,13 +30,13 @@ var <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion = func
  * @swagger
  * definitions:
  *   <xsl:value-of select="$table_name" />:
- *     required: [<xsl:for-each select="columns/column[@is_nullable=0 or @is_primary_key=1]" ><xsl:value-of select="@column_name" /><xsl:if test="position() != last()">, </xsl:if></xsl:for-each>]
+ *     required: [<xsl:for-each select="columns/column[@is_required=0 or @is_primary_key=1]" ><xsl:value-of select="@column_name" /><xsl:if test="position() != last()">, </xsl:if></xsl:for-each>]
  *     properties:
  *      <xsl:for-each select="columns/column" ><xsl:value-of select="@column_name" />:
  *          type:
  *              <xsl:value-of select="meta:datatype_to_js(@datatype)" />
  *          description:
- *              "DB datatype: <xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="@is_primary_key = 1"> | PRIMARY KEY</xsl:if><xsl:if test="@is_unique = 1"> | UNIQUE</xsl:if><xsl:if test="@is_nullable = 0"> | REQUIRED</xsl:if>"
+ *              "DB datatype: <xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="@is_primary_key = 1"> | PRIMARY KEY</xsl:if><xsl:if test="@is_unique = 1"> | UNIQUE</xsl:if><xsl:if test="@is_required = 0"> | REQUIRED</xsl:if>"
  *      </xsl:for-each>
  *
  * /api/{branch}/<xsl:value-of select="$table_name" />:
@@ -129,11 +129,11 @@ app.get("/api/:branch/<xsl:value-of select="$table_name" />", function(req , res
  *         description: "<xsl:value-of select="@column_name" /> | DB datatype: <xsl:value-of select="meta:datatype_to_sql(@datatype)" />"
  *         required: true
  *       </xsl:for-each>
- *       <xsl:for-each select="columns/column[@is_primary_key=0]" ><xsl:sort select="@is_nullable" order="descending" />- name: <xsl:value-of select="@column_name" />
+ *       <xsl:for-each select="columns/column[@is_primary_key=0]" ><xsl:sort select="@is_required" order="descending" />- name: <xsl:value-of select="@column_name" />
  *         type: <xsl:value-of select="meta:datatype_to_swagger(@datatype)" />
  *         in: body
  *         description: "<xsl:value-of select="@column_name" /> | DB datatype: <xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="@is_unique = 1"> | UNIQUE</xsl:if>"
- *         required: <xsl:choose><xsl:when test="@is_nullable = 0">true</xsl:when><xsl:otherwise>false</xsl:otherwise></xsl:choose>
+ *         required: <xsl:choose><xsl:when test="@is_required = 0">true</xsl:when><xsl:otherwise>false</xsl:otherwise></xsl:choose>
  *         example: "<xsl:value-of select="meta:datatype_to_swagger_example(@datatype)" />"
  *       </xsl:for-each>
  *     produces:
@@ -159,11 +159,11 @@ app.get("/api/:branch/<xsl:value-of select="$table_name" />", function(req , res
  *         description: "<xsl:value-of select="@column_name" /> | DB datatype: <xsl:value-of select="meta:datatype_to_sql(@datatype)" />"
  *         required: true
  *       </xsl:for-each>
- *       <xsl:for-each select="columns/column[@is_primary_key=0]" ><xsl:sort select="@is_nullable" order="descending" />- name: <xsl:value-of select="@column_name" />
+ *       <xsl:for-each select="columns/column[@is_primary_key=0]" ><xsl:sort select="@is_required" order="descending" />- name: <xsl:value-of select="@column_name" />
  *         type: <xsl:value-of select="meta:datatype_to_swagger(@datatype)" />
  *         in: body
  *         description: "<xsl:value-of select="@column_name" /> | DB datatype: <xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="@is_unique = 1"> | UNIQUE</xsl:if>"
- *         required: <xsl:choose><xsl:when test="@is_nullable = 0">true</xsl:when><xsl:otherwise>false</xsl:otherwise></xsl:choose>
+ *         required: <xsl:choose><xsl:when test="@is_required = 0">true</xsl:when><xsl:otherwise>false</xsl:otherwise></xsl:choose>
  *         example: "<xsl:value-of select="meta:datatype_to_swagger_example(@datatype)" />"
  *       </xsl:for-each>
  *     produces:

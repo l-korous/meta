@@ -114,7 +114,8 @@ BEGIN
     );
     
     CREATE TABLE meta.[datatype] (
-        datatype_name nvarchar(255) primary key
+        datatype_name nvarchar(255) primary key,
+        datatype_sql nvarchar(255)
     );  
 
     CREATE TABLE meta.[model_version] (
@@ -131,10 +132,10 @@ BEGIN
         model_version int,
         column_name nvarchar(255), 
         table_name nvarchar(255), 
-        datatype nvarchar(255), 
+        datatype_name nvarchar(255),
         is_primary_key bit,
         is_unique bit,
-        is_nullable bit,
+        is_required bit,
         PRIMARY KEY (model_version, [table_name], [column_name])
     ); 
 
@@ -160,12 +161,13 @@ BEGIN
     ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_start_master_version_name FOREIGN KEY (start_master_version_name) REFERENCES dbo.[version] (version_name);
     ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_last_closed_version_name FOREIGN KEY (last_closed_version_name) REFERENCES dbo.[version] (version_name);
     ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_current_version_name FOREIGN KEY (current_version_name) REFERENCES dbo.[version] (version_name);
+    ALTER TABLE dbo.[branch] ADD CONSTRAINT CHK_branch_last_closed_version_name CHECK (dbo.is_version_closed(last_closed_version_name) = 1);
     ALTER TABLE dbo.[version] ADD CONSTRAINT FK_version_previous_version_name FOREIGN KEY (previous_version_name) REFERENCES dbo.[version] (version_name);
     ALTER TABLE dbo.[version] ADD CONSTRAINT FK_version_branch_name FOREIGN KEY (branch_name) REFERENCES dbo.[branch] (branch_name);
     ALTER TABLE meta.[table] ADD CONSTRAINT FK_table_model_version FOREIGN KEY (model_version) REFERENCES meta.[model_version] (model_version);
     ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_model_version FOREIGN KEY (model_version) REFERENCES meta.[model_version] (model_version);
     ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_table FOREIGN KEY (model_version, table_name) REFERENCES meta.[table] (model_version, table_name);
-    ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_datatype FOREIGN KEY (datatype) REFERENCES meta.[datatype] (datatype_name);
+    ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_datatype FOREIGN KEY (datatype_name) REFERENCES meta.[datatype] (datatype_name);
     ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_model_version FOREIGN KEY (model_version) REFERENCES meta.[model_version] (model_version);
     ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referencing_table_name FOREIGN KEY (model_version, referencing_table_name) REFERENCES meta.[table] (model_version, table_name);
     ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referenced_table_name FOREIGN KEY (model_version, referenced_table_name) REFERENCES meta.[table] (model_version, table_name);
@@ -180,14 +182,14 @@ BEGIN
     INSERT INTO dbo.[version] VALUES ('initial_version', 'master', NULL, 0, 'OPEN')
     UPDATE dbo.[branch] SET current_version_name = (select top 1 version_name from dbo.[version] where version_name = 'initial_version')
 
-    INSERT INTO meta.[datatype] VALUES ('string');
-    INSERT INTO meta.[datatype] VALUES ('long_string');
-    INSERT INTO meta.[datatype] VALUES ('int');
-    INSERT INTO meta.[datatype] VALUES ('float');
-    INSERT INTO meta.[datatype] VALUES ('datetime');
-    INSERT INTO meta.[datatype] VALUES ('date');
-    INSERT INTO meta.[datatype] VALUES ('time');
-    INSERT INTO meta.[datatype] VALUES ('boolean');
+    INSERT INTO meta.[datatype] VALUES ('string', 'NVARCHAR(255)');
+    INSERT INTO meta.[datatype] VALUES ('long_string', 'NVARCHAR(MAX)');
+    INSERT INTO meta.[datatype] VALUES ('int', 'INT');
+    INSERT INTO meta.[datatype] VALUES ('float', 'FLOAT');
+    INSERT INTO meta.[datatype] VALUES ('datetime', 'DATETIME');
+    INSERT INTO meta.[datatype] VALUES ('date', 'DATE');
+    INSERT INTO meta.[datatype] VALUES ('boolean', 'BIT');
+    INSERT INTO meta.[datatype] VALUES ('time', 'TIME');
 END
 
 TRUNCATE TABLE meta.[configuration];
@@ -207,7 +209,7 @@ INSERT INTO meta.[model_version] DEFAULT VALUES;
             '<xsl:value-of select="@datatype" />',
             '<xsl:value-of select="@is_primary_key" />',
             '<xsl:value-of select="@is_unique" />',
-            '<xsl:value-of select="@is_nullable" />')
+            '<xsl:value-of select="@is_required" />')
     </xsl:for-each>
     <xsl:for-each select="references/reference" >
         INSERT INTO meta.[reference] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@reference_name" />',

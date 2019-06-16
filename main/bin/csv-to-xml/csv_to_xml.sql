@@ -7,7 +7,7 @@ CREATE TABLE #c (
     datatype nvarchar(max), 
     is_primary_key nvarchar(max),
     is_unique nvarchar(max),
-    is_nullable nvarchar(max)
+    is_required nvarchar(max)
 )
 CREATE TABLE #r (
     reference_name nvarchar(max),
@@ -42,7 +42,7 @@ UPDATE #c SET
     datatype =replace(trim(datatype), char(34), ''),
     is_primary_key = replace(trim(is_primary_key), char(34), ''),
     is_unique = replace(trim(is_unique), char(34), ''),
-    is_nullable = replace(trim(is_nullable), char(34), '');
+    is_required = replace(trim(is_required), char(34), '');
 
 UPDATE #r SET
     reference_name = replace(trim(reference_name), char(34), ''),
@@ -76,7 +76,7 @@ SELECT
 	   datatype,
 	   is_primary_key,
 	   is_unique,
-	   is_nullable
+	   is_required
     FROM 
         #c [column]
     where

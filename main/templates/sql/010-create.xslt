@@ -9,10 +9,10 @@
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 <xsl:for-each select="//table" >
-CREATE TABLE dbo.[<xsl:value-of select="@table_name" />]
+CREATE TABLE dbo.__new_<xsl:value-of select="@table_name" />
 (
     <xsl:for-each select="columns/column" >
-        [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" /> <xsl:if test="@is_nullable = 0">&s;NOT NULL</xsl:if>,
+        [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" /> <xsl:if test="@is_required = 1">&s;NOT NULL</xsl:if>,
     </xsl:for-each>
     branch_name NVARCHAR(255),
     PRIMARY KEY (
@@ -21,9 +21,9 @@ CREATE TABLE dbo.[<xsl:value-of select="@table_name" />]
         </xsl:for-each>
     branch_name
     )
-)
+);
 
-CREATE TABLE dbo.hist_<xsl:value-of select="@table_name" />
+CREATE TABLE dbo.__new_hist_<xsl:value-of select="@table_name" />
 (
     <xsl:for-each select="columns/column" >
         [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
@@ -36,7 +36,7 @@ CREATE TABLE dbo.hist_<xsl:value-of select="@table_name" />
     author NVARCHAR(255)
 )
 
-CREATE TABLE dbo.conflicts_<xsl:value-of select="@table_name" />
+CREATE TABLE dbo.__new_conflicts_<xsl:value-of select="@table_name" />
 (
     merge_version_name NVARCHAR(255),
     <xsl:for-each select="columns/column[@is_primary_key=1]" >
@@ -56,11 +56,11 @@ CREATE TABLE dbo.conflicts_<xsl:value-of select="@table_name" />
 )
 GO
 
-ALTER TABLE dbo.[<xsl:value-of select="@table_name" />] ADD CONSTRAINT FK_<xsl:value-of select="@table_name" />_branch_name FOREIGN KEY (branch_name) REFERENCES dbo.[branch] (branch_name)
-ALTER TABLE dbo.hist_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_hist_<xsl:value-of select="@table_name" />_branch_name FOREIGN KEY (branch_name) REFERENCES dbo.[branch] (branch_name)
-ALTER TABLE dbo.hist_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_hist_<xsl:value-of select="@table_name" />_version_name FOREIGN KEY (version_name) REFERENCES dbo.[version] (version_name)
-ALTER TABLE dbo.conflicts_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_conflicts_<xsl:value-of select="@table_name" />_merge_version_name FOREIGN KEY (merge_version_name) REFERENCES dbo.[version] (version_name)
-ALTER TABLE dbo.conflicts_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK_conflicts_<xsl:value-of select="@table_name" />_last_version_name_master FOREIGN KEY (last_version_name_master) REFERENCES dbo.[version] (version_name)
+ALTER TABLE dbo.__new_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK__new__<xsl:value-of select="@table_name" />_branch_name FOREIGN KEY (branch_name) REFERENCES dbo.[branch] (branch_name)
+ALTER TABLE dbo.__new_hist_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK__new__hist_<xsl:value-of select="@table_name" />_branch_name FOREIGN KEY (branch_name) REFERENCES dbo.[branch] (branch_name)
+ALTER TABLE dbo.__new_hist_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK__new__hist_<xsl:value-of select="@table_name" />_version_name FOREIGN KEY (version_name) REFERENCES dbo.[version] (version_name)
+ALTER TABLE dbo.__new_conflicts_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK__new__conflicts_<xsl:value-of select="@table_name" />_merge_version_name FOREIGN KEY (merge_version_name) REFERENCES dbo.[version] (version_name)
+ALTER TABLE dbo.__new_conflicts_<xsl:value-of select="@table_name" /> ADD CONSTRAINT FK__new__conflicts_<xsl:value-of select="@table_name" />_last_version_name_master FOREIGN KEY (last_version_name_master) REFERENCES dbo.[version] (version_name)
 </xsl:for-each>
 </xsl:template>
 </xsl:stylesheet>
