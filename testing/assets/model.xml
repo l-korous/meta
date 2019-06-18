@@ -49,25 +49,9 @@
         </table>
     </tables>
     <references>
-        <reference reference_name="Asset_Contract_Asset" referencing_table_name="Task" referenced_table_name="Asset" on_delete="CASCADE">
-            <reference_details>
-                <reference_detail referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Task" referenced_table_name="Asset"/>
-            </reference_details>
-        </reference>
-        <reference reference_name="Asset_Contract_Contract" referencing_table_name="Task" referenced_table_name="Contract" on_delete="CASCADE">
-            <reference_details>
-                <reference_detail referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Task" referenced_table_name="Contract"/>
-            </reference_details>
-        </reference>
-            <reference reference_name="Task_Asset" referencing_table_name="Asset_Contract" referenced_table_name="Asset" on_delete="CASCADE">
-                <reference_details>
-                    <reference_detail referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Asset"/>
-                </reference_details>
-            </reference>
-            <reference reference_name="Task_Contract" referencing_table_name="Asset_Contract" referenced_table_name="Contract" on_delete="CASCADE">
-                <reference_details>
-                    <reference_detail referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Contract"/>
-                </reference_details>
-            </reference>
+        <reference reference_name="Asset_Contract_Asset" referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Task" referenced_table_name="Asset" on_delete="CASCADE" />
+        <reference reference_name="Asset_Contract_Contract" referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Task" referenced_table_name="Contract" on_delete="CASCADE" />
+        <reference reference_name="Task_Asset" referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Asset" on_delete="CASCADE" />
+        <reference reference_name="Task_Contract" referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Contract" on_delete="CASCADE" />
     </references>
 </root>

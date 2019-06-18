@@ -57,7 +57,7 @@ var swaggerSpec = swaggerJSDoc({
         info: {
             title: 'Node Swagger API',
             version: appConfig.version,
-            description: 'Demonstrating how to describe a RESTful API with Swagger',
+            description: 'META-generated API documentation',
         },
         host: appConfig.hostName + ':' + appConfig.port,
         basePath: '/',

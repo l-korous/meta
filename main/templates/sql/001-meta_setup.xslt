@@ -68,20 +68,6 @@ BEGIN
 END
 GO
 
-IF OBJECT_ID ('meta.get_reference_details') IS NOT NULL DROP PROCEDURE meta.get_reference_details;
-GO
-CREATE PROCEDURE meta.get_reference_details
-AS
-BEGIN
-    SET XACT_ABORT, NOCOUNT ON
-    DECLARE @msg nvarchar(255)
-    BEGIN TRY
-        SELECT * FROM meta.[reference_detail];
-    END TRY
-    BEGIN CATCH
-    END CATCH
-END
-GO
 
 IF (
         NOT (
@@ -143,18 +129,10 @@ BEGIN
         model_version int,
         reference_name nvarchar(255),
         referencing_table_name nvarchar(255),
-        referenced_table_name nvarchar(255),
-        on_delete nvarchar(255),
-        PRIMARY KEY (model_version, [reference_name])
-    );
-
-    CREATE TABLE meta.[reference_detail] (
-        model_version int,
-        reference_name nvarchar(255),
-        referencing_table_name nvarchar(255),
         referencing_column_name nvarchar(255),
         referenced_table_name nvarchar(255),
         referenced_column_name nvarchar(255),
+        on_delete nvarchar(255),
         PRIMARY KEY (model_version, [reference_name], [referencing_table_name], [referencing_column_name], [referenced_table_name], [referenced_column_name])
     );
 
@@ -171,12 +149,8 @@ BEGIN
     ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_model_version FOREIGN KEY (model_version) REFERENCES meta.[model_version] (model_version);
     ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referencing_table_name FOREIGN KEY (model_version, referencing_table_name) REFERENCES meta.[table] (model_version, table_name);
     ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referenced_table_name FOREIGN KEY (model_version, referenced_table_name) REFERENCES meta.[table] (model_version, table_name);
-    ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_model_version FOREIGN KEY (model_version) REFERENCES meta.[model_version] (model_version);
-    ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_reference_name FOREIGN KEY (model_version, reference_name) REFERENCES meta.[reference] (model_version, reference_name);
-    ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_referencing_table_name FOREIGN KEY (model_version, referencing_table_name) REFERENCES meta.[table] (model_version, table_name);
-    ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_referenced_table_name FOREIGN KEY (model_version, referenced_table_name) REFERENCES meta.[table] (model_version, table_name);
-    ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_referencing_column_name FOREIGN KEY (model_version, referencing_table_name, referencing_column_name) REFERENCES meta.[column] (model_version, table_name, column_name);
-    ALTER TABLE meta.[reference_detail] ADD CONSTRAINT FK_reference_detail_referenced_column_name FOREIGN KEY (model_version, referenced_table_name, referenced_column_name) REFERENCES meta.[column] (model_version, table_name, column_name);
+    ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referencing_column_name FOREIGN KEY (model_version, referencing_table_name, referencing_column_name) REFERENCES meta.[column] (model_version, table_name, column_name);
+    ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referenced_column_name FOREIGN KEY (model_version, referenced_table_name, referenced_column_name) REFERENCES meta.[column] (model_version, table_name, column_name);
     
     INSERT INTO dbo.[branch] VALUES ('master', NULL, NULL, NULL)
     INSERT INTO dbo.[version] VALUES ('initial_version', 'master', NULL, 0, 'OPEN')
@@ -212,19 +186,228 @@ INSERT INTO meta.[model_version] DEFAULT VALUES;
             '<xsl:value-of select="@is_required" />')
     </xsl:for-each>
     <xsl:for-each select="references/reference" >
-        INSERT INTO meta.[reference] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@reference_name" />',
+        INSERT INTO meta.[reference] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="../../@reference_name" />',
             '<xsl:value-of select="@referencing_table_name" />',
+            '<xsl:value-of select="@referencing_column_name" />',
             '<xsl:value-of select="@referenced_table_name" />',
+            '<xsl:value-of select="@referenced_column_name" />',
             '<xsl:value-of select="@on_delete" />')
-        <xsl:for-each select="reference_details/reference_detail" >
-            INSERT INTO meta.[reference_detail] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="../../@reference_name" />',
-                '<xsl:value-of select="@referencing_table_name" />',
-                '<xsl:value-of select="@referencing_column_name" />',
-                '<xsl:value-of select="@referenced_table_name" />',
-                '<xsl:value-of select="@referenced_column_name" />')
-        </xsl:for-each>
     </xsl:for-each>
 </xsl:for-each>
+    
+IF OBJECT_ID ('meta.create_insert_column_query') IS NOT NULL DROP FUNCTION meta.create_insert_column_query;
+GO
+CREATE FUNCTION meta.create_insert_column_query
+(@column_name nvarchar(255), @column_name_prev nvarchar(255), @column_datatype_new nvarchar(255), @column_datatype_prev nvarchar(255), @column_is_primary_key_new bit, @column_is_required_new bit)
+RETURNS nvarchar(max)
+AS
+BEGIN
+    DECLARE @SQL NVARCHAR(MAX) = 'CAST(';
+    DECLARE @have_to_null bit = 0;
 
+    IF (
+	   (((@column_datatype_new = 'INT') OR (@column_datatype_new = 'FLOAT')) AND ((@column_datatype_prev = 'DATE') OR (@column_datatype_prev = 'TIME')))
+	   OR
+	   (((@column_datatype_new = 'DATE') OR (@column_datatype_new = 'TIME')) AND ((@column_datatype_prev = 'INT') OR (@column_datatype_prev = 'FLOAT')))
+    )
+	   SET @have_to_null = 1;
+
+    IF ((@have_to_null = 1) OR (@column_name_prev IS NULL)) BEGIN
+	   IF ((@column_is_primary_key_new = 1) OR (@column_is_required_new = 1))
+		  SET @SQL = @SQL + CASE
+				WHEN @column_datatype_new = 'NVARCHAR(255)' THEN ''''''
+				WHEN @column_datatype_new = 'NVARCHAR(MAX)' THEN ''''''
+				WHEN @column_datatype_new = 'INT' THEN '0'
+				WHEN @column_datatype_new = 'FLOAT' THEN '0'
+				WHEN @column_datatype_new = 'DATETIME' THEN ''''''
+				WHEN @column_datatype_new = 'DATE' THEN ''''''
+				WHEN @column_datatype_new = 'TIME' THEN ''''''
+				WHEN @column_datatype_new = 'BIT' THEN '0'
+			 END;
+	   ELSE
+		  SET @SQL = @SQL + 'NULL';
+    END
+    ELSE
+	   SET @SQL = @SQL + quotename(@column_name_prev);
+    SET @SQL = @SQL + ' AS ' + @column_datatype_new + '), ';
+
+    RETURN(@SQL);
+END
+GO
+IF OBJECT_ID ('meta.alter_model') IS NOT NULL DROP PROCEDURE meta.alter_model;
+GO
+CREATE PROCEDURE meta.alter_model
+AS
+BEGIN
+    SET XACT_ABORT, NOCOUNT ON
+    DECLARE @msg nvarchar(255)
+    BEGIN TRY
+    BEGIN TRANSACTION
+
+	   EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all";
+
+	   DECLARE @table_name nvarchar(255);
+	   DECLARE @table_action nvarchar(255);
+	   DECLARE @SQL NVARCHAR(MAX) = N'';
+
+	   DECLARE @column_name nvarchar(255);
+	   DECLARE @column_name_prev nvarchar(255);
+	   DECLARE @column_datatype_new nvarchar(255);
+	   DECLARE @column_datatype_prev nvarchar(255);
+	   DECLARE @column_is_primary_key_new bit;
+	   DECLARE @column_is_required_new bit;
+
+	   DECLARE table_cursor CURSOR FOR
+		  select
+		  isnull(table_new.table_name, table_prev.table_name),
+		  case
+			 when table_prev.table_name is null then 'NEW'
+			 when table_new.table_name is null then 'DROP'
+			 else 'POSSIBLY UPDATE'
+		  end as [action]
+		  from
+			 (select * from meta.[table] where model_version = (select max(model_version) from meta.model_version)) table_new
+		  full join
+			 (select * from meta.[table] where model_version = (select max(model_version) from meta.model_version mv_prev where exists (select model_version from meta.model_version mv where mv.model_version > mv_prev.model_version))) table_prev
+		  on
+			 table_new.table_name = table_prev.table_name;
+
+	   OPEN table_cursor
+	   FETCH NEXT FROM table_cursor INTO @table_name, @table_action;
+	   WHILE @@FETCH_STATUS = 0  
+	   BEGIN
+		  DECLARE @hist_table_name nvarchar(255) = concat('hist_', @table_name);
+		  DECLARE @conflicts_table_name nvarchar(255) = concat('conflicts_', @table_name);
+		  DECLARE @temp_table_name nvarchar(255) = concat('__new_', @table_name);
+		  DECLARE @temp_hist_table_name nvarchar(255) = concat('__new_hist_', @table_name);
+		  DECLARE @temp_conflicts_table_name nvarchar(255) = concat('__new_conflicts_', @table_name);
+
+		  IF @table_action = 'NEW' BEGIN
+			 EXEC sp_rename @temp_table_name, @table_name;
+			 EXEC sp_rename @temp_hist_table_name, @hist_table_name;
+			 EXEC sp_rename @temp_conflicts_table_name, @conflicts_table_name;
+		  END
+		  ELSE IF @table_action = 'DROP' BEGIN
+			 SET @SQL = 'DROP TABLE ' + @table_name;
+			 EXEC sp_executesql @SQL;
+			 SET @SQL = 'DROP TABLE ' + @hist_table_name;
+			 EXEC sp_executesql @SQL;
+			 SET @SQL = 'DROP TABLE ' + @conflicts_table_name;
+			 EXEC sp_executesql @SQL;
+		  END
+		  ELSE BEGIN -- (possibly) @table_action ~ 'UPDATE'
+			 DECLARE @changed_model bit;
+			 SET @changed_model = case when (
+				select count(*) from
+				    (select * from meta.[column] where model_version = (select max(model_version) from meta.model_version)) column_new
+				full join
+				    (select * from meta.[column] where model_version = (select max(model_version) from meta.model_version mv_prev where exists (select model_version from meta.model_version mv where mv.model_version > mv_prev.model_version))) column_prev
+					   on column_new.column_name = column_prev.column_name and column_new.table_name = column_prev.table_name
+				where (column_new.table_name = @table_name or column_prev.table_name = @table_name)
+				    and (
+				    column_new.datatype_name &lt;&gt; column_prev.datatype_name or
+				    column_new.is_primary_key &lt;&gt; column_prev.is_primary_key or
+				    column_new.is_required &lt;&gt; column_prev.is_required or
+				    column_new.column_name is null or
+				    column_prev.column_name is null or
+				    column_new.is_unique &lt;&gt; column_prev.is_unique
+				    )
+			 ) > 0 then 1 else 0 end;
+
+			 IF @changed_model = 1 BEGIN
+
+				-- put together insert statement by going through all new columns, possibly finding old ones to them
+				DECLARE @insert_statement nvarchar(max) = 'INSERT INTO ' + @temp_table_name + ' SELECT ';
+		  
+				DECLARE column_cursor CURSOR FOR
+				    select
+				    column_new.column_name,
+				    column_prev.column_name,
+				    datatype_new.datatype_sql,
+				    datatype_prev.datatype_sql,
+				    column_new.is_primary_key,
+				    column_new.is_required
+				    from
+					   (select * from meta.[column] where model_version = (select max(model_version) from meta.model_version)) column_new
+				    inner join
+					   meta.[datatype] datatype_new
+						  on datatype_new.datatype_name = column_new.datatype_name
+				    left join
+					   (select * from meta.[column] where model_version = (select max(model_version) from meta.model_version mv_prev where exists (select model_version from meta.model_version mv where mv.model_version > mv_prev.model_version))) column_prev
+						  on column_new.column_name = column_prev.column_name and column_new.table_name = column_prev.table_name
+				    left join
+					   meta.[datatype] datatype_prev
+						  on datatype_prev.datatype_name = column_prev.datatype_name
+				    where
+					   column_new.table_name = @table_name
+
+				OPEN column_cursor
+				FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_primary_key_new, @column_is_required_new
+				WHILE @@FETCH_STATUS = 0  
+				BEGIN
+				    SET @insert_statement = @insert_statement + meta.create_insert_column_query(@column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_primary_key_new, @column_is_required_new);
+
+				    FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_is_primary_key_new, @column_is_required_new
+				END
+				CLOSE column_cursor;
+				DEALLOCATE column_cursor;
+
+				SET @insert_statement = @insert_statement + 'branch_name FROM ' + @table_name;
+				EXEC sp_executesql @insert_statement;
+
+				-- Drop the old tables, including FKs
+				SET @SQL = '';
+				SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @table_name;
+				EXEC sp_executesql @SQL;
+				SET @SQL = 'DROP TABLE ' + @table_name;
+				EXEC sp_executesql @SQL;
+
+				-- Hist table (including deletion of foreign keys on old history table)
+				DECLARE @backup_hist_table_name nvarchar(255) = 'hist_' + @table_name + '_' + cast(isnull((select max(cast(right(table_name, 1) as int)) from INFORMATION_SCHEMA.tables where table_name like 'hist_' + @table_name + '%[0-9]'), '0') as nvarchar(255));
+				SET @SQL = '';
+				SELECT @SQL += 'ALTER TABLE dbo.' + @hist_table_name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.parent_object_id = t.object_id where t.name = @hist_table_name;
+				EXEC sp_executesql @SQL;
+				EXEC sp_rename @hist_table_name, @backup_hist_table_name;
+				EXEC sp_rename @temp_hist_table_name, @hist_table_name;
+
+				-- Conflict table
+				SET @SQL = 'DROP TABLE ' + @conflicts_table_name;
+				EXEC sp_executesql @SQL;
+				EXEC sp_rename @temp_conflicts_table_name, @conflicts_table_name;
+			 END
+			 ELSE BEGIN -- no change, therefore drop old, rename new (to have the FKs with __new_)
+				SET @SQL = 'DROP TABLE ' + @table_name;
+				EXEC sp_executesql @SQL;
+				SET @SQL = 'DROP TABLE ' + @hist_table_name;
+				EXEC sp_executesql @SQL;
+				SET @SQL = 'DROP TABLE ' + @conflicts_table_name;
+				EXEC sp_executesql @SQL;
+
+				EXEC sp_rename @temp_table_name, @table_name;
+				EXEC sp_rename @temp_hist_table_name, @hist_table_name;
+				EXEC sp_rename @temp_conflicts_table_name, @conflicts_table_name;
+			 END
+		  END
+
+		  FETCH NEXT FROM table_cursor INTO @table_name, @table_action;
+	   END
+	   CLOSE table_cursor;  
+	   DEALLOCATE table_cursor;
+    
+	   -- Rename constraints
+	   SET @SQL = '';
+	   SELECT @sql += 'EXEC sp_rename ' + fk.name + ', ' + replace(fk.name, '__new_', '') + '; ' from sys.foreign_keys as fk where name like '%__new_%';
+	   EXEC sp_executesql @SQL;
+
+	   EXEC sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
+
+    COMMIT TRANSACTION;
+    END TRY 
+    BEGIN CATCH 
+	   ROLLBACK TRANSACTION;
+	   THROW
+    END CATCH 
+END
+GO
     </xsl:template>
 </xsl:stylesheet>

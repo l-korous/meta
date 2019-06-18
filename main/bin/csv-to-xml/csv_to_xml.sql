@@ -12,15 +12,10 @@ CREATE TABLE #c (
 CREATE TABLE #r (
     reference_name nvarchar(max),
     referencing_table_name nvarchar(max),
-    referenced_table_name nvarchar(max),
-    on_delete nvarchar(max) 
-);
-CREATE TABLE #rd (
-    reference_name nvarchar(max),
-    referencing_table_name nvarchar(max),
     referencing_column_name nvarchar(max),
     referenced_table_name nvarchar(max),
-    referenced_column_name nvarchar(max)
+    referenced_column_name nvarchar(max),
+    on_delete nvarchar(max) 
 ); 
 CREATE TABLE #conf (
     [key] nvarchar(max),
@@ -30,7 +25,6 @@ CREATE TABLE #conf (
 BULK INSERT #t FROM tableCsv WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '\n'  );
 BULK INSERT #c FROM colCsv WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '\n' );
 BULK INSERT #r FROM refCsv WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '\n'  );
-BULK INSERT #rd FROM refDetailCsv WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '\n'  );
 BULK INSERT #conf FROM confCsv WITH ( FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '\n'  );
 
 UPDATE #t SET
@@ -44,18 +38,13 @@ UPDATE #c SET
     is_unique = replace(trim(is_unique), char(34), ''),
     is_required = replace(trim(is_required), char(34), '');
 
-UPDATE #r SET
-    reference_name = replace(trim(reference_name), char(34), ''),
-    referencing_table_name = replace(trim(referencing_table_name), char(34), ''),
-    referenced_table_name = replace(trim(referenced_table_name), char(34), ''),
-    on_delete = replace(trim(on_delete), char(34), '');
-
 UPDATE #rd SET
     reference_name = replace(trim(reference_name), char(34), ''),
     referencing_column_name = replace(trim(referencing_column_name), char(34), ''),
     referenced_column_name = replace(trim(referenced_column_name), char(34), ''),
     referencing_table_name = replace(trim(referencing_table_name), char(34), ''),
-    referenced_table_name = replace(trim(referenced_table_name), char(34), '');
+    referenced_table_name = replace(trim(referenced_table_name), char(34), ''),
+    on_delete = replace(trim(on_delete), char(34), '');
 
 UPDATE #conf SET
     [key] = replace(trim([key]), char(34), ''),
@@ -85,20 +74,11 @@ SELECT
     ), 
     ( select
 	   reference_name,
-	   referencing_table_name,
-	   referenced_table_name,
-	   on_delete,
-	   ( select
-		  referencing_column_name,
-		  referenced_column_name,
-          referencing_table_name,
-          referenced_table_name
-	   FROM 
-		  #rd [reference_detail]
-	   where
-		  [reference_detail].reference_name = [reference].reference_name
-	   for xml auto, root ('reference_details'), type
-	   )
+	   referencing_column_name,
+       referenced_column_name,
+       referencing_table_name,
+       referenced_table_name
+	   on_delete
     FROM 
         #r [reference]
     where

@@ -19,7 +19,6 @@ sqlScript="`cat csv_to_xml.sql`"
 sqlScript="${sqlScript//tableCsv/\"${path}tables.csv\"}"
 sqlScript="${sqlScript//colCsv/\"${path}columns.csv\"}"
 sqlScript="${sqlScript//refCsv/\"${path}references.csv\"}"
-sqlScript="${sqlScript//refDetailCsv/\"${path}reference_details.csv\"}"
 sqlScript="${sqlScript//confCsv/\"${path}configuration.csv\"}"
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then

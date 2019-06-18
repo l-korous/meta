@@ -54,12 +54,12 @@ var <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion = func
  *         description: "serialized object (e.g. [{'col': 'myColumn1', 'dir': 'ASC'}, {'col': 'myColumn2', 'dir': 'DESC'}, ...] ) for sorting, serialized using https://github.com/ljharb/qs (into form 'SortBy[0][col]=myColumn1&amp;SortBy[0][dir]=ASC&amp;SortBy[1][col]=myColumn2&amp;SortBy[1][dir]=DESC')"
  *         in: query
  *         required: false
- *         type: array
+ *         type: string
  *       - name: FilterBy
  *         description: "serialized object (e.g. [{'col': 'myColumn1', 'regex': '%Smith'}, {'col': 'myColumn2', 'regex': 'abc[def]'}, ...] ) for filtering, serialized using https://github.com/ljharb/qs (into form 'FilterBy[0][col]=myColumn1&amp;FilterBy[0][regex]=%Smith&amp;FilterBy[1][col]=myColumn2&amp;FilterBy[1][regex]=\"abc\\[def\\]\"')"
  *         in: query
  *         required: false
- *         type: array
+ *         type: string
  *     produces:
  *       - application/json
  *     responses:

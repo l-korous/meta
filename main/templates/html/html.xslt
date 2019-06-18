@@ -135,12 +135,10 @@
                             <button class="entryLinkDeleter">Delete</button>
                             <xsl:element name="a">
                                 <xsl:attribute name="class">entryLinkA entryLinkA<xsl:value-of select="@reference_name" /></xsl:attribute>
-                                <xsl:for-each select="//tables/table[@table_name=$referencing_table_name]/columns/column[@is_primary_key=1]">
-                                    <xsl:element name="div">
-                                        <xsl:attribute name="class">entryLinkIdentifierField<xsl:value-of select="@column_name" /></xsl:attribute>
-                                        <xsl:text disable-output-escaping="yes">&#160;</xsl:text>
-                                    </xsl:element>
-                                </xsl:for-each>
+                                <xsl:element name="div">
+                                    <xsl:attribute name="class">entryLinkIdentifierField<xsl:value-of select="@referencing_column_name" /></xsl:attribute>
+                                    <xsl:text disable-output-escaping="yes">&#160;</xsl:text>
+                                </xsl:element>
                             </xsl:element>
                         </xsl:element>
                     </xsl:element>

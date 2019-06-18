@@ -31,28 +31,19 @@ The parameter of the shell utility is the full path to the directory containing 
         - Unicode string, 255 chars
         - no reserved words
         - no special characters
-    "Source Table Name"
-        - refers to "tables.csv"
-    "Dest Table Name"
-        - refers to "tables.csv"
-    "On Delete"
-        - NULL (representing NO ACTION), or MSSQL syntax for ON UPDATE (CASCADE, SET NULL)
-        
-- "reference_details.csv", with these columns:
-    "Reference Name"
-        - refers to "references.csv"
     "Source Table"
         - refers to "tables.csv"
-        - must correspond to the same value in "references.csv"
     "Source Column"
         - refers to "columns.csv"
         - must refer to an entry in "columns.csv" where "Table Name" = "Source Table" here
     "Dest Table"
         - refers to "tables.csv"
-        - must correspond to the same value in "references.csv"
     "Dest Column"
         - refers to "columns.csv"
         - must refer to an entry in "columns.csv" where "Table Name" = "Dest Table" here
+    "On Delete"
+        - NULL (representing NO ACTION), or MSSQL syntax for ON UPDATE (CASCADE, SET NULL)
+
         
 - "configuration.csv", with these columns:
     "Key"

@@ -21,11 +21,13 @@ metaHome=$META_HOME
 
 # Deploy SQL
 echo Deploying DB
+scriptCount=$(ls -l ${metaHome}main/target/sql/*.sql | wc -l)
+i=1
 for f in ${metaHome}main/target/sql/*.sql;
 do
-    printf "."
-	filename=${f##*/}
+    filename=${f##*/}
 	filename=${filename%".sql"}
+    printf "($i / $scriptCount) $filename";echo
 	logfile=$filename.txt
 	
 	if [[ "$OSTYPE" != "linux-gnu" ]]; then
@@ -40,6 +42,7 @@ do
     else
         rm $filename.txt
 	fi
+    i=$((i+1))
 done
 echo
 echo SQL Deployment successful.

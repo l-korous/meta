@@ -41,11 +41,9 @@ function getApiQueryString() {
 <xsl:variable name="referencing_table_name" select="@referencing_table_name" />
 function getLinks<xsl:value-of select="@reference_name" />ApiUrl(item) {
     var toReturn = 'http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$referencing_table_name" />?';
-    <xsl:for-each select="reference_details/reference_detail">
-        toReturn += 'FilterBy[<xsl:value-of select="position() - 1"/>][col]=<xsl:value-of select="@referencing_column_name" /><xsl:text disable-output-escaping="yes">&amp;FilterBy</xsl:text>[<xsl:value-of select="position() - 1"/>][regex]=';
-        toReturn += item.<xsl:value-of select="@referencing_column_name" /><xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes"> + '&amp;'</xsl:text></xsl:if>;
-    </xsl:for-each>
-    return toReturn;
+    toReturn += 'FilterBy[<xsl:value-of select="position() - 1"/>][col]=<xsl:value-of select="@referenced_column_name" /><xsl:text disable-output-escaping="yes">&amp;FilterBy</xsl:text>[<xsl:value-of select="position() - 1"/>][regex]=';
+    toReturn += item.<xsl:value-of select="@referenced_column_name" /><xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes"> + '&amp;'</xsl:text></xsl:if>;
+return toReturn;
 }
 
 function getPrimaryRefLink<xsl:value-of select="@reference_name" />AppUrl(linkedItem) {
@@ -71,9 +69,7 @@ function getNewRefLink<xsl:value-of select="@reference_name" />AppUrl(linkedItem
 
 function getRefLink<xsl:value-of select="@reference_name" />ApiUrl(linkedItem) {
     var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$referencing_table_name" />';
-    <xsl:for-each select="reference_details/reference_detail">
-        toReturn += '/' +  item.<xsl:value-of select="@referenced_column_name" />;
-    </xsl:for-each>
+    toReturn += '/' +  item.<xsl:value-of select="@referenced_column_name" />;
     return toReturn;
 }
 </xsl:for-each>
@@ -123,17 +119,15 @@ function handleNew() {
         <xsl:value-of select="@column_name" />_field_to_input_value(item, $('.entryNew').find('[name=new_<xsl:value-of select="@column_name" />]'));
         
         <!-- This adds whispering for the relevant inputs -->
-        <xsl:if test="count(//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]) &gt; 0" >
+        <xsl:if test="count(//references/reference[@referencing_table_name=$table_name and @referencing_column_name=$column_name]) &gt; 0" >
         $("[name=new_<xsl:value-of select="@column_name" />]").keyup(function() {
             $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').empty();
             if($("[name=new_<xsl:value-of select="@column_name" />]").val().length <xsl:text disable-output-escaping="yes">&gt;</xsl:text> 0) {
-                meta_api_get('http://localhost:3000/api/master/<xsl:value-of select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/../../@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=new_<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
+                meta_api_get('http://localhost:3000/api/master/<xsl:value-of select="//references/reference[@referencing_table_name=$table_name and @referencing_column_name=$column_name]/../../@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=new_<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
                         $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').show();
                         $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').append('<xsl:text disable-output-escaping="yes">&lt;</xsl:text>li \
-                        onclick=" \<xsl:for-each select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/../reference_detail">
-                        $(\'[name=new_<xsl:value-of select="@referencing_column_name" />]\').val(\'' + item.<xsl:value-of select="@referenced_column_name" /> + '\'); \
-                        </xsl:for-each>$(\'[name=new_<xsl:value-of select="@column_name" />]\').next(\'ul\').hide();" \
-                        <xsl:text disable-output-escaping="yes">&gt;</xsl:text>' + item.<xsl:value-of select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/@referenced_column_name" /> + '<xsl:text disable-output-escaping="yes">&lt;/li&gt;</xsl:text>');
+                        onclick="$(\'[name=new_<xsl:value-of select="@referencing_column_name" />]\').val(\'' + item.<xsl:value-of select="@referenced_column_name" /> + '\'); $(\'[name=new_<xsl:value-of select="@column_name" />]\').next(\'ul\').hide();" \
+                        <xsl:text disable-output-escaping="yes">&gt;</xsl:text>' + item.<xsl:value-of select="//references/reference[@referencing_table_name=$table_name and @referencing_column_name=$column_name]/@referenced_column_name" /> + '<xsl:text disable-output-escaping="yes">&lt;/li&gt;</xsl:text>');
                     },
                     function() {},
                     errorHandler
@@ -195,19 +189,17 @@ function loadCall() {
         $(newElement).find('[for=dummy_<xsl:value-of select="@column_name" />]').attr('for', i + '<xsl:value-of select="@column_name" />');
         <!-- Whispering -->
         <xsl:variable name="column_name" select="@column_name"/>
-        <xsl:if test="count(//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]) &gt; 0" >
+        <xsl:if test="count(//references/reference[@referencing_table_name=$table_name and @referencing_column_name=$column_name]) &gt; 0" >
         $("[name=" + i + "<xsl:value-of select="@column_name" />]").attr('i', i);
         $("[name=" + i + "<xsl:value-of select="@column_name" />]").keyup(function() {
             var i = $(this).attr('i');
             $(this).next('ul').empty();
             if($(this).val().length <xsl:text disable-output-escaping="yes">&gt;</xsl:text> 0) {
-                meta_api_get('http://localhost:3000/api/master/<xsl:value-of select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/../../@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=" + i + "<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
+                meta_api_get('http://localhost:3000/api/master/<xsl:value-of select="//references/reference[@referencing_table_name=$table_name and @referencing_column_name=$column_name]/../../@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=" + i + "<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
                         $("[name=" + i + "<xsl:value-of select="@column_name" />]").next('ul').show();
                         $("[name=" + i + "<xsl:value-of select="@column_name" />]").next('ul').append('<xsl:text disable-output-escaping="yes">&lt;</xsl:text>li i = ' + i + '\
-                        onclick=" \<xsl:for-each select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/../reference_detail">
-                        $(\'[name=\' + $(this).attr(\'i\') + \'<xsl:value-of select="@referencing_column_name" />]\').val(\'' + item.<xsl:value-of select="@referenced_column_name" /> + '\'); \
-                        </xsl:for-each>$(\'[name=\' + $(this).attr(\'i\') + \'<xsl:value-of select="@column_name" />]\').next(\'ul\').hide();" \
-                        <xsl:text disable-output-escaping="yes">&gt;</xsl:text>' + item.<xsl:value-of select="//references/reference[@referencing_table_name=$table_name]/reference_details/reference_detail[@referencing_column_name=$column_name]/@referenced_column_name" /> + '<xsl:text disable-output-escaping="yes">&lt;/li&gt;</xsl:text>');
+                        onclick="$(\'[name=\' + $(this).attr(\'i\') + \'<xsl:value-of select="@referencing_column_name" />]\').val(\'' + item.<xsl:value-of select="@referenced_column_name" /> + '\'); $(\'[name=\' + $(this).attr(\'i\') + \'<xsl:value-of select="@column_name" />]\').next(\'ul\').hide();" \
+                        <xsl:text disable-output-escaping="yes">&gt;</xsl:text>' + item.<xsl:value-of select="//references/reference[@referencing_table_name=$table_name and @referencing_column_name=$column_name]/@referenced_column_name" /> + '<xsl:text disable-output-escaping="yes">&lt;/li&gt;</xsl:text>');
                     },
                     function() {},
                     errorHandler
@@ -231,9 +223,7 @@ function loadCall() {
         <!-- 1) create '+' handler -->
         $(newElement).find('#addEntryLink<xsl:value-of select="@reference_name" />').click(function() {
             var linkedItem = {};
-            <xsl:for-each select="reference_details/reference_detail">
-                linkedItem.<xsl:value-of select="@referencing_column_name" /> = item.<xsl:value-of select="@referenced_column_name" />;
-            </xsl:for-each>
+            linkedItem.<xsl:value-of select="@referencing_column_name" /> = item.<xsl:value-of select="@referenced_column_name" />;
             window.location = getNewRefLink<xsl:value-of select="@reference_name" />AppUrl(linkedItem);
         });
         <!-- 2) fire a GET for populating the list -->
