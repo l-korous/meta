@@ -31,7 +31,7 @@ BEGIN
     SET XACT_ABORT, NOCOUNT ON
     DECLARE @msg nvarchar(255)
     BEGIN TRY
-        SELECT * FROM meta.[table];
+        SELECT table_name FROM meta.[table];
     END TRY
     BEGIN CATCH
     END CATCH
@@ -41,12 +41,15 @@ GO
 IF OBJECT_ID ('meta.get_columns') IS NOT NULL DROP PROCEDURE meta.get_columns;
 GO
 CREATE PROCEDURE meta.get_columns
+(@table_name nvarchar(255) = '')
 AS
 BEGIN
     SET XACT_ABORT, NOCOUNT ON
     DECLARE @msg nvarchar(255)
     BEGIN TRY
-        SELECT * FROM meta.[column];
+        SELECT column_name, column_order, table_name, datatype_name, is_primary_key, is_unique, is_required FROM meta.[column]
+        WHERE (@table_name = '' OR table_name = @table_name)
+        ORDER BY column_order;
     END TRY
     BEGIN CATCH
     END CATCH
@@ -56,12 +59,20 @@ GO
 IF OBJECT_ID ('meta.get_references') IS NOT NULL DROP PROCEDURE meta.get_references;
 GO
 CREATE PROCEDURE meta.get_references
+(@table_name nvarchar(255) = '', @column_name nvarchar(255) = '')
 AS
 BEGIN
     SET XACT_ABORT, NOCOUNT ON
     DECLARE @msg nvarchar(255)
     BEGIN TRY
-        SELECT * FROM meta.[reference];
+        -- SANITY CHECKS
+        IF (@table_name = '' AND @column_name &lt;&gt; '') BEGIN
+            set @msg = 'ERROR: Column name set, but table name not';
+            THROW 50000, @msg, 1
+        END
+        SELECT reference_name, referencing_table_name, referencing_column_name, referenced_table_name, referenced_column_name, on_delete FROM meta.[reference]
+        WHERE (@table_name = '' OR referencing_table_name = @table_name)
+        AND (@column_name = '' OR referencing_column_name = @column_name);
     END TRY
     BEGIN CATCH
     END CATCH
@@ -116,7 +127,8 @@ BEGIN
 
     CREATE TABLE meta.[column] (
         model_version int,
-        column_name nvarchar(255), 
+        column_name nvarchar(255),
+        column_order int,
         table_name nvarchar(255), 
         datatype_name nvarchar(255),
         is_primary_key bit,
@@ -179,20 +191,21 @@ INSERT INTO meta.[model_version] DEFAULT VALUES;
     INSERT INTO meta.[table] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@table_name" />')
     <xsl:for-each select="columns/column" >
         INSERT INTO meta.[column] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@column_name" />',
+            <xsl:value-of select="position()" />,
             '<xsl:value-of select="../../@table_name" />',
             '<xsl:value-of select="@datatype" />',
             '<xsl:value-of select="@is_primary_key" />',
             '<xsl:value-of select="@is_unique" />',
             '<xsl:value-of select="@is_required" />')
     </xsl:for-each>
-    <xsl:for-each select="references/reference" >
-        INSERT INTO meta.[reference] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="../../@reference_name" />',
-            '<xsl:value-of select="@referencing_table_name" />',
-            '<xsl:value-of select="@referencing_column_name" />',
-            '<xsl:value-of select="@referenced_table_name" />',
-            '<xsl:value-of select="@referenced_column_name" />',
-            '<xsl:value-of select="@on_delete" />')
-    </xsl:for-each>
+</xsl:for-each>
+<xsl:for-each select="references/reference" >
+    INSERT INTO meta.[reference] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@reference_name" />',
+        '<xsl:value-of select="@referencing_table_name" />',
+        '<xsl:value-of select="@referencing_column_name" />',
+        '<xsl:value-of select="@referenced_table_name" />',
+        '<xsl:value-of select="@referenced_column_name" />',
+        '<xsl:value-of select="@on_delete" />')
 </xsl:for-each>
     
 IF OBJECT_ID ('meta.create_insert_column_query') IS NOT NULL DROP FUNCTION meta.create_insert_column_query;
@@ -243,10 +256,7 @@ BEGIN
     DECLARE @msg nvarchar(255)
     BEGIN TRY
     BEGIN TRANSACTION
-
-	   EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all";
-
-	   DECLARE @table_name nvarchar(255);
+       DECLARE @table_name nvarchar(255);
 	   DECLARE @table_action nvarchar(255);
 	   DECLARE @SQL NVARCHAR(MAX) = N'';
 
@@ -288,11 +298,11 @@ BEGIN
 			 EXEC sp_rename @temp_conflicts_table_name, @conflicts_table_name;
 		  END
 		  ELSE IF @table_action = 'DROP' BEGIN
-			 SET @SQL = 'DROP TABLE ' + @table_name;
+			 SET @SQL = 'DROP TABLE dbo.' + @table_name;
 			 EXEC sp_executesql @SQL;
-			 SET @SQL = 'DROP TABLE ' + @hist_table_name;
+			 SET @SQL = 'DROP TABLE dbo.' + @hist_table_name;
 			 EXEC sp_executesql @SQL;
-			 SET @SQL = 'DROP TABLE ' + @conflicts_table_name;
+			 SET @SQL = 'DROP TABLE dbo.' + @conflicts_table_name;
 			 EXEC sp_executesql @SQL;
 		  END
 		  ELSE BEGIN -- (possibly) @table_action ~ 'UPDATE'
@@ -359,7 +369,7 @@ BEGIN
 				SET @SQL = '';
 				SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @table_name;
 				EXEC sp_executesql @SQL;
-				SET @SQL = 'DROP TABLE ' + @table_name;
+				SET @SQL = 'DROP TABLE dbo.' + @table_name;
 				EXEC sp_executesql @SQL;
 
 				-- Hist table (including deletion of foreign keys on old history table)
@@ -371,16 +381,25 @@ BEGIN
 				EXEC sp_rename @temp_hist_table_name, @hist_table_name;
 
 				-- Conflict table
-				SET @SQL = 'DROP TABLE ' + @conflicts_table_name;
+				SET @SQL = 'DROP TABLE dbo.' + @conflicts_table_name;
 				EXEC sp_executesql @SQL;
 				EXEC sp_rename @temp_conflicts_table_name, @conflicts_table_name;
 			 END
 			 ELSE BEGIN -- no change, therefore drop old, rename new (to have the FKs with __new_)
-				SET @SQL = 'DROP TABLE ' + @table_name;
+				SET @SQL = '';
+                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @table_name;
 				EXEC sp_executesql @SQL;
-				SET @SQL = 'DROP TABLE ' + @hist_table_name;
+				SET @SQL = 'DROP TABLE dbo.' + @table_name;
 				EXEC sp_executesql @SQL;
-				SET @SQL = 'DROP TABLE ' + @conflicts_table_name;
+				SET @SQL = '';
+                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @hist_table_name;
+				EXEC sp_executesql @SQL;
+				SET @SQL = 'DROP TABLE dbo.' + @hist_table_name;
+				EXEC sp_executesql @SQL;
+				SET @SQL = '';
+                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @conflicts_table_name;
+				EXEC sp_executesql @SQL;
+				SET @SQL = 'DROP TABLE dbo.' + @conflicts_table_name;
 				EXEC sp_executesql @SQL;
 
 				EXEC sp_rename @temp_table_name, @table_name;
@@ -398,8 +417,6 @@ BEGIN
 	   SET @SQL = '';
 	   SELECT @sql += 'EXEC sp_rename ' + fk.name + ', ' + replace(fk.name, '__new_', '') + '; ' from sys.foreign_keys as fk where name like '%__new_%';
 	   EXEC sp_executesql @SQL;
-
-	   EXEC sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
 
     COMMIT TRANSACTION;
     END TRY 

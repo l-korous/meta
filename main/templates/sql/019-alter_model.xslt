@@ -6,6 +6,11 @@
     <xsl:template match="tables">
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
+EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all";
+GO
 EXEC meta.alter_model;
+GO
+EXEC sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
+GO
 </xsl:template>
 </xsl:stylesheet>
