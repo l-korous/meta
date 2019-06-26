@@ -42,12 +42,12 @@ BEGIN
 	   END
       -- Record does not exist
       IF EXISTS (select * from dbo.[<xsl:value-of select="@table_name" />] where
-       <xsl:for-each select="columns/column[@is_primary_key=1]" >
+       <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
             [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
         </xsl:for-each>
        branch_name = @branch_name) BEGIN
 		  set @msg = 'ERROR: <xsl:value-of select="@table_name" /> ( '+ 
-          <xsl:for-each select="columns/column[@is_primary_key=1]" >
+          <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
             '[<xsl:value-of select="@column_name" />]: ' + CAST(@<xsl:value-of select="@column_name" /> AS NVARCHAR(MAX)) + ', ' +
         </xsl:for-each>
             'branch_name: ' + @branch_name + ') already exists';
@@ -68,7 +68,7 @@ BEGIN
       UPDATE dbo.hist_<xsl:value-of select="@table_name" /> SET
             valid_to = @current_datetime
          WHERE
-            <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
                 [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
             </xsl:for-each>
             branch_name = @branch_name

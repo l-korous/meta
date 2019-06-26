@@ -19,23 +19,12 @@ The parameter of the shell utility is the full path to the directory containing 
     "Datatype"
         - one of MSSQL datatypes
         - no XML, FILESTREAM, etc.
-    "Is Primary Key"
+    "Is Part of Primary Key"
         - 0/1
     "Is Unique"
         - 0/1
     "Is Nullable"
         - 0/1
-        
-- "references.csv", with these columns:
-    "Reference Name"
-        - Unicode string, 255 chars
-        - no reserved words
-        - no special characters
-    "Source Table"
-        - refers to "tables.csv"
-    "Source Column"
-        - refers to "columns.csv"
-        - must refer to an entry in "columns.csv" where "Table Name" = "Source Table" here
     "Dest Table"
         - refers to "tables.csv"
     "Dest Column"
@@ -44,7 +33,6 @@ The parameter of the shell utility is the full path to the directory containing 
     "On Delete"
         - NULL (representing NO ACTION), or MSSQL syntax for ON UPDATE (CASCADE, SET NULL)
 
-        
 - "configuration.csv", with these columns:
     "Key"
         - Unicode string, 255 chars

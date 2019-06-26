@@ -17,41 +17,35 @@
     <tables>
         <table table_name="Contract">
             <columns>
-                <column column_name="name" datatype="string" is_primary_key="1" is_unique="1" is_required="1"/>
-                <column column_name="description" datatype="long_string" is_primary_key="0" is_unique="0" is_required="0"/>
-                <column column_name="since" datatype="datetime" is_primary_key="0" is_unique="0" is_required="0"/>
-                <column column_name="until" datatype="datetime" is_primary_key="0" is_unique="0" is_required="0"/>
-                <column column_name="auto_renewal" datatype="boolean" is_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="name" datatype="string" is_part_of_primary_key="1" is_unique="1" is_required="1"/>
+                <column column_name="description" datatype="long_string" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="since" datatype="datetime" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="until" datatype="datetime" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="auto_renewal" datatype="boolean" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
             </columns>
         </table>
         <table table_name="Asset">
             <columns>
-                <column column_name="name" datatype="string" is_primary_key="1" is_unique="1" is_required="1"/>
-                <column column_name="description" datatype="long_string" is_primary_key="0" is_unique="0" is_required="0"/>
-                <column column_name="unit_value" datatype="float" is_primary_key="0" is_unique="0" is_required="0"/>
-                <column column_name="count" datatype="int" is_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="name" datatype="string" is_part_of_primary_key="1" is_unique="1" is_required="1"/>
+                <column column_name="description" datatype="long_string" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="unit_value" datatype="float" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="count" datatype="int" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
             </columns>
         </table>
         <table table_name="Event">
             <columns>
-                <column column_name="name" datatype="string" is_primary_key="1" is_unique="1" is_required="1"/>
-                <column column_name="asset_name" datatype="string" is_primary_key="0" is_unique="0" is_required="0"/>
-                <column column_name="contract_name" datatype="string" is_primary_key="0" is_unique="0" is_required="0"/>
-                <column column_name="date" datatype="datetime" is_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="name" datatype="string" is_part_of_primary_key="1" is_unique="1" is_required="1"/>
+                <column column_name="asset_name" datatype="string" is_part_of_primary_key="0" is_unique="0" is_required="0" referenced_table_name="Asset" referenced_column_name="name" on_delete="CASCADE"/>
+                <column column_name="contract_name" datatype="string" is_part_of_primary_key="0" is_unique="0" is_required="0" referenced_table_name="Contract" referenced_column_name="name" on_delete="CASCADE"/>
+                <column column_name="date" datatype="datetime" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
             </columns>
         </table>
         <table table_name="Asset_Contract">
             <columns>
-                <column column_name="asset_name" datatype="string" is_primary_key="1" is_unique="0" is_required="1"/>
-                <column column_name="contract_name" datatype="string" is_primary_key="1" is_unique="0" is_required="1"/>
-                <column column_name="asset_contract_type" datatype="string" is_primary_key="0" is_unique="0" is_required="0"/>
+                <column column_name="asset_name" datatype="string" is_part_of_primary_key="1" is_unique="0" is_required="1" referenced_table_name="Asset" referenced_column_name="name" on_delete="CASCADE"/>
+                <column column_name="contract_name" datatype="string" is_part_of_primary_key="1" is_unique="0" is_required="1" referenced_table_name="Contract" referenced_column_name="name" on_delete="CASCADE"/>
+                <column column_name="asset_contract_type" datatype="string" is_part_of_primary_key="0" is_unique="0" is_required="0"/>
             </columns>
         </table>
     </tables>
-    <references>
-        <reference reference_name="Event_Asset" referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Event" referenced_table_name="Asset" on_delete="CASCADE" />
-        <reference reference_name="Event_Contract" referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Event" referenced_table_name="Contract" on_delete="CASCADE" />
-        <reference reference_name="Asset_Contract_Asset" referencing_column_name="asset_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Asset" on_delete="CASCADE" />
-        <reference reference_name="Asset_Contract_Contract" referencing_column_name="contract_name" referenced_column_name="name" referencing_table_name="Asset_Contract" referenced_table_name="Contract" on_delete="CASCADE" />
-    </references>
 </root>

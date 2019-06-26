@@ -95,15 +95,15 @@ BEGIN
 			FROM ( 
 				SELECT
 					CASE WHEN
-						h.[<xsl:value-of select="columns/column[@is_primary_key=1][1]/@column_name" />] IS NULL
+						h.[<xsl:value-of select="columns/column[@is_part_of_primary_key=1][1]/@column_name" />] IS NULL
 					THEN 'I'
 						-- If this is not a full import, we do not delete.
-						WHEN i.[<xsl:value-of select="columns/column[@is_primary_key=1][1]/@column_name" />] IS NULL AND @is_full_import = 1 THEN 'D'
-						<xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
+						WHEN i.[<xsl:value-of select="columns/column[@is_part_of_primary_key=1][1]/@column_name" />] IS NULL AND @is_full_import = 1 THEN 'D'
+						<xsl:if test="count(columns/column[@is_part_of_primary_key=0]) &gt; 0">
 							WHEN 
-								h.[<xsl:value-of select="columns/column[@is_primary_key=1][1]/@column_name" />] IS NOT NULL AND
-								i.[<xsl:value-of select="columns/column[@is_primary_key=1][1]/@column_name" />] IS NOT NULL AND
-							( <xsl:for-each select="columns/column[@is_primary_key=0]" >
+								h.[<xsl:value-of select="columns/column[@is_part_of_primary_key=1][1]/@column_name" />] IS NOT NULL AND
+								i.[<xsl:value-of select="columns/column[@is_part_of_primary_key=1][1]/@column_name" />] IS NOT NULL AND
+							( <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
 								h.[<xsl:value-of select="@column_name" />] &lt;&gt; i.[<xsl:value-of select="@column_name" />]
 								OR (h.[<xsl:value-of select="@column_name" />] IS NULL AND i.[<xsl:value-of select="@column_name" />] IS NOT NULL) OR (i.[<xsl:value-of select="@column_name" />] IS NULL AND h.[<xsl:value-of select="@column_name" />] IS NOT NULL)
 								<xsl:if test="position() != last()">
@@ -122,7 +122,7 @@ BEGIN
 					</xsl:for-each>
 				FROM #tempTable i 
 					FULL OUTER JOIN currentHistory h ON
-					<xsl:for-each select="columns/column[@is_primary_key=1]" >
+					<xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
 						i.[<xsl:value-of select="@column_name" />] = h.[<xsl:value-of select="@column_name" />]
 						<xsl:if test="position() != last()"> AND </xsl:if>
 					</xsl:for-each>
@@ -131,7 +131,7 @@ BEGIN
 			INNER JOIN dbo.[branch] _b ON @branch_name = _b.branch_name
 		) [input]
 		ON
-			<xsl:for-each select="columns/column[@is_primary_key=1]" >
+			<xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
 				[input].[h_<xsl:value-of select="@column_name" />] = historyTable.[<xsl:value-of select="@column_name" />] AND
 			</xsl:for-each>
 			historyTable.branch_name = @branch_name AND historyTable.valid_to IS NULL AND [input].[reaction] = 'D'
@@ -147,10 +147,10 @@ BEGIN
 			is_delete,
 			author
 		) VALUES (
-			<xsl:for-each select="columns/column[@is_primary_key=1]" >
+			<xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
 				isnull([input].[i_<xsl:value-of select="@column_name" />],[input].[h_<xsl:value-of select="@column_name" />]),
 			</xsl:for-each>
-			<xsl:for-each select="columns/column[@is_primary_key=0]" >
+			<xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
 				IIF([input].[action] = 'D', NULL, [input].[i_<xsl:value-of select="@column_name" />]),
 			</xsl:for-each>
 			@branch_name,
@@ -173,22 +173,22 @@ BEGIN
         FROM 
             dbo.[<xsl:value-of select="@table_name" />] a
             INNER JOIN #mergeResultTable m
-            ON <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            ON <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
 				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
                 AND
 			</xsl:for-each>
             m.is_delete = 1 AND a.branch_name = @branch_name;
            
-       <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
+       <xsl:if test="count(columns/column[@is_part_of_primary_key=0]) &gt; 0">
         UPDATE a SET 
-            <xsl:for-each select="columns/column[@is_primary_key=0]" >
+            <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
 				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
                 <xsl:if test="position() != last()">,</xsl:if>
 			</xsl:for-each>
         FROM 
             dbo.[<xsl:value-of select="@table_name" />] a
             INNER JOIN #mergeResultTable m
-            ON <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            ON <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
 				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
                 AND
 			</xsl:for-each>
@@ -203,11 +203,11 @@ BEGIN
             @branch_name
         FROM #mergeResultTable m
             LEFT JOIN dbo.[<xsl:value-of select="@table_name" />] a
-            ON <xsl:for-each select="columns/column[@is_primary_key=1]" >
+            ON <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
 				a.[<xsl:value-of select="@column_name" />] = m.inserted_<xsl:value-of select="@column_name" />
                 <xsl:if test="position() != last()"> AND </xsl:if>
 			</xsl:for-each>
-        WHERE a.[<xsl:value-of select="columns/column[@is_primary_key=1][1]/@column_name" />] IS NULL AND m.is_delete = 0 AND m.action_type = 'INSERT';
+        WHERE a.[<xsl:value-of select="columns/column[@is_part_of_primary_key=1][1]/@column_name" />] IS NULL AND m.is_delete = 0 AND m.action_type = 'INSERT';
         
 		COMMIT TRANSACTION;
     END TRY 

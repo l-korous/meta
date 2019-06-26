@@ -7,10 +7,9 @@
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 <xsl:for-each select="//table" >
-<xsl:variable name="table_name" select="@table_name"/>
-    <xsl:for-each select="//references/reference[@referencing_table_name=$table_name]" >
-ALTER TABLE dbo.__new_<xsl:value-of select="$table_name" /> ADD CONSTRAINT FK__new__<xsl:value-of select="@reference_name" />_<xsl:value-of select="@referencing_table_name" />_<xsl:value-of select="@referenced_table_name" /> FOREIGN KEY (
-    [<xsl:value-of select="@referencing_column_name" />],
+    <xsl:for-each select="columns/column[@referenced_table_name]" >
+ALTER TABLE dbo.__new_<xsl:value-of select="../../@table_name" /> ADD CONSTRAINT FK__new__<xsl:value-of select="@column_name" />_<xsl:value-of select="../../@table_name" />_<xsl:value-of select="@referenced_table_name" />_<xsl:value-of select="@referenced_column_name" /> FOREIGN KEY (
+    [<xsl:value-of select="@column_name" />],
     [branch_name])
     REFERENCES dbo.__new_<xsl:value-of select="@referenced_table_name" /> (
     [<xsl:value-of select="@referenced_column_name" />],

@@ -16,7 +16,7 @@ CREATE TABLE dbo.__new_<xsl:value-of select="@table_name" />
     </xsl:for-each>
     branch_name NVARCHAR(255),
     PRIMARY KEY (
-        <xsl:for-each select="columns/column[@is_primary_key=1]" >
+        <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
             [<xsl:value-of select="@column_name" />],
         </xsl:for-each>
     branch_name
@@ -39,15 +39,15 @@ CREATE TABLE dbo.__new_hist_<xsl:value-of select="@table_name" />
 CREATE TABLE dbo.__new_conflicts_<xsl:value-of select="@table_name" />
 (
     merge_version_name NVARCHAR(255),
-    <xsl:for-each select="columns/column[@is_primary_key=1]" >
+    <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
         [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
     is_del_master BIT,
     is_del_branch BIT,
-    <xsl:for-each select="columns/column[@is_primary_key=0]" >
+    <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
         <xsl:value-of select="@column_name" />_master &s; <xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
-    <xsl:for-each select="columns/column[@is_primary_key=0]" >
+    <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
         <xsl:value-of select="@column_name" />_branch &s; <xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
     last_author_master NVARCHAR(255),

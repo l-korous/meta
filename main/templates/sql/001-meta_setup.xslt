@@ -47,7 +47,7 @@ BEGIN
     SET XACT_ABORT, NOCOUNT ON
     DECLARE @msg nvarchar(255)
     BEGIN TRY
-        SELECT column_name, column_order, table_name, datatype_name, is_primary_key, is_unique, is_required FROM meta.[column]
+        SELECT column_name, column_order, table_name, datatype_name, is_part_of_primary_key, is_unique, is_required, referenced_table_name, referenced_column_name, on_delete FROM meta.[column]
         WHERE (@table_name = '' OR table_name = @table_name)
         ORDER BY column_order;
     END TRY
@@ -55,30 +55,6 @@ BEGIN
     END CATCH
 END
 GO
-
-IF OBJECT_ID ('meta.get_references') IS NOT NULL DROP PROCEDURE meta.get_references;
-GO
-CREATE PROCEDURE meta.get_references
-(@table_name nvarchar(255) = '', @column_name nvarchar(255) = '')
-AS
-BEGIN
-    SET XACT_ABORT, NOCOUNT ON
-    DECLARE @msg nvarchar(255)
-    BEGIN TRY
-        -- SANITY CHECKS
-        IF (@table_name = '' AND @column_name &lt;&gt; '') BEGIN
-            set @msg = 'ERROR: Column name set, but table name not';
-            THROW 50000, @msg, 1
-        END
-        SELECT reference_name, referencing_table_name, referencing_column_name, referenced_table_name, referenced_column_name, on_delete FROM meta.[reference]
-        WHERE (@table_name = '' OR referencing_table_name = @table_name)
-        AND (@column_name = '' OR referencing_column_name = @column_name);
-    END TRY
-    BEGIN CATCH
-    END CATCH
-END
-GO
-
 
 IF (
         NOT (
@@ -131,22 +107,14 @@ BEGIN
         column_order int,
         table_name nvarchar(255), 
         datatype_name nvarchar(255),
-        is_primary_key bit,
+        is_part_of_primary_key bit,
         is_unique bit,
         is_required bit,
-        PRIMARY KEY (model_version, [table_name], [column_name])
-    ); 
-
-    CREATE TABLE meta.[reference] (
-        model_version int,
-        reference_name nvarchar(255),
-        referencing_table_name nvarchar(255),
-        referencing_column_name nvarchar(255),
         referenced_table_name nvarchar(255),
         referenced_column_name nvarchar(255),
         on_delete nvarchar(255),
-        PRIMARY KEY (model_version, [reference_name], [referencing_table_name], [referencing_column_name], [referenced_table_name], [referenced_column_name])
-    );
+        PRIMARY KEY (model_version, [table_name], [column_name])
+    ); 
 
     ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_start_master_version_name FOREIGN KEY (start_master_version_name) REFERENCES dbo.[version] (version_name);
     ALTER TABLE dbo.[branch] ADD CONSTRAINT FK_branch_last_closed_version_name FOREIGN KEY (last_closed_version_name) REFERENCES dbo.[version] (version_name);
@@ -158,11 +126,8 @@ BEGIN
     ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_model_version FOREIGN KEY (model_version) REFERENCES meta.[model_version] (model_version);
     ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_table FOREIGN KEY (model_version, table_name) REFERENCES meta.[table] (model_version, table_name);
     ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_datatype FOREIGN KEY (datatype_name) REFERENCES meta.[datatype] (datatype_name);
-    ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_model_version FOREIGN KEY (model_version) REFERENCES meta.[model_version] (model_version);
-    ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referencing_table_name FOREIGN KEY (model_version, referencing_table_name) REFERENCES meta.[table] (model_version, table_name);
-    ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referenced_table_name FOREIGN KEY (model_version, referenced_table_name) REFERENCES meta.[table] (model_version, table_name);
-    ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referencing_column_name FOREIGN KEY (model_version, referencing_table_name, referencing_column_name) REFERENCES meta.[column] (model_version, table_name, column_name);
-    ALTER TABLE meta.[reference] ADD CONSTRAINT FK_reference_referenced_column_name FOREIGN KEY (model_version, referenced_table_name, referenced_column_name) REFERENCES meta.[column] (model_version, table_name, column_name);
+    ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_referenced_table_name FOREIGN KEY (model_version, referenced_table_name) REFERENCES meta.[table] (model_version, table_name);
+    ALTER TABLE meta.[column] ADD CONSTRAINT FK_column_referenced_column_name FOREIGN KEY (model_version, referenced_table_name, referenced_column_name) REFERENCES meta.[column] (model_version, table_name, column_name);
     
     INSERT INTO dbo.[branch] VALUES ('master', NULL, NULL, NULL)
     INSERT INTO dbo.[version] VALUES ('initial_version', 'master', NULL, 0, 'OPEN')
@@ -186,32 +151,34 @@ TRUNCATE TABLE meta.[configuration];
 
 </xsl:template>
 <xsl:template match="tables">
+EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all";
+GO
+
 INSERT INTO meta.[model_version] DEFAULT VALUES;
 <xsl:for-each select="//table" >
-    INSERT INTO meta.[table] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@table_name" />')
+    INSERT INTO meta.[table] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@table_name" />');
     <xsl:for-each select="columns/column" >
         INSERT INTO meta.[column] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@column_name" />',
             <xsl:value-of select="position()" />,
             '<xsl:value-of select="../../@table_name" />',
             '<xsl:value-of select="@datatype" />',
-            '<xsl:value-of select="@is_primary_key" />',
+            '<xsl:value-of select="@is_part_of_primary_key" />',
             '<xsl:value-of select="@is_unique" />',
-            '<xsl:value-of select="@is_required" />')
+            '<xsl:value-of select="@is_required" />',
+            <xsl:if test="@referenced_table_name">'<xsl:value-of select="@referenced_table_name" />'</xsl:if><xsl:if test="not(@referenced_table_name)">NULL</xsl:if>,
+            <xsl:if test="@referenced_table_name">'<xsl:value-of select="@referenced_column_name" />'</xsl:if><xsl:if test="not(@referenced_table_name)">NULL</xsl:if>,
+            <xsl:if test="@referenced_table_name">'<xsl:value-of select="@on_delete" />'</xsl:if><xsl:if test="not(@referenced_table_name)">NULL</xsl:if>)
     </xsl:for-each>
 </xsl:for-each>
-<xsl:for-each select="references/reference" >
-    INSERT INTO meta.[reference] VALUES ((SELECT MAX(model_version) from meta.[model_version]), '<xsl:value-of select="@reference_name" />',
-        '<xsl:value-of select="@referencing_table_name" />',
-        '<xsl:value-of select="@referencing_column_name" />',
-        '<xsl:value-of select="@referenced_table_name" />',
-        '<xsl:value-of select="@referenced_column_name" />',
-        '<xsl:value-of select="@on_delete" />')
-</xsl:for-each>
-    
+
+GO
+EXEC sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
+GO
+   
 IF OBJECT_ID ('meta.create_insert_column_query') IS NOT NULL DROP FUNCTION meta.create_insert_column_query;
 GO
 CREATE FUNCTION meta.create_insert_column_query
-(@column_name nvarchar(255), @column_name_prev nvarchar(255), @column_datatype_new nvarchar(255), @column_datatype_prev nvarchar(255), @column_is_primary_key_new bit, @column_is_required_new bit)
+(@column_name nvarchar(255), @column_name_prev nvarchar(255), @column_datatype_new nvarchar(255), @column_datatype_prev nvarchar(255), @column_is_part_of_primary_key_new bit, @column_is_required_new bit)
 RETURNS nvarchar(max)
 AS
 BEGIN
@@ -226,7 +193,7 @@ BEGIN
 	   SET @have_to_null = 1;
 
     IF ((@have_to_null = 1) OR (@column_name_prev IS NULL)) BEGIN
-	   IF ((@column_is_primary_key_new = 1) OR (@column_is_required_new = 1))
+	   IF ((@column_is_part_of_primary_key_new = 1) OR (@column_is_required_new = 1))
 		  SET @SQL = @SQL + CASE
 				WHEN @column_datatype_new = 'NVARCHAR(255)' THEN ''''''
 				WHEN @column_datatype_new = 'NVARCHAR(MAX)' THEN ''''''
@@ -264,7 +231,7 @@ BEGIN
 	   DECLARE @column_name_prev nvarchar(255);
 	   DECLARE @column_datatype_new nvarchar(255);
 	   DECLARE @column_datatype_prev nvarchar(255);
-	   DECLARE @column_is_primary_key_new bit;
+	   DECLARE @column_is_part_of_primary_key_new bit;
 	   DECLARE @column_is_required_new bit;
 
 	   DECLARE table_cursor CURSOR FOR
@@ -316,7 +283,7 @@ BEGIN
 				where (column_new.table_name = @table_name or column_prev.table_name = @table_name)
 				    and (
 				    column_new.datatype_name &lt;&gt; column_prev.datatype_name or
-				    column_new.is_primary_key &lt;&gt; column_prev.is_primary_key or
+				    column_new.is_part_of_primary_key &lt;&gt; column_prev.is_part_of_primary_key or
 				    column_new.is_required &lt;&gt; column_prev.is_required or
 				    column_new.column_name is null or
 				    column_prev.column_name is null or
@@ -335,7 +302,7 @@ BEGIN
 				    column_prev.column_name,
 				    datatype_new.datatype_sql,
 				    datatype_prev.datatype_sql,
-				    column_new.is_primary_key,
+				    column_new.is_part_of_primary_key,
 				    column_new.is_required
 				    from
 					   (select * from meta.[column] where model_version = (select max(model_version) from meta.model_version)) column_new
@@ -352,12 +319,12 @@ BEGIN
 					   column_new.table_name = @table_name
 
 				OPEN column_cursor
-				FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_primary_key_new, @column_is_required_new
+				FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new
 				WHILE @@FETCH_STATUS = 0  
 				BEGIN
-				    SET @insert_statement = @insert_statement + meta.create_insert_column_query(@column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_primary_key_new, @column_is_required_new);
+				    SET @insert_statement = @insert_statement + meta.create_insert_column_query(@column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new);
 
-				    FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_is_primary_key_new, @column_is_required_new
+				    FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_is_part_of_primary_key_new, @column_is_required_new
 				END
 				CLOSE column_cursor;
 				DEALLOCATE column_cursor;
