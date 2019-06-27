@@ -81,6 +81,7 @@ BEGIN
 	   THROW
     END CATCH
 END
-GO</xsl:for-each>
+GO
+</xsl:for-each>
 </xsl:template>
 </xsl:stylesheet>

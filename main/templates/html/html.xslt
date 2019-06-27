@@ -113,7 +113,7 @@
                         &s;
                     </xsl:element>
                 </xsl:for-each>
-                <xsl:for-each select="columns/column[@referenced_table_name]" >
+                <xsl:for-each select="columns/column[@referenced_table_name != '']" >
                     <xsl:element name="div">
                         <xsl:attribute name="class">entryLinks entryLinks<xsl:value-of select="@column_name" /></xsl:attribute>
                         

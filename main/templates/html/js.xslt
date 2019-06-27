@@ -37,7 +37,7 @@ function getApiQueryString() {
     return queryString;
 }
 
-<xsl:for-each select="columns/column[@referenced_table_name]" >
+<xsl:for-each select="columns/column[@referenced_table_name != '']" >
 function getLinks<xsl:value-of select="@column_name" />ApiUrl(item) {
     var toReturn = 'http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$table_name" />?';
     toReturn += 'FilterBy[<xsl:value-of select="position() - 1"/>][col]=<xsl:value-of select="@column_name" /><xsl:text disable-output-escaping="yes">&amp;FilterBy</xsl:text>[<xsl:value-of select="position() - 1"/>][regex]=';
@@ -118,7 +118,7 @@ function handleNew() {
         <xsl:value-of select="@column_name" />_field_to_input_value(item, $('.entryNew').find('[name=new_<xsl:value-of select="@column_name" />]'));
         
         <!-- This adds whispering for the relevant inputs -->
-        <xsl:if test="@referenced_table_name" >
+        <xsl:if test="@referenced_table_name != ''" >
         $("[name=new_<xsl:value-of select="@column_name" />]").keyup(function() {
             $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').empty();
             if($("[name=new_<xsl:value-of select="@column_name" />]").val().length <xsl:text disable-output-escaping="yes">&gt;</xsl:text> 0) {
@@ -188,7 +188,7 @@ function loadCall() {
         $(newElement).find('[for=dummy_<xsl:value-of select="@column_name" />]').attr('for', i + '<xsl:value-of select="@column_name" />');
         <!-- Whispering -->
         <xsl:variable name="column_name" select="@column_name"/>
-        <xsl:if test="@referenced_table_name" >
+        <xsl:if test="@referenced_table_name != ''" >
         $("[name=" + i + "<xsl:value-of select="@column_name" />]").attr('i', i);
         $("[name=" + i + "<xsl:value-of select="@column_name" />]").keyup(function() {
             var i = $(this).attr('i');
@@ -217,7 +217,7 @@ function loadCall() {
         </xsl:for-each>
         
         <!-- For each reference, where this table is src or dest take the other table and: -->
-        <xsl:for-each select="columns/column[@referenced_table_name]" >
+        <xsl:for-each select="columns/column[@referenced_table_name != '']" >
         <!-- 1) create '+' handler -->
         $(newElement).find('#addEntryLink<xsl:value-of select="@column_name" />').click(function() {
             var linkedItem = {};

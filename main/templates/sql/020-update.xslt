@@ -136,6 +136,7 @@ BEGIN
 	   THROW
     END CATCH
 END
+GO
 </xsl:if>
 </xsl:for-each>
 </xsl:template>

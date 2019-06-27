@@ -165,9 +165,9 @@ INSERT INTO meta.[model_version] DEFAULT VALUES;
             '<xsl:value-of select="@is_part_of_primary_key" />',
             '<xsl:value-of select="@is_unique" />',
             '<xsl:value-of select="@is_required" />',
-            <xsl:if test="@referenced_table_name">'<xsl:value-of select="@referenced_table_name" />'</xsl:if><xsl:if test="not(@referenced_table_name)">NULL</xsl:if>,
-            <xsl:if test="@referenced_table_name">'<xsl:value-of select="@referenced_column_name" />'</xsl:if><xsl:if test="not(@referenced_table_name)">NULL</xsl:if>,
-            <xsl:if test="@referenced_table_name">'<xsl:value-of select="@on_delete" />'</xsl:if><xsl:if test="not(@referenced_table_name)">NULL</xsl:if>)
+            <xsl:if test="@referenced_table_name != ''">'<xsl:value-of select="@referenced_table_name" />'</xsl:if><xsl:if test="not(@referenced_table_name != '')">NULL</xsl:if>,
+            <xsl:if test="@referenced_table_name != ''">'<xsl:value-of select="@referenced_column_name" />'</xsl:if><xsl:if test="not(@referenced_table_name != '')">NULL</xsl:if>,
+            <xsl:if test="@referenced_table_name != ''">'<xsl:value-of select="@on_delete" />'</xsl:if><xsl:if test="not(@referenced_table_name != '')">NULL</xsl:if>)
     </xsl:for-each>
 </xsl:for-each>
 

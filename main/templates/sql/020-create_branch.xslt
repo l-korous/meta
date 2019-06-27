@@ -52,5 +52,6 @@ BEGIN
 	   THROW
     END CATCH
 END
+GO
 </xsl:template>
 </xsl:stylesheet>
