@@ -31,11 +31,13 @@ BEGIN
     </xsl:for-each>
         
         -- enable all constraints
-        exec sp_MSforeachtable @command1="print '?'", @command2="ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
+        EXEC sp_MSforeachtable "ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all"
 		COMMIT TRANSACTION;
     END TRY 
-    BEGIN CATCH 
-	   ROLLBACK TRANSACTION;
+    BEGIN CATCH
+       IF @@TRANCOUNT > 0 BEGIN
+            ROLLBACK TRANSACTION;
+       END;
 	   THROW
     END CATCH 
 END

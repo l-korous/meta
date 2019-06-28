@@ -289,12 +289,17 @@ BEGIN
 				    column_prev.column_name is null or
 				    column_new.is_unique &lt;&gt; column_prev.is_unique
 				    )
-			 ) > 0 then 1 else 0 end;
+			 ) &gt; 0 then 1 else 0 end;
 
 			 IF @changed_model = 1 BEGIN
 
 				-- put together insert statement by going through all new columns, possibly finding old ones to them
-				DECLARE @insert_statement nvarchar(max) = 'INSERT INTO ' + @temp_table_name + ' SELECT ';
+				-- first part is just this
+				DECLARE @insert_statement_1 nvarchar(max) = 'INSERT INTO ' + @temp_table_name ;
+				-- second part is the columns, we will build that in the cursor loop
+				DECLARE @insert_statement_2 nvarchar(max) = '(';
+                -- third part is the select, we will build that in the cursor loop
+				DECLARE @insert_statement_3 nvarchar(max) = ' SELECT ';
 		  
 				DECLARE column_cursor CURSOR FOR
 				    select
@@ -316,21 +321,25 @@ BEGIN
 					   meta.[datatype] datatype_prev
 						  on datatype_prev.datatype_name = column_prev.datatype_name
 				    where
-					   column_new.table_name = @table_name
+					   column_new.table_name = @table_name;
 
 				OPEN column_cursor
 				FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new
 				WHILE @@FETCH_STATUS = 0  
 				BEGIN
-				    SET @insert_statement = @insert_statement + meta.create_insert_column_query(@column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new);
+                    SET @insert_statement_2 = @insert_statement_2 + @column_name + ', ';
+				    SET @insert_statement_3 = @insert_statement_3 + meta.create_insert_column_query(@column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new);
 
-				    FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_is_part_of_primary_key_new, @column_is_required_new
+				    FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new
 				END
 				CLOSE column_cursor;
 				DEALLOCATE column_cursor;
 
-				SET @insert_statement = @insert_statement + 'branch_name FROM ' + @table_name;
-				EXEC sp_executesql @insert_statement;
+                SET @insert_statement_2 = @insert_statement_2 + 'branch_name) ';
+				SET @insert_statement_3 = @insert_statement_3 + 'branch_name FROM ' + @table_name;
+				SET @insert_statement_1 = @insert_statement_1 + @insert_statement_2 + @insert_statement_3;
+                PRINT @insert_statement_1;
+				EXEC sp_executesql @insert_statement_1;
 
 				-- Drop the old tables, including FKs
 				SET @SQL = '';
@@ -338,9 +347,10 @@ BEGIN
 				EXEC sp_executesql @SQL;
 				SET @SQL = 'DROP TABLE dbo.' + @table_name;
 				EXEC sp_executesql @SQL;
+				EXEC sp_rename @temp_table_name, @table_name;
 
 				-- Hist table (including deletion of foreign keys on old history table)
-				DECLARE @backup_hist_table_name nvarchar(255) = 'hist_' + @table_name + '_' + cast(isnull((select max(cast(right(table_name, 1) as int)) from INFORMATION_SCHEMA.tables where table_name like 'hist_' + @table_name + '%[0-9]'), '0') as nvarchar(255));
+				DECLARE @backup_hist_table_name nvarchar(255) = 'hist_' + @table_name + '_' + (select cast(isnull(max(cast(right(table_name, 1) as int)), -1) + 1 as nvarchar(255)) from INFORMATION_SCHEMA.tables where table_name like 'hist_' + @table_name + '%[0-9]');
 				SET @SQL = '';
 				SELECT @SQL += 'ALTER TABLE dbo.' + @hist_table_name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.parent_object_id = t.object_id where t.name = @hist_table_name;
 				EXEC sp_executesql @SQL;
