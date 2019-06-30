@@ -33,12 +33,12 @@ BEGIN
 		  AND valid_to IS NULL
 		  AND is_delete = 0
 		  AND NOT EXISTS(select * from dbo.[<xsl:value-of select="@table_name" />] _curr where
-          <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
             _curr.[<xsl:value-of select="@column_name" />] = _hist.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
           _curr.branch_name = 'master')
 
-       <xsl:if test="count(column[@is_part_of_primary_key=0]) &gt; 0">
+       <xsl:if test="count(column[@is_primary_key=0]) &gt; 0">
 	   -- Updates (history)
 	   INSERT INTO dbo.hist_<xsl:value-of select="@table_name" />
 	   SELECT
@@ -52,13 +52,13 @@ BEGIN
 		  AND valid_to IS NULL
 		  AND is_delete = 0
 		  AND EXISTS(select * from dbo.[<xsl:value-of select="@table_name" />] _curr where
-          <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
             _curr.[<xsl:value-of select="@column_name" />] = _hist.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
           _curr.branch_name = 'master')
 		  AND (
-              <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
-                   (_hist.[<xsl:value-of select="@column_name" />] &lt;&gt; (select [<xsl:value-of select="@column_name" />] from dbo.[<xsl:value-of select="../@table_name" />] _curr where <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+              <xsl:for-each select="columns/column[@is_primary_key=0]" >
+                   (_hist.[<xsl:value-of select="@column_name" />] &lt;&gt; (select [<xsl:value-of select="@column_name" />] from dbo.[<xsl:value-of select="../@table_name" />] _curr where <xsl:for-each select="columns/column[@is_primary_key=1]" >
                         _curr.[<xsl:value-of select="@column_name" />] = _hist.[<xsl:value-of select="@column_name" />] AND
                     </xsl:for-each>
                    _curr.branch_name = 'master'))
@@ -77,43 +77,43 @@ BEGIN
 	   FROM dbo.[<xsl:value-of select="@table_name" />] _branch
 	   INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> _branch_hist
 		  ON
-            <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+            <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 _branch_hist.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />] AND
             </xsl:for-each>
 			 _branch_hist.branch_name = @branch_name
 			 AND valid_to IS NULL
 	   WHERE _branch.branch_name = @branch_name
 		  AND NOT EXISTS(select * from dbo.[<xsl:value-of select="@table_name" />] _curr where
-          <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 _curr.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />] AND
             </xsl:for-each>
           _curr.branch_name = 'master')
 		  
-       <xsl:if test="count(column[@is_part_of_primary_key=0]) &gt; 0">
+       <xsl:if test="count(column[@is_primary_key=0]) &gt; 0">
 	   -- Updates (current)
 	   UPDATE _curr
 		  SET
-            <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+            <xsl:for-each select="columns/column[@is_primary_key=0]" >
                 _curr.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />]
                 <xsl:if test="position() != last()">,</xsl:if>
             </xsl:for-each>
 	   FROM dbo.[<xsl:value-of select="@table_name" />] _curr
 	   INNER JOIN dbo.[<xsl:value-of select="@table_name" />] _branch
 		  ON
-          <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 _curr.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />] AND
             </xsl:for-each>
             _curr.branch_name = 'master'
 			 AND _branch.branch_name = @branch_name
 	   INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> _branch_hist
 		  ON
-            <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+            <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 _branch_hist.[<xsl:value-of select="@column_name" />] = _branch.[<xsl:value-of select="@column_name" />] AND
             </xsl:for-each>
             _branch_hist.branch_name = @branch_name
 			 AND valid_to IS NULL
 			 AND (
-                <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+                <xsl:for-each select="columns/column[@is_primary_key=0]" >
                     _branch_hist.[<xsl:value-of select="@column_name" />] &lt;&gt; _curr.[<xsl:value-of select="@column_name" />]
                     <xsl:if test="position() != last()"> OR </xsl:if>
                 </xsl:for-each>
@@ -125,7 +125,7 @@ BEGIN
        FROM dbo.[<xsl:value-of select="@table_name" />] _d
        INNER JOIN 
         dbo.hist_<xsl:value-of select="@table_name" /> _h on 
-	    <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+	    <xsl:for-each select="columns/column[@is_primary_key=1]" >
             _d.[<xsl:value-of select="@column_name" />] = _h.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
         _h.branch_name = @branch_name and _h.is_delete = 1 and _h.valid_to is null and _d.branch_name = 'master'
@@ -135,7 +135,7 @@ BEGIN
 		  SET valid_to = @current_datetime
 	   FROM dbo.hist_<xsl:value-of select="@table_name" /> h_master
 	   INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> h_branch ON
-        <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+        <xsl:for-each select="columns/column[@is_primary_key=1]" >
             h_master.[<xsl:value-of select="@column_name" />] = h_branch.[<xsl:value-of select="@column_name" />] AND
         </xsl:for-each>
             h_master.branch_name = 'master'

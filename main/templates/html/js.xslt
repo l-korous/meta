@@ -28,7 +28,7 @@ function getApiQueryString() {
     if(window.location.search.substring(1) == '') 
         return defaultQueryString;
     else {
-    <xsl:for-each select="columns/column[@is_part_of_primary_key=1]">
+    <xsl:for-each select="columns/column[@is_primary_key=1]">
         if(urlParams.get('<xsl:value-of select="@column_name" />') == null || urlParams.get('<xsl:value-of select="@column_name" />') == '')
             return defaultQueryString;
         queryString += 'FilterBy[<xsl:value-of select="position() - 1"/>][col]=<xsl:value-of select="@column_name" /><xsl:text disable-output-escaping="yes">&amp;FilterBy</xsl:text>[<xsl:value-of select="position() - 1"/>][regex]=' + urlParams.get('<xsl:value-of select="@column_name" />') + '<xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes">&amp;</xsl:text></xsl:if>';
@@ -47,7 +47,7 @@ return toReturn;
 
 function getPrimaryRefLink<xsl:value-of select="@column_name" />AppUrl(linkedItem) {
     var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$table_name" />.html?';
-    <xsl:for-each select="//tables/table[@table_name=$table_name]/columns/column[@is_part_of_primary_key=1]">
+    <xsl:for-each select="//tables/table[@table_name=$table_name]/columns/column[@is_primary_key=1]">
         toReturn += '<xsl:value-of select="@column_name" />=';
         toReturn += linkedItem.<xsl:value-of select="@column_name" /><xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes">+ '&amp;'</xsl:text></xsl:if>;
     </xsl:for-each>
@@ -75,7 +75,7 @@ function getRefLink<xsl:value-of select="@column_name" />ApiUrl(linkedItem) {
 
 function getLink<xsl:value-of select="$table_name" />(item) {
     var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$table_name" />';
-    <xsl:for-each select="columns/column[@is_part_of_primary_key=1]">
+    <xsl:for-each select="columns/column[@is_primary_key=1]">
         toReturn += '/' +  item.<xsl:value-of select="@column_name" />;
     </xsl:for-each>
     return toReturn;
@@ -182,7 +182,7 @@ function loadCall() {
         
         <!-- Read & Write -->
         <xsl:for-each select="columns/column" >
-        $(newElement).find('.entry<xsl:if test="@is_part_of_primary_key=1">Identifier</xsl:if>Field<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + <xsl:value-of select="@column_name" />_field_to_html_conversion(item);
+        $(newElement).find('.entry<xsl:if test="@is_primary_key=1">Identifier</xsl:if>Field<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + <xsl:value-of select="@column_name" />_field_to_html_conversion(item);
         <xsl:value-of select="@column_name" />_field_to_input_value(item, $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]'));
         $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]').attr('name', i + '<xsl:value-of select="@column_name" />');
         $(newElement).find('[for=dummy_<xsl:value-of select="@column_name" />]').attr('for', i + '<xsl:value-of select="@column_name" />');
@@ -229,7 +229,7 @@ function loadCall() {
         meta_api_get(getLinks<xsl:value-of select="@column_name" />ApiUrl(item), function(linkedItem) {
             var newChildElement = $($(newElement).find('.entryLinks<xsl:value-of select="@column_name" />')[0].appendChild(document.getElementById("entryLinkDiv<xsl:value-of select="@column_name" />-dummy").cloneNode(true)));
             newChildElement.attr("id", newElement.attr("id") + "Link<xsl:value-of select="@column_name" />" + i_<xsl:value-of select="@column_name" />++);
-            <xsl:for-each select="//tables/table[@table_name=$table_name]/columns/column[@is_part_of_primary_key=1]">
+            <xsl:for-each select="//tables/table[@table_name=$table_name]/columns/column[@is_primary_key=1]">
             $(newChildElement).find('.entryLinkIdentifierField<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + linkedItem.<xsl:value-of select="@column_name" />;
             </xsl:for-each>
             $(newChildElement).find('.entryLinkA')[0].href = getPrimaryRefLink<xsl:value-of select="@column_name" />AppUrl(linkedItem);

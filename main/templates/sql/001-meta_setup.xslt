@@ -31,7 +31,7 @@ BEGIN
     SET XACT_ABORT, NOCOUNT ON
     DECLARE @msg nvarchar(255)
     BEGIN TRY
-        SELECT table_name FROM meta.[table];
+        SELECT table_name FROM meta.[table] where model_version = (select max(model_version) from meta.model_version);
     END TRY
     BEGIN CATCH
     END CATCH
@@ -47,8 +47,8 @@ BEGIN
     SET XACT_ABORT, NOCOUNT ON
     DECLARE @msg nvarchar(255)
     BEGIN TRY
-        SELECT column_name, column_order, table_name, datatype_name, is_part_of_primary_key, is_unique, is_required, referenced_table_name, referenced_column_name, on_delete FROM meta.[column]
-        WHERE (@table_name = '' OR table_name = @table_name)
+        SELECT column_name, column_order, table_name, datatype_name, is_primary_key, is_unique, is_required, referenced_table_name, referenced_column_name, on_delete FROM meta.[column]
+        WHERE (@table_name = '' OR table_name = @table_name) and model_version = (select max(model_version) from meta.model_version)
         ORDER BY column_order;
     END TRY
     BEGIN CATCH
@@ -107,7 +107,7 @@ BEGIN
         column_order int,
         table_name nvarchar(255), 
         datatype_name nvarchar(255),
-        is_part_of_primary_key bit,
+        is_primary_key bit,
         is_unique bit,
         is_required bit,
         referenced_table_name nvarchar(255),
@@ -162,7 +162,7 @@ INSERT INTO meta.[model_version] DEFAULT VALUES;
             <xsl:value-of select="position()" />,
             '<xsl:value-of select="../../@table_name" />',
             '<xsl:value-of select="@datatype" />',
-            '<xsl:value-of select="@is_part_of_primary_key" />',
+            '<xsl:value-of select="@is_primary_key" />',
             '<xsl:value-of select="@is_unique" />',
             '<xsl:value-of select="@is_required" />',
             <xsl:if test="@referenced_table_name != ''">'<xsl:value-of select="@referenced_table_name" />'</xsl:if><xsl:if test="not(@referenced_table_name != '')">NULL</xsl:if>,
@@ -178,7 +178,7 @@ GO
 IF OBJECT_ID ('meta.create_insert_column_query') IS NOT NULL DROP FUNCTION meta.create_insert_column_query;
 GO
 CREATE FUNCTION meta.create_insert_column_query
-(@column_name nvarchar(255), @column_name_prev nvarchar(255), @column_datatype_new nvarchar(255), @column_datatype_prev nvarchar(255), @column_is_part_of_primary_key_new bit, @column_is_required_new bit)
+(@column_name nvarchar(255), @column_name_prev nvarchar(255), @column_datatype_new nvarchar(255), @column_datatype_prev nvarchar(255), @column_is_primary_key_new bit, @column_is_required_new bit)
 RETURNS nvarchar(max)
 AS
 BEGIN
@@ -193,7 +193,7 @@ BEGIN
 	   SET @have_to_null = 1;
 
     IF ((@have_to_null = 1) OR (@column_name_prev IS NULL)) BEGIN
-	   IF ((@column_is_part_of_primary_key_new = 1) OR (@column_is_required_new = 1))
+	   IF ((@column_is_primary_key_new = 1) OR (@column_is_required_new = 1))
 		  SET @SQL = @SQL + CASE
 				WHEN @column_datatype_new = 'NVARCHAR(255)' THEN ''''''
 				WHEN @column_datatype_new = 'NVARCHAR(MAX)' THEN ''''''
@@ -231,7 +231,7 @@ BEGIN
 	   DECLARE @column_name_prev nvarchar(255);
 	   DECLARE @column_datatype_new nvarchar(255);
 	   DECLARE @column_datatype_prev nvarchar(255);
-	   DECLARE @column_is_part_of_primary_key_new bit;
+	   DECLARE @column_is_primary_key_new bit;
 	   DECLARE @column_is_required_new bit;
 
 	   DECLARE table_cursor CURSOR FOR
@@ -283,11 +283,12 @@ BEGIN
 				where (column_new.table_name = @table_name or column_prev.table_name = @table_name)
 				    and (
 				    column_new.datatype_name &lt;&gt; column_prev.datatype_name or
-				    column_new.is_part_of_primary_key &lt;&gt; column_prev.is_part_of_primary_key or
+				    column_new.is_primary_key &lt;&gt; column_prev.is_primary_key or
 				    column_new.is_required &lt;&gt; column_prev.is_required or
 				    column_new.column_name is null or
 				    column_prev.column_name is null or
-				    column_new.is_unique &lt;&gt; column_prev.is_unique
+				    column_new.referenced_column_name &lt;&gt; column_prev.referenced_column_name or
+				    column_new.referenced_table_name &lt;&gt; column_prev.referenced_table_name
 				    )
 			 ) &gt; 0 then 1 else 0 end;
 
@@ -295,7 +296,7 @@ BEGIN
 
 				-- put together insert statement by going through all new columns, possibly finding old ones to them
 				-- first part is just this
-				DECLARE @insert_statement_1 nvarchar(max) = 'INSERT INTO ' + @temp_table_name ;
+				DECLARE @insert_statement_1 nvarchar(max) = 'INSERT INTO dbo.' + @temp_table_name ;
 				-- second part is the columns, we will build that in the cursor loop
 				DECLARE @insert_statement_2 nvarchar(max) = '(';
                 -- third part is the select, we will build that in the cursor loop
@@ -307,7 +308,7 @@ BEGIN
 				    column_prev.column_name,
 				    datatype_new.datatype_sql,
 				    datatype_prev.datatype_sql,
-				    column_new.is_part_of_primary_key,
+				    column_new.is_primary_key,
 				    column_new.is_required
 				    from
 					   (select * from meta.[column] where model_version = (select max(model_version) from meta.model_version)) column_new
@@ -324,22 +325,21 @@ BEGIN
 					   column_new.table_name = @table_name;
 
 				OPEN column_cursor
-				FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new
+				FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_primary_key_new, @column_is_required_new
 				WHILE @@FETCH_STATUS = 0  
 				BEGIN
                     SET @insert_statement_2 = @insert_statement_2 + @column_name + ', ';
-				    SET @insert_statement_3 = @insert_statement_3 + meta.create_insert_column_query(@column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new);
+				    SET @insert_statement_3 = @insert_statement_3 + meta.create_insert_column_query(@column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_primary_key_new, @column_is_required_new);
 
-				    FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_part_of_primary_key_new, @column_is_required_new
+				    FETCH NEXT FROM column_cursor INTO @column_name, @column_name_prev, @column_datatype_new, @column_datatype_prev, @column_is_primary_key_new, @column_is_required_new
 				END
 				CLOSE column_cursor;
 				DEALLOCATE column_cursor;
 
                 SET @insert_statement_2 = @insert_statement_2 + 'branch_name) ';
-				SET @insert_statement_3 = @insert_statement_3 + 'branch_name FROM ' + @table_name;
+				SET @insert_statement_3 = @insert_statement_3 + 'branch_name FROM dbo.' + @table_name;
 				SET @insert_statement_1 = @insert_statement_1 + @insert_statement_2 + @insert_statement_3;
-                PRINT @insert_statement_1;
-				EXEC sp_executesql @insert_statement_1;
+                EXEC sp_executesql @insert_statement_1;
 
 				-- Drop the old tables, including FKs
 				SET @SQL = '';
@@ -356,32 +356,34 @@ BEGIN
 				EXEC sp_executesql @SQL;
 				EXEC sp_rename @hist_table_name, @backup_hist_table_name;
 				EXEC sp_rename @temp_hist_table_name, @hist_table_name;
+                SET @SQL = '';
+				SELECT @SQL += 'UPDATE dbo.' + @backup_hist_table_name + ' SET valid_to = getdate() WHERE valid_to is NULL;';
+				EXEC sp_executesql @SQL;
+				SET @SQL = '';
+                SELECT @SQL += 'INSERT INTO dbo.' + @hist_table_name + ' SELECT *, (SELECT current_version_name from dbo.[branch] where branch_name = d.branch_name), getdate(), NULL, 0, CURRENT_USER FROM dbo.' + @table_name + ' d';
+				EXEC sp_executesql @SQL;
 
 				-- Conflict table
 				SET @SQL = 'DROP TABLE dbo.' + @conflicts_table_name;
 				EXEC sp_executesql @SQL;
 				EXEC sp_rename @temp_conflicts_table_name, @conflicts_table_name;
 			 END
-			 ELSE BEGIN -- no change, therefore drop old, rename new (to have the FKs with __new_)
+			 ELSE BEGIN -- no change, therefore drop new
 				SET @SQL = '';
-                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @table_name;
+                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @temp_table_name;
 				EXEC sp_executesql @SQL;
-				SET @SQL = 'DROP TABLE dbo.' + @table_name;
-				EXEC sp_executesql @SQL;
-				SET @SQL = '';
-                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @hist_table_name;
-				EXEC sp_executesql @SQL;
-				SET @SQL = 'DROP TABLE dbo.' + @hist_table_name;
+				SET @SQL = 'DROP TABLE dbo.' + @temp_table_name;
 				EXEC sp_executesql @SQL;
 				SET @SQL = '';
-                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @conflicts_table_name;
+                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @temp_hist_table_name;
 				EXEC sp_executesql @SQL;
-				SET @SQL = 'DROP TABLE dbo.' + @conflicts_table_name;
+				SET @SQL = 'DROP TABLE dbo.' + @temp_hist_table_name;
 				EXEC sp_executesql @SQL;
-
-				EXEC sp_rename @temp_table_name, @table_name;
-				EXEC sp_rename @temp_hist_table_name, @hist_table_name;
-				EXEC sp_rename @temp_conflicts_table_name, @conflicts_table_name;
+				SET @SQL = '';
+                SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name = @temp_conflicts_table_name;
+				EXEC sp_executesql @SQL;
+				SET @SQL = 'DROP TABLE dbo.' + @temp_conflicts_table_name;
+				EXEC sp_executesql @SQL;
 			 END
 		  END
 

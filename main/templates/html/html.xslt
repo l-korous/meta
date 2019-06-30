@@ -68,7 +68,7 @@
 			</xsl:for-each>
         </div>
         <div class="entry bubblar" id="entry-dummy">
-            <xsl:if test="count(columns/column[@is_part_of_primary_key=0]) &gt; 0">
+            <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
             <div class="write" style="display:none">
                 <button class="saveButton" onclick="$(this).parent().toggle();$(this).parent().next().toggle();save($(this).attr('i'));">Save</button>
                 <button class="cancelButton" type="button" onclick="$(this).parent().toggle();$(this).parent().next().toggle();">Cancel</button>
@@ -84,7 +84,7 @@
                                 <xsl:element name="input">
                                     <xsl:attribute name="type"><xsl:value-of select="meta:datatype_to_html_input_type(@datatype)" /></xsl:attribute>
                                     <xsl:attribute name="name">dummy_<xsl:value-of select="@column_name" /></xsl:attribute>
-                                    <xsl:if test="@is_part_of_primary_key=1">
+                                    <xsl:if test="@is_primary_key=1">
                                         <xsl:attribute name="readonly" />
                                     </xsl:if>
                                 </xsl:element>
@@ -99,15 +99,15 @@
             </div>
             </xsl:if>
             <div class="read">
-                <xsl:if test="count(columns/column[@is_part_of_primary_key=0]) &gt; 0"><button class="editButton" onclick="$(this).parent().toggle();$(this).parent().prev().toggle();">Edit</button></xsl:if>
+                <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0"><button class="editButton" onclick="$(this).parent().toggle();$(this).parent().prev().toggle();">Edit</button></xsl:if>
                 <button class="entryDeleter">Delete</button>
-                <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+                <xsl:for-each select="columns/column[@is_primary_key=1]" >
                     <xsl:element name="h2">
                         <xsl:attribute name="class">entryIdentifierField entryIdentifierField<xsl:value-of select="@column_name" /></xsl:attribute>
                         &s;
                     </xsl:element>
                 </xsl:for-each>
-                <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+                <xsl:for-each select="columns/column[@is_primary_key=0]" >
                     <xsl:element name="div">
                         <xsl:attribute name="class">entryField entryField<xsl:value-of select="@column_name" /></xsl:attribute>
                         &s;

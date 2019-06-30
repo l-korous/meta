@@ -9,7 +9,7 @@
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 <xsl:for-each select="//table" >
-<xsl:if test="count(columns/column[@is_part_of_primary_key=0]) &gt; 0">
+<xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0">
 IF OBJECT_ID ('dbo.update_<xsl:value-of select="@table_name" />') IS NOT NULL 
      DROP PROCEDURE dbo.update_<xsl:value-of select="@table_name" />
 GO
@@ -43,12 +43,12 @@ BEGIN
       END
       -- Record exists
 	   IF NOT EXISTS (select * from dbo.[<xsl:value-of select="@table_name" />] where
-       <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+       <xsl:for-each select="columns/column[@is_primary_key=1]" >
             [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
         </xsl:for-each>
        branch_name = @branch_name) BEGIN
 		  set @msg = 'ERROR: <xsl:value-of select="@table_name" /> ( '+ 
-          <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
             '[<xsl:value-of select="@column_name" />]: ' + CAST(@<xsl:value-of select="@column_name" /> AS NVARCHAR(MAX)) + ', ' +
         </xsl:for-each>
             'branch_name: ' + @branch_name + ') does not exist';
@@ -59,15 +59,15 @@ BEGIN
 	   declare @current_version NVARCHAR(255) = (SELECT current_version_name from dbo.[branch] where branch_name = @branch_name)
        
          -- EQUALITY CHECK
-         <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+         <xsl:for-each select="columns/column[@is_primary_key=0]" >
             declare @<xsl:value-of select="@column_name" />_same bit = (select IIF([<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" />,1,0) FROM dbo.[<xsl:value-of select="../../@table_name" />] WHERE
-            <xsl:for-each select="../../columns/column[@is_part_of_primary_key=1]" >
+            <xsl:for-each select="../../columns/column[@is_primary_key=1]" >
                 [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
             </xsl:for-each>
             branch_name = @branch_name)
         </xsl:for-each>
          IF
-            <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+            <xsl:for-each select="columns/column[@is_primary_key=0]" >
                 @<xsl:value-of select="@column_name" />_same = 1
                 <xsl:if test="position() != last()">AND</xsl:if>
             </xsl:for-each>
@@ -77,19 +77,19 @@ BEGIN
             END
 
          UPDATE dbo.[<xsl:value-of select="@table_name" />] SET
-         <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+         <xsl:for-each select="columns/column[@is_primary_key=0]" >
                 [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" />
                 <xsl:if test="position() != last()">,</xsl:if>
             </xsl:for-each>
          WHERE
-            <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+            <xsl:for-each select="columns/column[@is_primary_key=1]" >
                 [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
             </xsl:for-each>
             branch_name = @branch_name
 
          -- EXISTENCE of history record for this branch (always true for master)
          IF @branch_name &lt;&gt; 'master' AND NOT EXISTS (SELECT 1 FROM dbo.hist_<xsl:value-of select="@table_name" /> WHERE
-         <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+         <xsl:for-each select="columns/column[@is_primary_key=1]" >
             [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
         </xsl:for-each>
          branch_name = @branch_name)
@@ -101,7 +101,7 @@ BEGIN
                 </xsl:for-each>
                 @branch_name, @current_version, valid_from, @current_datetime, is_delete, author
                 FROM dbo.hist_<xsl:value-of select="@table_name" /> WHERE
-                <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+                <xsl:for-each select="columns/column[@is_primary_key=1]" >
                     [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
                 </xsl:for-each>
                 branch_name = 'master' and valid_to is null
@@ -111,7 +111,7 @@ BEGIN
                 UPDATE dbo.hist_<xsl:value-of select="@table_name" /> SET
                    valid_to = @current_datetime
                 WHERE
-                   <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+                   <xsl:for-each select="columns/column[@is_primary_key=1]" >
                         [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
                     </xsl:for-each>
                    branch_name = @branch_name

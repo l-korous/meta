@@ -25,7 +25,7 @@ BEGIN
           SELECT COUNT(*)
           FROM dbo.hist_<xsl:value-of select="@table_name" /> h_master
              INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> h_branch ON
-                <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+                <xsl:for-each select="columns/column[@is_primary_key=1]" >
                     h_master.[<xsl:value-of select="@column_name" />] = h_branch.[<xsl:value-of select="@column_name" />] AND
                 </xsl:for-each>
                 h_master.branch_name = 'master'
@@ -35,7 +35,7 @@ BEGIN
                 AND h_branch.valid_to IS NULL
                 AND (
                         (0 = 1)
-                        <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+                        <xsl:for-each select="columns/column[@is_primary_key=0]" >
                         OR
                             (
                               (h_master.[<xsl:value-of select="@column_name" />] IS NULL AND h_branch.[<xsl:value-of select="@column_name" />] IS NOT NULL)
@@ -51,14 +51,14 @@ BEGIN
        IF @number_of_conflicts &gt; 0 BEGIN
           INSERT INTO dbo.conflicts_<xsl:value-of select="@table_name" />
           SELECT @merge_version_name,
-          <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+          <xsl:for-each select="columns/column[@is_primary_key=1]" >
             h_master.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>
           h_master.is_delete, h_branch.is_delete,
-          <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+          <xsl:for-each select="columns/column[@is_primary_key=0]" >
             h_master.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>         
-          <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+          <xsl:for-each select="columns/column[@is_primary_key=0]" >
             h_branch.[<xsl:value-of select="@column_name" />],
         </xsl:for-each>
           h_master.author, h_master.version_name, h_master.valid_from
@@ -66,7 +66,7 @@ BEGIN
              dbo.hist_<xsl:value-of select="@table_name" /> h_master
              INNER JOIN dbo.hist_<xsl:value-of select="@table_name" /> h_branch
                 ON
-                    <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+                    <xsl:for-each select="columns/column[@is_primary_key=1]" >
                         h_master.[<xsl:value-of select="@column_name" />] = h_branch.[<xsl:value-of select="@column_name" />] AND
                     </xsl:for-each>
                     h_master.branch_name = 'master'
@@ -76,7 +76,7 @@ BEGIN
                     AND h_branch.valid_to IS NULL
                     AND (
                         0 = 1
-                        <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+                        <xsl:for-each select="columns/column[@is_primary_key=0]" >
                             OR
                             (
                               (h_master.[<xsl:value-of select="@column_name" />] IS NULL AND h_branch.[<xsl:value-of select="@column_name" />] IS NOT NULL)

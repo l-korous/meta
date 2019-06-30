@@ -9,6 +9,13 @@
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 <xsl:for-each select="//table" >
+
+DECLARE @SQL NVARCHAR(MAX) = '';
+SELECT @SQL += 'ALTER TABLE dbo.' + t0.name + ' DROP CONSTRAINT ' + fk.name + '; ' from sys.foreign_keys fk join sys.tables t on fk.referenced_object_id = t.object_id join sys.tables t0 on fk.parent_object_id = t0.object_id where t.name in ('__new_<xsl:value-of select="@table_name" />', '__new_hist_<xsl:value-of select="@table_name" />', '__new_conflicts_<xsl:value-of select="@table_name" />');
+EXEC sp_executesql @SQL;
+
+IF OBJECT_ID ('dbo.__new_<xsl:value-of select="@table_name" />') IS NOT NULL DROP TABLE dbo.__new_<xsl:value-of select="@table_name" />;
+GO
 CREATE TABLE dbo.__new_<xsl:value-of select="@table_name" />
 (
     <xsl:for-each select="columns/column" >
@@ -16,13 +23,15 @@ CREATE TABLE dbo.__new_<xsl:value-of select="@table_name" />
     </xsl:for-each>
     branch_name NVARCHAR(255),
     PRIMARY KEY (
-        <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+        <xsl:for-each select="columns/column[@is_primary_key=1]" >
             [<xsl:value-of select="@column_name" />],
         </xsl:for-each>
     branch_name
     )
 );
 
+IF OBJECT_ID ('dbo.__new_hist_<xsl:value-of select="@table_name" />') IS NOT NULL DROP TABLE dbo.__new_hist_<xsl:value-of select="@table_name" />;
+GO
 CREATE TABLE dbo.__new_hist_<xsl:value-of select="@table_name" />
 (
     <xsl:for-each select="columns/column" >
@@ -36,18 +45,20 @@ CREATE TABLE dbo.__new_hist_<xsl:value-of select="@table_name" />
     author NVARCHAR(255)
 )
 
+IF OBJECT_ID ('dbo.__new_conflicts_<xsl:value-of select="@table_name" />') IS NOT NULL DROP TABLE dbo.__new_conflicts_<xsl:value-of select="@table_name" />;
+GO
 CREATE TABLE dbo.__new_conflicts_<xsl:value-of select="@table_name" />
 (
     merge_version_name NVARCHAR(255),
-    <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+    <xsl:for-each select="columns/column[@is_primary_key=1]" >
         [<xsl:value-of select="@column_name" />]&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
     is_del_master BIT,
     is_del_branch BIT,
-    <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+    <xsl:for-each select="columns/column[@is_primary_key=0]" >
         <xsl:value-of select="@column_name" />_master &s; <xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
-    <xsl:for-each select="columns/column[@is_part_of_primary_key=0]" >
+    <xsl:for-each select="columns/column[@is_primary_key=0]" >
         <xsl:value-of select="@column_name" />_branch &s; <xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
     </xsl:for-each>
     last_author_master NVARCHAR(255),

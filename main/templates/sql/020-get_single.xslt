@@ -14,7 +14,7 @@ IF OBJECT_ID ('dbo.get_single_<xsl:value-of select="@table_name" />') IS NOT NUL
 GO
 CREATE PROCEDURE dbo.get_single_<xsl:value-of select="@table_name" />
 (
-<xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+<xsl:for-each select="columns/column[@is_primary_key=1]" >
     @<xsl:value-of select="@column_name" />&s;<xsl:value-of select="meta:datatype_to_sql(@datatype)" />,
 </xsl:for-each>
     @branch_name NVARCHAR(255)
@@ -43,12 +43,12 @@ BEGIN
 	   END
 	   -- Record exists
 	   IF NOT EXISTS (select * from dbo.[<xsl:value-of select="@table_name" />] where
-       <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+       <xsl:for-each select="columns/column[@is_primary_key=1]" >
             [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
         </xsl:for-each>
        branch_name = @branch_name) BEGIN
             set @msg = 'ERROR: <xsl:value-of select="@table_name" /> ( '+
-            <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+            <xsl:for-each select="columns/column[@is_primary_key=1]" >
             '[<xsl:value-of select="@column_name" />]: ' + CAST(@<xsl:value-of select="@column_name" /> AS NVARCHAR(MAX)) + ', ' +
             </xsl:for-each>
             'branch_name: ' + @branch_name + ') does not exist';
@@ -67,7 +67,7 @@ BEGIN
                 [<xsl:value-of select="@column_name" />]<xsl:if test="position() != last()">, </xsl:if></xsl:for-each>
        FROM dbo.[<xsl:value-of select="@table_name" />]
 	   WHERE
-        <xsl:for-each select="columns/column[@is_part_of_primary_key=1]" >
+        <xsl:for-each select="columns/column[@is_primary_key=1]" >
             [<xsl:value-of select="@column_name" />] = @<xsl:value-of select="@column_name" /> AND
         </xsl:for-each>
 		  branch_name = @branch_name;
