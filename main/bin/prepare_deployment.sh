@@ -7,10 +7,10 @@ metaHome=$META_HOME
 [[ "${metaHome}" != */ ]] && metaHome="${metaHome}/"
 templatesPath=${metaHome}main/templates
 #=================
-if [ $# -lt 3 ] 
+if [ $# -lt 3 ]
 then
     echo "usage: ${0##*/} <xmlModelFile> <targetPath> <sql credentials>"
-    xmlModelFile="${metaHome}testing/assets/model.xml"
+    xmlModelFile="${metaHome}testing/excel_model_test/model.xml"
     targetPath="${metaHome}main/target"
 	sqlCredentials="-S localhost\\SQLEXPRESS"
     # exit
@@ -25,6 +25,7 @@ fi
 
 echo Generating artefacts
 ${metaHome}main/bin/generate_artefacts.sh $xmlModelFile $targetPath $sqlCredentials
+
 echo Copying resources
 cp -r ${metaHome}main/resources/* $targetPath
 
