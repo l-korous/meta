@@ -11,7 +11,7 @@ exports.initialize = function (app, appConfig, Busboy, path, fs) {
 
     /**
      * @swagger
-     * /api/model-json/{model_id}:
+     * /api/model-xml/{model_id}:
      *   get:
      *     description: Get stored model by id
      *     produces:
@@ -32,7 +32,7 @@ exports.initialize = function (app, appConfig, Busboy, path, fs) {
      *                  type: string
      *                  description: the entire model is returned (as JSON)
      */
-    app.get("/api/model-json/:model_id", function(req , res) {
+    app.get("/api/model-xml/:model_id", function(req , res) {
         var model_id = req.params['model_id'];
         full_path = path.join(__dirname, 'tmp', model_id);
         var contents = fs.readFileSync(full_path, 'utf8');
@@ -41,14 +41,17 @@ exports.initialize = function (app, appConfig, Busboy, path, fs) {
 
     /**
      * @swagger
-     * /api/model-json:
+     * /api/model-xml:
      *   post:
      *     description: Store model internally
-     *     content: multipart/form-data
-     *     consumes:
-     *       - multipart/form-data
+     *     parameters:
+     *       - name: model
+     *         description: the model xml file
+     *         in: body
+     *         required: true
+     *         type: string  
      *     produces:
-     *       - application/json
+     *       - application/xml
      *     responses:
      *       200:
      *         description: 'OK'
@@ -59,18 +62,14 @@ exports.initialize = function (app, appConfig, Busboy, path, fs) {
      *                  type: string
      *                  description: the internal model ID with which a GET call needs to be made
      */
-    app.post("/api/model-json", function(req , res) {
-        var busboy = new Busboy({ headers: req.headers });
+    app.post("/api/model-xml", function(req , res) {
         var model_id = makeid(32);
         var full_path = path.join(__dirname, 'tmp', model_id);
-          
-        busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
-          file.pipe(fs.createWriteStream(full_path));
+        fs.writeFile(full_path, req.body, (err) => {
+          if (err)
+              console.log(err);
         });
-        
-        busboy.on('finish', function() {
-          res.send({model_id: model_id});
-        });
-        return req.pipe(busboy);
+    
+        res.send(model_id);
     });
 };

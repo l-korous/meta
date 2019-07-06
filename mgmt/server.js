@@ -13,7 +13,7 @@ const appConfig = {
 };
 
 var app = express();
-app.use(bodyParser.json()); 
+app.use(bodyParser.text({type: '*/*'}));
 app.use(function (req, res, next) {
     //Enabling CORS 
     res.header("Access-Control-Allow-Origin", "*");
