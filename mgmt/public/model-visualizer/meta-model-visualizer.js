@@ -78,12 +78,14 @@ function xmlToJson(xml) {
 
 function getNodes(xml_data) {
     var nodes = [];
+    var id_ = 0;
     xml_data.root.tables.table.forEach(function(table) {
         var node = {
-            id: table.table_name,
+            id: id_,
             class: "baseTable",
             shape: "table",
             name: table.table_name,
+            node: table,
             rows1: [],
             rows2: [],
             rows3: []
@@ -97,6 +99,7 @@ function getNodes(xml_data) {
                 node.rows3.push({col1: column.column_name, col2: column.datatype, col3: (column.required == "1" ? (column.unique == "1" ? "required+unique" : "required") : (column.unique == "1" ? "unique" : "")) });
         });
         
+        id_ = id_ + 1;
         nodes.push(node);
     });
     return nodes;
@@ -104,12 +107,14 @@ function getNodes(xml_data) {
 
 function getLinks(xml_data, nodes) {
     var links = [];
-    xml_data.root.tables.table.forEach(function(table) {
-        table.columns.column.forEach(function(column) {
+    nodes.forEach(function(node) {
+        xml_data.root.tables.table.find(function(table) { return table.table_name == node.name; }).columns.column.forEach(function(column) {
             if (column.referenced_table_name != "") {
                 var link = {
-                    source: table.table_name,
-                    target: nodes.find(function(node) { return node.id == column.referenced_table_name; })
+                    source: node.id,
+                    sourceNode: node,
+                    target: nodes.find(function(node) { return node.name == column.referenced_table_name; }).id,
+                    targetNode: nodes.find(function(node) { return node.name == column.referenced_table_name; })
                 };
                 
                 links.push(link);
@@ -227,17 +232,61 @@ function createTableHtml(node) {
     return table;
 }
 
+// Create Event Handlers for mouse
+function handleMouseOver(d, i) {  // Add interactivity
+    // Highlight node
+    var node = d3.select(this);
+    node.attr("class", function(d) { return "highLightedNode " + node.attr("class"); });
+    
+    // Referenced nodes
+    if(node.data()[0].node.columns.column) {
+        node.data()[0].node.columns.column.forEach(function(column) {
+            if(column.referenced_table_name != "") {
+                var other_node = d3.select( 'g.node[node_name=' + column.referenced_table_name + ']');
+                other_node.attr("class", function(d) { return "referencedNode " + other_node.attr("class"); });
+            }
+        });
+    }
+    
+    // Referencing nodes
+    data.nodes.forEach(function(node_) {
+        node_.node.columns.column.forEach(function(column) {
+            if(column.referenced_table_name == node.attr("node_name")) {
+                var other_node = d3.select( 'g.node[node_name=' + node_.name + ']');
+                other_node.attr("class", function(d) { return "referencingNode " + other_node.attr("class"); });
+            }
+        });
+    });
+}
+
+function handleMouseOut(d, i) {
+    // Highlight node
+    var node = d3.select(this);
+    node.attr("class", function(d) { return node.attr("class").replace("highLightedNode ", ''); });
+    
+    // Referenced nodes
+    if(node.data()[0].node.columns.column) {
+        node.data()[0].node.columns.column.forEach(function(column) {
+            if(column.referenced_table_name != "") {
+                var other_node = d3.select( 'g.node[node_name=' + column.referenced_table_name + ']');
+                other_node.attr("class", function(d) { return other_node.attr("class").replace("referencedNode ", ''); });
+            }
+        });
+    }
+    
+    // Referencing nodes
+    data.nodes.forEach(function(node_) {
+        node_.node.columns.column.forEach(function(column) {
+            if(column.referenced_table_name == node.attr("node_name")) {
+                var other_node = d3.select( 'g.node[node_name=' + node_.name + ']');
+                other_node.attr("class", function(d) { return other_node.attr("class").replace("referencingNode ", ''); });
+            }
+        });
+    });
+}
+
+
 function redraw() {
-    // Force-directed simulation in D3
-    var simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().id(function(d) { return d.id; }))
-            .force("collide",d3.forceCollide( function(d){return Math.max(getHorizontalSize(d), getVerticalSize(d)); }).iterations(5) )
-            .force("charge", d3.forceManyBody())
-            .force("center", d3.forceCenter(0, 0))
-            .force("y", d3.forceY(0))
-            .force("x", d3.forceX(0))
-            .alphaDecay(.3);
-            
     container.selectAll("g.node").remove();
     container.selectAll("g.links").selectAll("line").remove();
     
@@ -269,8 +318,13 @@ function redraw() {
         .attr("class", function(d) {
             return "node " + d.shape + " nodeInfo-" + d.id;
         })
+        .attr("node_name", function(d) {
+            return d.name;
+        })
         .attr("x", "0").attr("y", "0")
-        .call(drag);
+        .call(drag)
+        .on("mouseover", handleMouseOver)
+        .on("mouseout", handleMouseOut);
     
     var divEnter = nodeEnter.append("foreignObject").attr("width", nodeWidth).attr("height", nodeHeight).append("xhtml:div");
     
@@ -285,32 +339,29 @@ function redraw() {
     
     var ticked = function() {
         link
-            .attr("x1", function(d) { return (d.source.xSet ? d.source.xSet : d.source.x) + (getHorizontalSize(d.source) / 2.); })
-            .attr("y1", function(d) { return (d.source.ySet ? d.source.ySet : d.source.y) + (getVerticalSize(d.source) / 2.); })
-            .attr("x2", function(d) { return (d.target.xSet ? d.target.xSet : d.target.x) + (getHorizontalSize(d.target) / 2.); })
-            .attr("y2", function(d) { return (d.target.ySet ? d.target.ySet : d.target.y) + (getVerticalSize(d.target) / 2.); })
-            .attr("class", function(d) { return "edge start-" + d.source.id + " end-" + d.target.id; });
+            .attr("x1", function(d) { return d.sourceNode.x + (getHorizontalSize(d.sourceNode) / 2.); })
+            .attr("y1", function(d) { return d.sourceNode.y + (getVerticalSize(d.sourceNode) / 2.); })
+            .attr("x2", function(d) { return d.targetNode.x + (getHorizontalSize(d.targetNode) / 2.); })
+            .attr("y2", function(d) { return d.targetNode.y + (getVerticalSize(d.targetNode) / 2.); })
+            .attr("class", function(d) { return "edge start-" + d.sourceNode.id + " end-" + d.targetNode.id; });
 
         nodeEnter
-            .attr("x", function(d) { return d.xSet ? d.xSet : d.x; })
-            .attr("y", function(d) { return d.ySet ? d.ySet : d.y; })
-            .attr("transform", function(d) { return "translate(" + (d.xSet ? d.xSet : d.x) + ", " + (d.ySet ? d.ySet : d.y) + ")"; });
+            .attr("x", function(d) { return d.x; })
+            .attr("y", function(d) { return d.y; })
+            .attr("transform", function(d) { return "translate(" + d.x + ", " + d.y + ")"; });
     }  
     
-    simulation.nodes(data.nodes).on("tick", ticked);
-    simulation.force("link").links(data.links);    
+    // Force-directed simulation in D3
+    var simulation = d3.forceSimulation()
+            .nodes(data.nodes).on("tick", ticked)
+            .force("charge", d3.forceManyBody().strength(-1000))
+            .force('link', d3.forceLink().links(data.links).distance(0).strength(1))
+            .force("center", d3.forceCenter(0, 0))
+            .force("collide",d3.forceCollide().radius( function(d){return Math.max(getHorizontalSize(d), getVerticalSize(d)); }).strength(0.5) )
+            .alphaDecay(0.05);
     
     // Pre-drawing simulation run
     for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
         simulation.tick();
     }
-    
-    var node = container.selectAll("g.node").data(data.nodes)
-        .attr("dsfa", function(d) { return d.xSet; });
-}
-
-function setPosition(id,x,y) {
-    data.nodes.find(function(n) { return n.id == id;} ).xSet = x;
-    data.nodes.find(function(n) { return n.id == id;} ).ySet = y;
-    redraw();
 }

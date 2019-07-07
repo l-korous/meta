@@ -111,3 +111,15 @@ line.edge {
 .baseTable .dfRow2 .dfCol3 {
     color:blue;
 }
+
+.referencedNode .dfTableName{
+    background:red ! important;
+}
+
+.referencingNode .dfTableName{
+    background:green ! important;
+}
+
+.highLightedNode .dfTableName{
+    background:blue ! important;
+}
