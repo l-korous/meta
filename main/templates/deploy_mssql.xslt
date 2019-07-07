@@ -4,8 +4,7 @@
 	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
 	<xsl:strip-space elements="*"/>
     <xsl:template match="configurations">
-#!/bin/bash  
-#=================
+#!/bin/bash
 # Should run in the folder with sqls
 # SQL credentials (! no quotes)
 <xsl:if test="//configuration[@key='UseEmbeddedDb']/@value = 1">

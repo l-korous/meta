@@ -1,6 +1,7 @@
 #!/bin/bash  
 #=================
 # Add trailing slash
+set -e
 metaHome=$META_HOME
 [[ "${metaHome}" != */ ]] && metaHome="${metaHome}/"
 

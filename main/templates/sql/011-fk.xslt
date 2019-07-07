@@ -14,7 +14,7 @@ ALTER TABLE dbo.__new_<xsl:value-of select="../../@table_name" /> ADD CONSTRAINT
     REFERENCES dbo.__new_<xsl:value-of select="@referenced_table_name" /> (
     [<xsl:value-of select="@referenced_column_name" />],
     [branch_name])
-    ON UPDATE NO ACTION ON DELETE <xsl:if test="not(@on_delete != '')">CASCADE</xsl:if><xsl:if test="@on_delete!=''"><xsl:value-of select="@on_delete" /></xsl:if>
+    ON UPDATE NO ACTION ON DELETE <xsl:if test="not(@on_delete != '')">NO ACTION</xsl:if><xsl:if test="@on_delete!=''"><xsl:value-of select="@on_delete" /></xsl:if>
     </xsl:for-each>
 </xsl:for-each>
 </xsl:template>

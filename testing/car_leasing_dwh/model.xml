@@ -1,0 +1,711 @@
+<root>
+    <configurations>
+        <configuration key="DbHostName" value="localhost"/>
+        <configuration key="DbPort" value="1433"/>
+        <configuration key="DbInstanceName" value="SQLEXPRESS"/>
+        <configuration key="DbName" value="car_leasing_demo"/>
+        <configuration key="DbUser" value="sa"/>
+        <configuration key="DbPassword" value="asdf"/>
+        <configuration key="UseEmbeddedDb" value="0"/>
+        <configuration key="DbCollation" value="SQL_Latin1_General_CP1_CI_AI"/>
+        <configuration key="UseEmbeddedKafka" value="0"/>
+        <configuration key="ZookeeperHostAndPort" value="localhost:2181"/>
+        <configuration key="KafkaBrokerHostAndPort" value="localhost:9092"/>
+        <configuration key="NodeJsHostname" value="localhost"/>
+        <configuration key="NodeJsPort" value="3000"/>
+    </configurations>
+    <tables>
+      <table table_name="Case">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkComplaintSectionCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkComplaintCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkComplaintReasonCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkObjectId" referenced_table_name="Object" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkStatusId" referenced_table_name="Status" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="Application" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="InvoicedFlag" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ComplaintFinancialImpact" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ComplaintImpactToALD" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="CreatedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ResolvedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="Device" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="WorkHoursEstimated" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="CaseNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Price" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="RequestorEmailText" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="RequestorNameText" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="RootServiceNameText" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ServiceNameText" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SupplierNameText" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ValidComplaintFlag" referenced_table_name="" referenced_column_name="" datatype="boolean" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimaryTableSetId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Category">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryTypeId" referenced_table_name="CategoryType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkParentId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="PrimarySystemIdCz" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemIdSk" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="CategoryToCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryParentId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkCategoryToCategoryTypeId" referenced_table_name="CategoryToCategoryType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="CategoryToCategoryType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="CategoryType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Contract">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkContractCurrencyId" referenced_table_name="Unit" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkStatusId" referenced_table_name="Status" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="ApprovalDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ApprovalRejectedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ArchivedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ContractMileage" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="BuyBackFlag" referenced_table_name="" referenced_column_name="" datatype="boolean" is_required="0" is_primary_key="0" />
+          <column column_name="CarReturnedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ClientApprovedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ContractDuration" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="ContractEffectiveDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ContractRealTerminationDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ContractNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ContractSerie" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ContractStartDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="CreatedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="EmployeeProgramCode" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ExpectedTerminationDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="FirstTerminationPhaseDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ModifiedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="Name" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="NewOrUsedCarContractFlag" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OfferValidityDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ReceivedForApprovalDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="SentForApprovalDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="SettlementPeriod" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SignedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="SoldDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="TerminatedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="UsedCarRegistrationDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="VATRefundableFlag" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimaryTableSetId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="ContractToCase">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCaseId" referenced_table_name="Case" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkContractToCaseTypeId" referenced_table_name="ContractToCaseType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DateEffectiveFrom" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="DateEffectiveTo" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="ContractToCaseType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="ContractToCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="ContractToContract">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkContractParentId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Dictionary">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="Language" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="Translate" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="ValueType" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Document">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkDocumentTypeId" referenced_table_name="DocumentType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkObjectId" referenced_table_name="Object" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkStatusId" referenced_table_name="Status" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DocumentNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="DocumentRowNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="DueDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="FkGLAccountId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="IssuedDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="Name" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Note" referenced_table_name="" referenced_column_name="" datatype="long_string" is_required="0" is_primary_key="0" />
+          <column column_name="TaxDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimaryTableSetId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="DfEffectiveDateForHistorization" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="DocumentToCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkDocumentId" referenced_table_name="Document" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="DocumentToDocument">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkDocumentParentId" referenced_table_name="Document" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkDocumentId" referenced_table_name="Document" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkDocumentToDocumentTypeId" referenced_table_name="DocumentToDocumentType" referenced_column_name="ID" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DfEffectiveDateForHistorization" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="DocumentToDocumentType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="DocumentType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkParentId" referenced_table_name="DocumentType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Event">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkEventTypeId" referenced_table_name="EventType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkObjectId" referenced_table_name="Object" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkServiceId" referenced_table_name="Service" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkSpecificationCategory1Id" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkSpecificationCategory2Id" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkSpecificationCategory3Id" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkStatusId" referenced_table_name="Status" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="Quantity" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="EventDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="EventFactDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="EventNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Note" referenced_table_name="" referenced_column_name="" datatype="long_string" is_required="0" is_primary_key="0" />
+          <column column_name="Reinvoicing" referenced_table_name="" referenced_column_name="" datatype="boolean" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="EventToCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkEventId" referenced_table_name="Event" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="EventToDocument">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkDocumentId" referenced_table_name="Document" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkEventId" referenced_table_name="Event" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="EventToEvent">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkEventParentId" referenced_table_name="Event" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkEventId" referenced_table_name="Event" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkEventToEventTypeId" referenced_table_name="EventToEventType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="EventToEventType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="EventToJournalItem">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkEventId" referenced_table_name="Event" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkJournalItemId" referenced_table_name="JournalItem" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DfEffectiveDateForHistorization" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="EventToParty">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkEventId" referenced_table_name="Event" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="EventType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkParentId" referenced_table_name="EventType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Fact">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkDocumentId" referenced_table_name="Document" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkDocumentToDocumentId" referenced_table_name="DocumentToDocument" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkEventId" referenced_table_name="Event" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkFactGeneralCategoryId" referenced_table_name="FactCategory" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkFactVATCategoryId" referenced_table_name="FactCategory" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkFactStateCategoryId" referenced_table_name="FactCategory" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkJournalItemId" referenced_table_name="JournalItem" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkObjectId" referenced_table_name="Object" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkServiceId" referenced_table_name="Service" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkUnitId" referenced_table_name="Unit" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="Value" referenced_table_name="" referenced_column_name="" datatype="float" is_required="1" is_primary_key="0" />
+          <column column_name="FkCaseId" referenced_table_name="Case" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DateEffective" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="DfEffectiveDateForHistorization" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="FactCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="FkFactCategoryTypeId" referenced_table_name="FactCategoryType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkParentId" referenced_table_name="FactCategory" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="FactCategoryType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Folder">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkFolderTypeId" referenced_table_name="FolderType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="Name" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="FolderToCase">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCaseId" referenced_table_name="Case" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkFolderId" referenced_table_name="Folder" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="FolderType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="GLAccount">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="FkGLAccountChartTypeCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountTypeCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountSaldoCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountReconciliationCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="AccountNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="ShortNameEn" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="GLAccountToCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="GLAccountToGLAccount">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkGLAccountParentId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="JournalItem">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkDocumentId" referenced_table_name="Document" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkEventId" referenced_table_name="Event" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountCreditId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkCaseId" referenced_table_name="Case" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountDebitId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkJournalItemTypeId" referenced_table_name="JournalItemType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkServiceId" referenced_table_name="Service" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkSpecificationCategory1Id" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkSpecificationCategory2Id" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkSpecificationCategory3Id" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="BookDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="CostEffectiveDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="IsExpenseFlag" referenced_table_name="" referenced_column_name="" datatype="boolean" is_required="0" is_primary_key="0" />
+          <column column_name="IsCharged" referenced_table_name="" referenced_column_name="" datatype="boolean" is_required="0" is_primary_key="0" />
+          <column column_name="Note" referenced_table_name="" referenced_column_name="" datatype="long_string" is_required="0" is_primary_key="0" />
+          <column column_name="ReferenceDateFrom" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ReferenceDateTo" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimaryTableSetId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="DfEffectiveDateForHistorization" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="JournalItemToJournalItem">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkJournalItemParentId" referenced_table_name="JournalItem" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkJournalItemId" referenced_table_name="JournalItem" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkJournalItemToJournalItemTypeId" referenced_table_name="JournalItemToJournalItemType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DfEffectiveDateForHistorization" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="JournalItemToJournalItemType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="JournalItemType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Location">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkLocationTypeId" referenced_table_name="LocationType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="Address1" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Address2" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Country" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="LocationNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="ZipCode" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimaryTableSetId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="LocationType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Object">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountAssetsId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkGLAccountDepreciationId" referenced_table_name="GLAccount" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkLocationId" referenced_table_name="Location" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkStatusId" referenced_table_name="Status" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="CO2Emissions" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="CylinderVolume" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="DepreciationPeriod" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="EnginePower" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="FirstRegistrationDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="FixedAssetDocument" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="FuelConsumption" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="FuelType" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="GearBox" referenced_table_name="" referenced_column_name="" datatype="long_string" is_required="0" is_primary_key="0" />
+          <column column_name="IncludingDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="InitialDistance" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="InspectionDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="IsUsed" referenced_table_name="" referenced_column_name="" datatype="boolean" is_required="0" is_primary_key="0" />
+          <column column_name="LicensePlate" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="Name" referenced_table_name="" referenced_column_name="" datatype="long_string" is_required="1" is_primary_key="0" />
+          <column column_name="NumberOfAxes" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="NumberOfDoors" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="NumberOfPassangers" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="ObjectNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="ProductionDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="RegistrationDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="SaleDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="StandardProductClassification" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SupplementaryFirstRegistrationDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="AccountingDeperciationStartDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="TaxDepreciationStartDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="AccountingDepreciationsType" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="TPMSIndicator" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="TaxDepreciationsType" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="TotalWeight" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="AccountingDisposalDate" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="VinCode" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="AccountingDisposalReason" referenced_table_name="" referenced_column_name="" datatype="long_string" is_required="0" is_primary_key="0" />
+          <column column_name="WheelBase" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimaryTableSetId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="ObjectToCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkObjectId" referenced_table_name="Object" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="ObjectToDocument">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkDocumentId" referenced_table_name="Document" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkObjectId" referenced_table_name="Object" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DfEffectiveDateForHistorization" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Party">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkStatusId" referenced_table_name="Status" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="BirthNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ClientIdentificationNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="CompanyIdentificationNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="CreditApprovalDateFrom" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="CreditApprovalDateTo" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="Name" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="VATPayerFlag" referenced_table_name="" referenced_column_name="" datatype="boolean" is_required="0" is_primary_key="0" />
+          <column column_name="VatNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimaryTableSetId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToCase">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCaseId" referenced_table_name="Case" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyToCaseTypeId" referenced_table_name="PartyToCaseType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyTypeId" referenced_table_name="PartyType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DateEffectiveFrom" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="DateEffectiveTo" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToCaseType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToContract">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyToContractTypeId" referenced_table_name="PartyToContractType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DateEffectiveFrom" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="DateEffectiveTo" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToContractType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToDocument">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkDocumentId" referenced_table_name="Document" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyToDocumentTypeId" referenced_table_name="PartyToDocumentType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="DfEffectiveDateForHistorization" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToDocumentType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToLocation">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkLocationId" referenced_table_name="Location" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToParty">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkPartyParentId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyToPartyTypeId" referenced_table_name="PartyToPartyType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyToPartyType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="PartyTypeToParty">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkPartyId" referenced_table_name="Party" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkPartyTypeId" referenced_table_name="PartyType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Service">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkContractId" referenced_table_name="Contract" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="AssistanceType" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="FuelCardBrand" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ReplacementVehicleDaysPerYear" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="Discount" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="FuelCardNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="FuelCardType" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="FuelFee" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="FuelService" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="HeadCode" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Hubcap" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="MonthlyFee" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="MonthlyFixed" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="ServiceNumber" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ReplacementVehicleCategory" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ReplacementVehicleModel" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="ReplacementVehicleType" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="RimCategory" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="RimCount" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="RimPrice" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="RimSize" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="RimTyreWheelSize" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="CarServiceType" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SettlementPeriod" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SummerTyreBrand" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SummerTyreCategory" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SummerTyreCount" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="SummerTyrePrice" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="SummerTyreSize" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SummerTyreSpeedIndex" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="SummerTyreWheelSize" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="TyreStorage" referenced_table_name="" referenced_column_name="" datatype="boolean" is_required="0" is_primary_key="0" />
+          <column column_name="ValidFrom" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="ValidTo" referenced_table_name="" referenced_column_name="" datatype="date" is_required="0" is_primary_key="0" />
+          <column column_name="VignetteCount" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="WinterTyreBrand" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="WinterTyreCategory" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="WinterTyreCount" referenced_table_name="" referenced_column_name="" datatype="int" is_required="0" is_primary_key="0" />
+          <column column_name="WinterTyrePrice" referenced_table_name="" referenced_column_name="" datatype="float" is_required="0" is_primary_key="0" />
+          <column column_name="WinterTyreSize" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="WinterTyreSpeedIndex" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="WinterTyreWheelSize" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimaryTableSetId" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="ServiceToCategory">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkCategoryId" referenced_table_name="Category" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkServiceId" referenced_table_name="Service" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Status">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkStatusTypeId" referenced_table_name="StatusType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkParentId" referenced_table_name="Status" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemIdCz" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemIdSk" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="StatusType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="Unit">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="FkUnitTypeId" referenced_table_name="UnitType" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="FkParentId" referenced_table_name="Unit" referenced_column_name="Id" datatype="int" is_required="1" is_primary_key="0" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+          <column column_name="Source" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="OrgUnit" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemIdCz" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+          <column column_name="PrimarySystemIdSk" referenced_table_name="" referenced_column_name="" datatype="string" is_required="0" is_primary_key="0" />
+        </columns>
+      </table>
+      <table table_name="UnitType">
+        <columns>
+          <column column_name="Id" referenced_table_name="" referenced_column_name="" datatype="int" is_required="1" is_primary_key="1" />
+          <column column_name="ShortName" referenced_table_name="" referenced_column_name="" datatype="string" is_required="1" is_primary_key="0" />
+        </columns>
+      </table>
+    </tables>
+</root>
