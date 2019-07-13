@@ -5,7 +5,6 @@
 	<xsl:strip-space elements="*"/>
     <xsl:template match="configurations">
 #!/bin/bash
-# Should run in the folder with sqls
 # SQL credentials (! no quotes)
 <xsl:if test="//configuration[@key='UseEmbeddedDb']/@value = 1">
 sqlCredentials="-S localhost\\SQLEXPRESS"
@@ -13,16 +12,18 @@ sqlCredentials="-S localhost\\SQLEXPRESS"
 <xsl:if test="//configuration[@key='UseEmbeddedDb']/@value = 0">
 sqlCredentials="-S <xsl:value-of select="//configuration[@key='DbHostName']/@value" /><xsl:if test="//configuration[@key='DbInstanceName']/@value != ''">\\<xsl:value-of select="//configuration[@key='DbInstanceName']/@value" />"</xsl:if>
 </xsl:if>
-# Add trailing slash
-metaHome=$META_HOME
-[[ "${metaHome}" != */ ]] &amp;&amp; metaHome="${metaHome}/"
 #=================
+# For development only
+if [[ "$OSTYPE" != "linux-gnu" ]]; then
+    PATH=$PATH:"/c/Program Files/Microsoft SQL Server/Client SDK/ODBC/130/Tools/Binn"
+fi
 
 # Deploy SQL
+currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwd )"
 echo Deploying DB
-scriptCount=$(ls -l ${metaHome}main/target/sql/*.sql | wc -l)
+scriptCount=$(ls -l ${currentDir}/*.sql | wc -l)
 i=1
-for f in ${metaHome}main/target/sql/*.sql;
+for f in ${currentDir}/*.sql;
 do
     filename=${f##*/}
 	filename=${filename%".sql"}
@@ -36,14 +37,13 @@ do
 	sqlcmd -b -C -o ${logfile} $sqlCredentials -i "$f" -f 65001
 	
 	if [ "$?" -ne 0 ] ; then
-		cat $filename.txt
+		cat ${logfile}
 		exit $?
     else
-        rm $filename.txt
+        rm ${logfile}
 	fi
     i=$((i+1))
 done
-echo
 echo SQL Deployment successful.
 	</xsl:template>
 </xsl:stylesheet>

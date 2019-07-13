@@ -5,6 +5,7 @@ var Busboy = require('busboy');
 var fs = require('fs');
 var path = require('path');
 var os = require('os');
+const shell = require('shelljs');
 
 const appConfig = {
     hostName: 'localhost',
@@ -57,4 +58,4 @@ app.get('/swagger.json', function(req, res) {
 
 app.use(express.static('public'))
 var routes = require('./routes.js');
-routes.initialize(app, appConfig, Busboy, path, fs);
+routes.initialize(app, appConfig, Busboy, path, fs, shell);

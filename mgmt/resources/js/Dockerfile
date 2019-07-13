@@ -1,5 +1,8 @@
 FROM debian:latest
 
+ARG BUILD_DATE
+LABEL org.label-schema.build-date=$BUILD_DATE
+
 RUN apt-get update
 RUN apt-get -y upgrade
 RUN apt-get -y install curl software-properties-common
