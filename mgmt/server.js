@@ -1,3 +1,4 @@
+const correlator = require('express-correlation-id');
 var express = require("express");
 var bodyParser = require("body-parser");
 var swaggerJSDoc = require('swagger-jsdoc');
@@ -6,11 +7,10 @@ var fs = require('fs');
 var path = require('path');
 var os = require('os');
 const shell = require('shelljs');
+var serveIndex = require('serve-index')
 
 const appConfig = {
-    hostName: 'localhost',
-    version: '1.0.0',
-    port: 3000
+    port: 4499
 };
 
 var app = express();
@@ -33,10 +33,8 @@ var swaggerSpec = swaggerJSDoc({
     swaggerDefinition: {
         info: {
             title: 'META Management API',
-            version: appConfig.version,
             description: 'META Management API documentation',
         },
-        host: appConfig.hostName + ':' + appConfig.port,
         basePath: '/',
         securityDefinitions: {
             BasicAuth: {
@@ -56,6 +54,23 @@ app.get('/swagger.json', function(req, res) {
   res.send(swaggerSpec);
 });
 
-app.use(express.static('public'))
+function getTimestamp (date) {
+    return date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+}
+
+app.use(correlator({header: "x-my-correlation-header-name"}));
+
+const logRequestStartFinish = (req, res, next) => {
+    console.info(getTimestamp(new Date()) + ' |' + req.correlationId() + '| ' + req.method + ' ' + req.originalUrl);
+
+    res.on('finish', () => {
+        console.info(getTimestamp(new Date()) + ' |' + req.correlationId() + '| ' + res.statusCode + ' ' + res.statusMessage);
+    })
+
+    next();
+}
+
+app.use(logRequestStartFinish);
+app.use('/public', express.static('public'), serveIndex('public', {'icons': true, view: 'details'}))
 var routes = require('./routes.js');
 routes.initialize(app, appConfig, Busboy, path, fs, shell);

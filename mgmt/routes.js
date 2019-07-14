@@ -55,6 +55,7 @@ exports.initialize = function (app, appConfig, Busboy, path, fs, shell) {
             console.log('Exit code:', code);
             console.log('Program output:', stdout);
             console.log('Program stderr:', stderr);
+            throw stderr;
         }
         return { stdout: stdout, stderr: stderr, code: code };
     }
@@ -80,65 +81,6 @@ exports.initialize = function (app, appConfig, Busboy, path, fs, shell) {
             console.error(err)
         }
     }
-
-    /**
-     * @swagger
-     * /api/model-xml/{model_id}:
-     *   get:
-     *     description: Get stored model by id
-     *     produces:
-     *       - application/json
-     *     parameters:
-     *       - name: model_id
-     *         description: the internal model ID from the POST response (upload of the model).
-     *         in: path
-     *         required: true
-     *         type: string  
-     *     responses:
-     *       200:
-     *         description: 'OK'
-     *         schema:
-     *          type: object
-     *          properties:
-     *              model:
-     *                  type: string
-     *                  description: the entire model is returned (as JSON)
-     */
-    app.get("/api/model-xml/:model_id", function(req , res) {
-        res.send(get_model(req.params['model_id']));
-    });
-
-    /**
-     * @swagger
-     * /api/model-xml:
-     *   post:
-     *     description: Store model internally
-     *     parameters:
-     *       - name: model
-     *         description: the model xml file
-     *         in: body
-     *         required: true
-     *         type: string  
-     *     produces:
-     *       - application/xml
-     *     responses:
-     *       200:
-     *         description: 'OK'
-     *         schema:
-     *          type: object
-     *          properties:
-     *              model_id:
-     *                  type: string
-     *                  description: the internal model ID with which a GET call needs to be made
-     */
-    app.post("/api/model-xml", function(req , res) {
-        res.send(put_model(req.body));
-    });
-    
-    app.delete("/api/model-xml/:model_id", function(req , res) {
-        delete_model(req.params['model_id']);
-        res.send();
-    });
     
     const awaitHandlerFactory = (middleware) => {
       return async (req, res, next) => {
@@ -150,15 +92,28 @@ exports.initialize = function (app, appConfig, Busboy, path, fs, shell) {
       }
     }
     
+    app.get("/api/model-xml/:model_id", function(req , res) {
+        res.send(get_model(req.params['model_id']));
+    });
+    
+    app.post("/api/model-xml", awaitHandlerFactory(async function(req , res) {
+        var model_id = await put_model(req.body);
+        res.send(model_id);
+    }));
+    
+    app.delete("/api/model-xml/:model_id", function(req , res) {
+        delete_model(req.params['model_id']);
+        res.send();
+    });
+    
     app.post("/api/deploy-model-xml", awaitHandlerFactory(async function(req , res) {
         var model_id = await put_model(req.body);
          
         safe_shell('rm target', () => shell.rm('-rf', get_full_target_path(model_id)));
         safe_shell('mkdir target', () => shell.mkdir('-p', get_full_target_path(model_id)));
-        safe_shell('cp resources', () => shell.cp('-R', get_resources_path(), get_full_target_path(model_id)));
         safe_shell('cd templates', () => shell.cd(get_templates_path()));
         
-        ['sql', 'kafka', 'js', 'html'].forEach(function(ext) {
+        ['sql', 'js', 'html'].forEach(function(ext) {
             console.log('Generating artefacts - ' + ext);
             safe_shell('mkdir target - ' + ext, () => shell.mkdir('-p', path.join(get_full_target_path(model_id), ext)));
             shell.pushd('-q', ext);
@@ -170,9 +125,11 @@ exports.initialize = function (app, appConfig, Busboy, path, fs, shell) {
         });
         
         console.log('Generating artefacts - special');
-        [ { template: 'deploy.xslt', target: 'deploy.sh' }, { template: 'deploy_mssql.xslt', target: 'sql/deploy_mssql.sh' } ].forEach(function(custom_template) {
+        [ { template: 'deploy.xslt', target: 'deploy.sh' }, { template: 'deploy_mssql.xslt', target: 'sql/deploy_mssql.sh' }, { template: 'Dockerfile.xslt', target: 'js/Dockerfile' } ].forEach(function(custom_template) {
             safe_shell('generate - ' + custom_template.template, () => shell.exec('java -jar ' + path.join(get_bin_path(), 'saxon9he.jar') + ' -s:' + get_full_model_path(model_id) + ' -xsl:' + path.join(get_templates_path(), custom_template.template) + ' -o:' + path.join(get_full_target_path(model_id), custom_template.target)));
         });
+        
+        safe_shell('mkdir html', () => shell.mkdir('-p', path.join(get_full_target_path(model_id), 'js', 'public', 'app')));
         
         safe_shell('mv html', () => shell.mv(path.join(get_full_target_path(model_id), 'html', '*'), path.join(get_full_target_path(model_id), 'js', 'public', 'app')));
         

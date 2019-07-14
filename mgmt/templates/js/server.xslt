@@ -15,7 +15,6 @@ var path = require('path');
 var os = require('os');
 
 const appConfig = {
-    hostName: '<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />',
     version: '1.0.0',
     port: <xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />
 };
@@ -59,7 +58,6 @@ var swaggerSpec = swaggerJSDoc({
             version: appConfig.version,
             description: 'META-generated API documentation',
         },
-        host: appConfig.hostName + ':' + appConfig.port,
         basePath: '/',
         securityDefinitions: {
             BasicAuth: {

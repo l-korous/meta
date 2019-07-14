@@ -17,6 +17,7 @@ async function errorHandler(error) {
         
     console.log("ERROR");
     console.dir(text);
+    $("body").text(text);
 }
 
 function parseXml(xml) {
@@ -125,38 +126,36 @@ function getLinks(xml_data, nodes) {
 }
 
 async function initialize() {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const response = await fetch(window.location.origin + '/api/model-xml/' + urlParams.get('model_id'));
-        if(response.ok) {
-            var response_ = await response.text();
-            var dom_ = parseXml(response_);
-            xml_data = xmlToJson(dom_);
-            var nodes_ = getNodes(xml_data);
-            var links_ = getLinks(xml_data, nodes_);
-            
-            // Main data container
-            data = { nodes: nodes_, links: links_ };
+    const urlParams = new URLSearchParams(window.location.search);
+    if(!urlParams.get('model_id')) {
+        throw "This module works only if called from another module";
+    }
+    const response = await fetch(window.location.origin + '/api/model-xml/' + urlParams.get('model_id'));
+    if(response.ok) {
+        var response_ = await response.text();
+        var dom_ = parseXml(response_);
+        xml_data = xmlToJson(dom_);
+        var nodes_ = getNodes(xml_data);
+        var links_ = getLinks(xml_data, nodes_);
+        
+        // Main data container
+        data = { nodes: nodes_, links: links_ };
 
-            // Canvas for all nodes.
-            canvas = d3.select("#canvas");
-            container = canvas.append("g");
-            
-            zoom = d3.zoom().scaleExtent([minZoom, maxZoom]).on("zoom", function () {
-              container.attr("transform", d3.event.transform);
-            });
-            canvas.call(zoom);
-            
-            // Move to [0, 0]
-            box = canvas.node().getBoundingClientRect();
-            zoom.translateBy(canvas, box.width/ 2, box.height / 2);
-        }
-        else
-            throw response;
+        // Canvas for all nodes.
+        canvas = d3.select("#canvas");
+        container = canvas.append("g");
+        
+        zoom = d3.zoom().scaleExtent([minZoom, maxZoom]).on("zoom", function () {
+          container.attr("transform", d3.event.transform);
+        });
+        canvas.call(zoom);
+        
+        // Move to [0, 0]
+        box = canvas.node().getBoundingClientRect();
+        zoom.translateBy(canvas, box.width/ 2, box.height / 2);
     }
-    catch(e) {
-        errorHandler(e);
-    }
+    else
+        throw response;
 }
     
 
@@ -164,7 +163,7 @@ $(document).ready( function () {
     var promise_ = initialize();
     promise_.then(function() {
         redraw();
-    });
+    }).catch(e => errorHandler(e));
 });
 
 // Vertical size after before-draw

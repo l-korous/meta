@@ -39,14 +39,14 @@ function getApiQueryString() {
 
 <xsl:for-each select="columns/column[@referenced_table_name != '']" >
 function getLinks<xsl:value-of select="@column_name" />ApiUrl(item) {
-    var toReturn = 'http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$table_name" />?';
+    var toReturn = '/api/master/<xsl:value-of select="$table_name" />?';
     toReturn += 'FilterBy[<xsl:value-of select="position() - 1"/>][col]=<xsl:value-of select="@column_name" /><xsl:text disable-output-escaping="yes">&amp;FilterBy</xsl:text>[<xsl:value-of select="position() - 1"/>][regex]=';
     toReturn += item.<xsl:value-of select="@referenced_column_name" /><xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes"> + '&amp;'</xsl:text></xsl:if>;
 return toReturn;
 }
 
 function getPrimaryRefLink<xsl:value-of select="@column_name" />AppUrl(linkedItem) {
-    var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$table_name" />.html?';
+    var toReturn='/app/<xsl:value-of select="$table_name" />.html?';
     <xsl:for-each select="//tables/table[@table_name=$table_name]/columns/column[@is_primary_key=1]">
         toReturn += '<xsl:value-of select="@column_name" />=';
         toReturn += linkedItem.<xsl:value-of select="@column_name" /><xsl:if test="position() != last()"><xsl:text disable-output-escaping="yes">+ '&amp;'</xsl:text></xsl:if>;
@@ -55,7 +55,7 @@ function getPrimaryRefLink<xsl:value-of select="@column_name" />AppUrl(linkedIte
 }
 
 function getNewRefLink<xsl:value-of select="@column_name" />AppUrl(linkedItem) {
-    var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$table_name" />.html?new=1';
+    var toReturn='/app/<xsl:value-of select="$table_name" />.html?new=1';
     
     Object.entries(linkedItem).forEach(entry =<xsl:text disable-output-escaping="yes">&gt;</xsl:text> {
         let key = entry[0];
@@ -67,14 +67,14 @@ function getNewRefLink<xsl:value-of select="@column_name" />AppUrl(linkedItem) {
 }
 
 function getRefLink<xsl:value-of select="@column_name" />ApiUrl(linkedItem) {
-    var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$table_name" />';
+    var toReturn='/api/master/<xsl:value-of select="$table_name" />';
     toReturn += '/' +  item.<xsl:value-of select="@referenced_column_name" />;
     return toReturn;
 }
 </xsl:for-each>
 
 function getLink<xsl:value-of select="$table_name" />(item) {
-    var toReturn='http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="$table_name" />';
+    var toReturn='/api/master/<xsl:value-of select="$table_name" />';
     <xsl:for-each select="columns/column[@is_primary_key=1]">
         toReturn += '/' +  item.<xsl:value-of select="@column_name" />;
     </xsl:for-each>
@@ -88,7 +88,7 @@ function saveNew() {
         </xsl:if></xsl:for-each>
     };
     meta_api_post(getLink<xsl:value-of select="$table_name" />(body), body, function() {
-       location = 'http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/app/<xsl:value-of select="$table_name" />.html';
+       location = '/app/<xsl:value-of select="$table_name" />.html';
     }, errorHandler);
 }
     
@@ -170,7 +170,7 @@ function loadCall() {
     
     var i = 1;
     var query = getApiQueryString();
-    meta_api_get('http://<xsl:value-of select="//configuration[@key='NodeJsHostname']/@value" />:<xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />/api/master/<xsl:value-of select="@table_name" />' + query, function(item) {
+    meta_api_get('/api/master/<xsl:value-of select="@table_name" />' + query, function(item) {
         var newElement = $(document.getElementById("flex").appendChild(document.getElementById("entry-dummy").cloneNode(true)));
         newElement.attr("id", "entry" + i);
         
