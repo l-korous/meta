@@ -55,7 +55,13 @@ app.get('/swagger.json', function(req, res) {
 });
 
 function getTimestamp (date) {
-    return date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds() + '.' + date.getMilliseconds();
+    return date.getFullYear()
+    + '-' + (date.getMonth() < 10 ? '0' : '') + date.getMonth()
+    + '-' + (date.getDate() < 10 ? '0' : '') + date.getDate()
+    + ' ' + (date.getHours() < 10 ? '0' : '') + date.getHours()
+    + ':' + (date.getMinutes() < 10 ? '0' : '') + date.getMinutes()
+    + ':' + (date.getSeconds() < 10 ? '0' : '') + date.getSeconds()
+    + '.' + (date.getMilliseconds() < 100 ? (date.getMilliseconds() < 10 ? '00' : '0') : '') + date.getMilliseconds();
 }
 
 app.use(correlator({header: "x-my-correlation-header-name"}));

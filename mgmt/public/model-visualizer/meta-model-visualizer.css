@@ -113,13 +113,13 @@ line.edge {
 }
 
 .referencedNode .dfTableName{
-    background:red ! important;
+    background:radial-gradient(20% 70% ellipse at 0% 50%, gold 40%, black) ! important;
 }
 
 .referencingNode .dfTableName{
-    background:green ! important;
+    background:radial-gradient(20% 70% ellipse at 100% 50%, gold 40%, black) ! important;
 }
 
 .highLightedNode .dfTableName{
-    background:blue ! important;
+    background:gold ! important;
 }

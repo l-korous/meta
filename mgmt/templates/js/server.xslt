@@ -16,7 +16,7 @@ var os = require('os');
 
 const appConfig = {
     version: '1.0.0',
-    port: <xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />
+    port: 80
 };
 
 var app = express();

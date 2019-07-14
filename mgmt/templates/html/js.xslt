@@ -122,7 +122,7 @@ function handleNew() {
         $("[name=new_<xsl:value-of select="@column_name" />]").keyup(function() {
             $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').empty();
             if($("[name=new_<xsl:value-of select="@column_name" />]").val().length <xsl:text disable-output-escaping="yes">&gt;</xsl:text> 0) {
-                meta_api_get('http://localhost:3000/api/master/<xsl:value-of select="@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=new_<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
+                meta_api_get('/api/master/<xsl:value-of select="@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=new_<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
                         $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').show();
                         $("[name=new_<xsl:value-of select="@column_name" />]").next('ul').append('<xsl:text disable-output-escaping="yes">&lt;</xsl:text>li \
                         onclick="$(\'[name=new_<xsl:value-of select="@column_name" />]\').val(\'' + item.<xsl:value-of select="@referenced_column_name" /> + '\'); $(\'[name=new_<xsl:value-of select="@column_name" />]\').next(\'ul\').hide();" \
@@ -194,7 +194,7 @@ function loadCall() {
             var i = $(this).attr('i');
             $(this).next('ul').empty();
             if($(this).val().length <xsl:text disable-output-escaping="yes">&gt;</xsl:text> 0) {
-                meta_api_get('http://localhost:3000/api/master/<xsl:value-of select="@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=" + i + "<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
+                meta_api_get('/api/master/<xsl:value-of select="@referenced_table_name" />?FilterBy[0][col]=name<xsl:text disable-output-escaping="yes">&amp;</xsl:text>FilterBy[0][regex]=%' + $("[name=" + i + "<xsl:value-of select="@column_name" />]").val() + '%', function(item) {
                         $("[name=" + i + "<xsl:value-of select="@column_name" />]").next('ul').show();
                         $("[name=" + i + "<xsl:value-of select="@column_name" />]").next('ul').append('<xsl:text disable-output-escaping="yes">&lt;</xsl:text>li i = ' + i + '\
                         onclick="$(\'[name=\' + $(this).attr(\'i\') + \'<xsl:value-of select="@column_name" />]\').val(\'' + item.<xsl:value-of select="@referenced_column_name" /> + '\'); $(\'[name=\' + $(this).attr(\'i\') + \'<xsl:value-of select="@column_name" />]\').next(\'ul\').hide();" \

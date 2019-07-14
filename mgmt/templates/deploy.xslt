@@ -25,7 +25,7 @@ fi
 tag="<xsl:value-of select="lower-case(//configuration[@key='DbName']/@value)" />-${PWD##*/}"
 (cd ${currentDir}/js &amp;&amp; docker build -t $tag --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') .)
 
-echo "docker save $tag &gt; docker-img-$tag.tar; echo -n docker-img-$tag.tar;" > save_docker_img.sh
+echo "docker save $tag | gzip -c &gt; docker-img-$tag.tar.gz; echo -n docker-img-$tag.tar.gz;" > save_docker_img.sh
 
 echo Deployment done.
 	</xsl:template>

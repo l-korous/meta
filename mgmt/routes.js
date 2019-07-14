@@ -35,10 +35,6 @@ exports.initialize = function (app, appConfig, Busboy, path, fs, shell) {
     function get_bin_path() {
         return path.join(__dirname, 'bin');
     }
-    
-    function get_docker_tar_url(docker_tar_name) {
-        return 'docker/' + docker_tar_name;
-    }
         
     function shell_run_script(script_name, fn) {
         if(process.platform === 'win32') {
@@ -141,6 +137,6 @@ exports.initialize = function (app, appConfig, Busboy, path, fs, shell) {
         var docker_image_name = docker_image_response.stdout;
         
         safe_shell('mv docker image', () => shell.mv(docker_image_name, get_full_docker_path()));
-        res.send({dockerUrl: get_docker_tar_url(docker_image_name)});
+        res.send({dockerUrl: docker_image_name});
     }));
 };

@@ -13,7 +13,7 @@ WORKDIR /var/meta
 
 COPY . .
 
-EXPOSE <xsl:value-of select="//configuration[@key='NodeJsPort']/@value" />
+EXPOSE 80
 
 ENTRYPOINT nodemon server.js
 	</xsl:template>
