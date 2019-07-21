@@ -39,7 +39,7 @@ var <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion = func
  *              "DB datatype: <xsl:value-of select="meta:datatype_to_sql(@datatype)" /><xsl:if test="@is_primary_key = 1"> | PRIMARY KEY</xsl:if><xsl:if test="@is_unique = 1"> | UNIQUE</xsl:if><xsl:if test="@is_required = 0"> | REQUIRED</xsl:if>"
  *      </xsl:for-each>
  *
- * /api/{branch}/<xsl:value-of select="$table_name" />:
+ * /api/data/{branch}/<xsl:value-of select="$table_name" />:
  *   get:
  *     tags:
  *       - <xsl:value-of select="$table_name" />
@@ -68,7 +68,7 @@ var <xsl:value-of select="$table_name" />_field_to_js_datatype_conversion = func
  *         schema:
  *           $ref: '#/definitions/<xsl:value-of select="$table_name" />'
  */
-app.get("/api/:branch/<xsl:value-of select="$table_name" />", function(req , res) {          
+app.get("/api/data/:branch/<xsl:value-of select="$table_name" />", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     request.input('jsonParams', sql.NVarChar, JSON.stringify(qs.parse(req.query)) || '{}');
@@ -89,7 +89,7 @@ app.get("/api/:branch/<xsl:value-of select="$table_name" />", function(req , res
 
 /**
  * @swagger
- * /api/{branch}/<xsl:value-of select="$table_name" /><xsl:for-each select="columns/column[@is_primary_key=1]">/{<xsl:value-of select="@column_name" />}</xsl:for-each>:
+ * /api/data/{branch}/<xsl:value-of select="$table_name" /><xsl:for-each select="columns/column[@is_primary_key=1]">/{<xsl:value-of select="@column_name" />}</xsl:for-each>:
  *   get:
  *     tags:
  *       - <xsl:value-of select="$table_name" />
@@ -195,7 +195,7 @@ app.get("/api/:branch/<xsl:value-of select="$table_name" />", function(req , res
  *       200:
  *         description: Successfully deleted
  */
-app.get("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
+app.get("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     <xsl:for-each select="columns/column[@is_primary_key=1]">
@@ -214,7 +214,7 @@ app.get("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select
         }
     });
 });
-app.delete("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
+app.delete("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     <xsl:for-each select="columns/column[@is_primary_key=1]">
@@ -233,7 +233,7 @@ app.delete("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each sel
         }
     });
 });
-app.post("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
+app.post("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     <xsl:for-each select="columns/column[@is_primary_key=1]">
@@ -258,7 +258,7 @@ app.post("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each selec
         }
     });
 });
-app.put("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
+app.put("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select="columns/column[@is_primary_key=1]">:<xsl:value-of select="@column_name" /><xsl:if test="position() != last()">/</xsl:if></xsl:for-each>", function(req , res) {          
     const request = new sql.Request(pool);
     request.input('branch_name', sql.NVarChar, req.params['branch']);
     <xsl:for-each select="columns/column[@is_primary_key=1]">
@@ -287,7 +287,7 @@ app.put("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select
 
 /**
  * @swagger
- * /api/{branch}/bulk-csv/<xsl:value-of select="$table_name" />:
+ * /api/data/{branch}/bulk-csv/<xsl:value-of select="$table_name" />:
  *   post:
  *     tags:
  *       - <xsl:value-of select="$table_name" />
@@ -333,7 +333,7 @@ app.put("/api/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each select
  *         description: 'OK'
 
  */
-app.post("/api/:branch/bulk-csv/<xsl:value-of select="$table_name" />", function(req , res) {
+app.post("/api/data/:branch/bulk-csv/<xsl:value-of select="$table_name" />", function(req , res) {
     var busboy = new Busboy({ headers: req.headers });
     var full_path = '';
     

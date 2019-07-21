@@ -8,24 +8,24 @@
 set -e
 currentDir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; pwd )"
 
+# Deploy DB
+${currentDir}/sql/deploy_mssql.sh
+
 # For development only
 if [[ "$OSTYPE" != "linux-gnu" ]]; then
     PATH=$PATH:"/c/Program Files/Docker/Docker/Resources/bin"
 fi
 
-# Deploy DB
-${currentDir}/sql/deploy_mssql.sh
-
-# Create Kafka topics, Confluent plugins / scanners
+# For production only
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
-	${currentDir}/kafka/deploy_kafka.sh
+    # Create Kafka topics, Confluent plugins / scanners
+    ${currentDir}/kafka/deploy_kafka.sh
+    
+    # Create a container with Node.js app
+    tag="<xsl:value-of select="lower-case(//configuration[@key='DbName']/@value)" />-${PWD##*/}"
+    (cd ${currentDir}/js &amp;&amp; docker build -t $tag --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') .)
+    echo "docker save $tag | gzip -c &gt; docker-img-$tag.tar.gz; echo -n docker-img-$tag.tar.gz;" > save_docker_img.sh
 fi
-
-# Create a container with Node.js app
-tag="<xsl:value-of select="lower-case(//configuration[@key='DbName']/@value)" />-${PWD##*/}"
-(cd ${currentDir}/js &amp;&amp; docker build -t $tag --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') .)
-
-echo "docker save $tag | gzip -c &gt; docker-img-$tag.tar.gz; echo -n docker-img-$tag.tar.gz;" > save_docker_img.sh
 
 echo Deployment done.
 	</xsl:template>

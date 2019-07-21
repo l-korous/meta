@@ -49,7 +49,7 @@ BEGIN
     BEGIN TRY
         SELECT column_name, column_order, table_name, datatype_name, is_primary_key, is_unique, is_required, referenced_table_name, referenced_column_name, on_delete FROM meta.[column]
         WHERE (@table_name = '' OR table_name = @table_name) and model_version = (select max(model_version) from meta.model_version)
-        ORDER BY column_order;
+        ORDER BY table_name, column_order;
     END TRY
     BEGIN CATCH
     END CATCH

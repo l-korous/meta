@@ -1,178 +1,418 @@
 exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
-
-/**
- * @swagger
- * definitions:
- *   Branch:
- *     properties:
- *      branch_name:
- *          type:
- *              string
- *          description:
- *              "DB datatype: NVARCHAR(255) | PRIMARY KEY"
- *      start_master_version_name:
- *          type:
- *              string
- *          description:
- *              "Reference to Version | The (closed) Version in the master branch where this Branch branched from | DB datatype: NVARCHAR(255)"
- *      last_closed_version_name:
- *          type:
- *              string
- *          description:
- *              "Reference to Version | The last closed Version in this branch | DB datatype: NVARCHAR(255)"
- *      current_version_name:
- *          type:
- *              string
- *          description:
- *              "Reference to Version | The current Version in this Branch | DB datatype: NVARCHAR(255)"
- *   Version:
- *     properties:
- *      version_name:
- *          type:
- *              string
- *          description:
- *              "DB datatype: NVARCHAR(255) | PRIMARY KEY"
- *      branch_name:
- *          type:
- *              string
- *          description:
- *              "Reference to Branch | The Branch where this Version is worked on | DB datatype: NVARCHAR(255)"
- *      previous_version_name:
- *          type:
- *              string
- *          description:
- *              "Reference to Version | The previous Version in the history of changes (similar to a commit in Git) | PRIMARY KEY"
- *      version_order:
- *          type:
- *              number
- *          description:
- *              "Global order of Versions (across all Branches) | DB datatype: NVARCHAR(255)"
- *      version_status:
- *          type:
- *              string
- *          description:
- *              "Status (OPEN | CLOSED | MERGING) of this Version | DB datatype: NVARCHAR(255)"
- *      
- * /api/branch:
- *   get:
- *     tags:
- *       - Branch
- *     description: Returns all Branches
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: Array of Branch records
- *         schema:
- *           $ref: '#/definitions/Branch'
- *
- * /api/version:
- *   get:
- *     tags:
- *       - Version
- *     description: Returns all Versions
- *     parameters:
- *       - name: branch
- *         description: name of the branch (e.g. 'master')
- *         in: query
- *         required: false
- *         type: string
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: Array of Version records
- *         schema:
- *           $ref: '#/definitions/Version'
- *
- * /api/branch/{branch_name}:
- *   post:
- *     tags:
- *       - Branch
- *     description: Creates a new Branch
- *     parameters:
- *       - name: branch_name
- *         description: name of the branch (e.g. 'DEV-123')
- *         in: path
- *         required: true
- *         type: string
-  *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: The created Branch record
- *         schema:
- *           $ref: '#/definitions/Branch'
- *
- * /api/{branch}/version/{version_name}:
- *   post:
- *     tags:
- *       - Version
- *     description: Creates a new version
- *     parameters:
- *       - name: version_name
- *         description: "name of the created version (e.g. 'DEV-123: add first batch')"
- *         in: path
- *         required: true
- *         type: string
- *         example: "DEV-123: add first batch"
- *       - name: branch
- *         description: name of the branch (e.g. 'DEV-123')
- *         in: path
- *         required: true
- *         type: string
- *         example: "DEV-123"
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: The created Version record
- *         schema:
- *           $ref: '#/definitions/Version'
- *
- * /api/truncate_repository:
- *   get:
- *     description: Wipes out entire repository, leaving only master Branch and no Version / data
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: successful truncation
- */
-app.post("/api/:branch/version/:version_name", function(req , res) {          
-    const request = new sql.Request(pool);
-    if(req.body['branch'])
+    /**
+        * @swagger
+        * definitions:
+        *   Branch:
+        *     properties:
+        *      branch_name:
+        *          type:
+        *              string
+        *          description:
+        *              "DB datatype: NVARCHAR(255) | PRIMARY KEY"
+        *      start_master_version_name:
+        *          type:
+        *              string
+        *          description:
+        *              "Reference to Version | The (closed) Version in the master branch where this Branch branched from | DB datatype: NVARCHAR(255)"
+        *      last_closed_version_name:
+        *          type:
+        *              string
+        *          description:
+        *              "Reference to Version | The last closed Version in this branch | DB datatype: NVARCHAR(255)"
+        *      current_version_name:
+        *          type:
+        *              string
+        *          description:
+        *              "Reference to Version | The current Version in this Branch | DB datatype: NVARCHAR(255)"
+        * /api/branch:
+        *   get:
+        *     tags:
+        *       - Branch
+        *     description: Returns all Branches
+        *     produces:
+        *       - application/json
+        *     responses:
+        *       200:
+        *         description: Array of Branch records
+        *         schema:
+        *           $ref: '#/definitions/Branch'
+        *   delete:
+        *     tags:
+        *       - Branch
+        *     description: Deletes an existing branch
+        *     parameters:
+        *       - name: branch_name
+        *         description: name of the branch (e.g. 'DEV-123')
+        *         in: path
+        *         required: true
+        *         type: string
+        *         example: "DEV-123"
+        *     produces:
+        *       - application/json
+        *     responses:
+        *       200:
+        *         description: (empty)
+    */
+     app.delete("/api/branch/:branch_name", function(req , res) {          
+        const request = new sql.Request(pool);    
+        request.input('branch_name', sql.NVarChar, req.params['branch_name']);
+        request.execute('meta.delete_branch', (err, result) => {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
+            }
+        });
+    });
+    
+    /**
+    * @swagger
+    *
+    * /api/branch/{branch_name}:
+    *   post:
+    *     tags:
+    *       - Branch
+    *     description: Creates a new Branch
+    *     parameters:
+    *       - name: branch_name
+    *         description: name of the branch (e.g. 'DEV-123')
+    *         in: path
+    *         required: true
+    *         type: string
+    *     produces:
+    *       - application/json
+    *     responses:
+    *       200:
+    *         description: The created Branch record
+    *         schema:
+    *           $ref: '#/definitions/Branch'
+    */
+     app.post("/api/branch/:branch_name", function(req , res) {          
+        const request = new sql.Request(pool);
+        request.input('branch_name', sql.NVarChar, req.params['branch_name']);
+        request.execute('meta.create_branch', (err, result) => {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
+            }
+        });
+    });
+     
+     /**
+     * @swagger
+     * definitions:
+     *   Version:
+     *     properties:
+     *      version_name:
+     *          type:
+     *              string
+     *          description:
+     *              "DB datatype: NVARCHAR(255) | PRIMARY KEY"
+     *      branch_name:
+     *          type:
+     *              string
+     *          description:
+     *              "Reference to Branch | The Branch where this Version is worked on | DB datatype: NVARCHAR(255)"
+     *      previous_version_name:
+     *          type:
+     *              string
+     *          description:
+     *              "Reference to Version | The previous Version in the history of changes (similar to a commit in Git) | PRIMARY KEY"
+     *      version_order:
+     *          type:
+     *              number
+     *          description:
+     *              "Global order of Versions (across all Branches) | DB datatype: NVARCHAR(255)"
+     *      version_status:
+     *          type:
+     *              string
+     *          description:
+     *              "Status (OPEN | CLOSED | MERGING) of this Version | DB datatype: NVARCHAR(255)"
+     *      
+     * /api/branch/{branch}/version:
+     *   get:
+     *     tags:
+     *       - Version
+     *     description: Returns all Versions
+     *     parameters:
+     *       - name: branch
+     *         description: name of the branch (e.g. 'master')
+     *         in: query
+     *         required: false
+     *         type: string
+     *     produces:
+     *       - application/json
+     *     responses:
+     *       200:
+     *         description: Array of Version records
+     *         schema:
+     *           $ref: '#/definitions/Version'
+     *
+     * /api/branch/{branch}/version/{version_name}:
+     *   post:
+     *     tags:
+     *       - Version
+     *     description: Creates a new version
+     *     parameters:
+     *       - name: version_name
+     *         description: "name of the created version (e.g. 'DEV-123: add first batch')"
+     *         in: path
+     *         required: true
+     *         type: string
+     *         example: "DEV-123: add first batch"
+     *       - name: branch
+     *         description: name of the branch (e.g. 'DEV-123')
+     *         in: path
+     *         required: true
+     *         type: string
+     *         example: "DEV-123"
+     *     produces:
+     *       - application/json
+     *     responses:
+     *       200:
+     *         description: The created Version record
+     *         schema:
+     *           $ref: '#/definitions/Version'
+     */
+    app.post("/api/branch/:branch/version/:version_name", function(req , res) {          
+        const request = new sql.Request(pool);
         request.input('branch_name', sql.NVarChar, req.params['branch']);
-    request.input('version_name', sql.NVarChar, req.params['version_name']);
-    request.execute('meta.create_version', (err, result) => {
-        if(err) {
-            console.log(err);
-            res.status(400).send(err);
-        }
-        else {
-            if(result.recordset) {
-                res.send(result.recordset);
+        request.input('version_name', sql.NVarChar, req.params['version_name']);
+        request.execute('meta.create_version', (err, result) => {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
             }
-            else
-                res.send(result.output);
-        }
-    });
-});
-
-app.get("/api/truncate_repository", function(req , res) {          
-    const request = new sql.Request(pool);
-    request.execute('meta.truncate_repository', (err, result) => {
-        if(err) {
-            console.log(err);
-            res.status(400).send(err);
-        }
-        else {
-            if(result.recordset) {
-                res.send(result.recordset);
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
             }
-            else
-                res.send(result.output);
-        }
+        });
     });
-});
+    
+    /**
+    * @swagger
+    * /api/branch/{branch}/close-version/{version}:
+    *   get:
+    *     tags:
+    *       - Version
+    *     description: Closes an existing version
+    *     parameters:
+    *       - name: version
+    *         description: "name of the version (e.g. 'DEV-123: add first batch')"
+    *         in: path
+    *         required: true
+    *         type: string
+    *         example: "DEV-123: add first batch"
+    *       - name: branch
+    *         description: name of the branch (e.g. 'DEV-123')
+    *         in: path
+    *         required: true
+    *         type: string
+    *         example: "DEV-123"
+    *     produces:
+    *       - application/json
+    *     responses:
+    *       200:
+    *         description: The closed Version record
+    *         schema:
+    *           $ref: '#/definitions/Version'
+    */
+     app.get("/api/branch/:branch/close-version/:version", function(req , res) {          
+        const request = new sql.Request(pool);
+        request.input('branch_name', sql.NVarChar, req.params['branch']);
+        request.input('version_name', sql.NVarChar, req.params['version']);
+        request.execute('meta.close_version', (err, result) => {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
+            }
+        });
+    });
+     
+    /**
+    * @swagger
+    * /api/truncate-repository:
+    *   get:
+    *     tags:
+    *       - Repository
+    *     description: Wipes out entire repository, leaving only master Branch and no Version / data
+    *     produces:
+    *       - application/json
+    *     responses:
+    *       200:
+    *         description: successful truncation
+    */
+    app.get("/api/truncate-repository", function(req , res) {          
+        const request = new sql.Request(pool);
+        request.execute('meta.truncate_repository', (err, result) => {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
+            }
+        });
+    });
+     
+    /**
+    * @swagger
+    * definitions:
+    *   Table:
+    *     properties:
+    *      table_name:
+    *          type:
+    *              string
+    *          description:
+    *              "Name of the table"
+    * /api/table:
+    *   get:
+    *     tags:
+    *       - Repository
+    *     description: Lists all tables
+    *     produces:
+    *       - application/json
+    *     responses:
+     *       200:
+     *         description: Array of Table records
+     *         schema:
+     *           $ref: '#/definitions/Table'
+    */
+    app.get("/api/table", function(req , res) {          
+        const request = new sql.Request(pool);
+        request.execute('meta.get_tables', (err, result) => {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
+            }
+        });
+    });
+     
+    /**
+    * @swagger
+    * definitions:
+    *   Column:
+    *     properties:
+    *      column_name:
+    *          type:
+    *              string
+    *          description:
+    *              Name of the column
+    *      column_order:
+    *          type:
+    *              integer
+    *          description:
+    *              Order of the column within its table
+    *      table_name:
+    *          type:
+    *              string
+    *          description:
+    *              Name of the table
+    *      datatype_name:
+    *          type:
+    *              string
+    *          description:
+    *              Name of the datatype of the column
+    *      is_primary_key:
+    *          type:
+    *              boolean
+    *          description:
+    *              If the column is the primary key in the table
+    *      is_unique:
+    *          type:
+    *              boolean
+    *          description:
+    *              If the column must have unique values within the table
+    *      is_required:
+    *          type:
+    *              boolean
+    *          description:
+    *              If the column is required to have value
+    *      referenced_table_name:
+    *          type:
+    *              string
+    *          description:
+    *              If the column is a foreign key, then name of the table it references
+    *      referenced_column_name:
+    *          type:
+    *              string
+    *          description:
+    *              If the column is a foreign key, then name of the column it references
+    *      on_delete:
+    *          type:
+    *              string
+    *          description:
+    *              If the column is a foreign key, then behavior if the referenced record is deleted
+    * /api/column:
+    *   get:
+    *     tags:
+    *       - Repository
+    *     description: Lists all columns for a particular table
+    *     parameters:
+    *       - name: table
+    *         description: "name of the table"
+    *         in: path
+    *         required: true
+    *         type: string
+    *         example: "myTable"
+    *     produces:
+    *       - application/json
+    *     responses:
+     *       200:
+     *         description: Array of Column records
+     *         schema:
+     *           $ref: '#/definitions/Column'
+    */
+    app.get("/api/table/:table/column", function(req , res) {          
+        const request = new sql.Request(pool);
+        request.input('table_name', sql.NVarChar, req.params['table']);
+        request.execute('meta.get_columns', (err, result) => {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
+            }
+        });
+    });
 };

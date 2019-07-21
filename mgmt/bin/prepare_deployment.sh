@@ -24,7 +24,7 @@ echo Delete target
 rm -rf ${targetPath}*
 
 # All templates for the target technology
-for ext in sql kafka js html
+for ext in sql js html
 do
     echo "Generating artefacts - ${ext}"
     for f in $(find ${templatesPath}${ext} -name "*.xslt")
@@ -39,7 +39,7 @@ do
 done
 
 # Deployment etc. templates that require custom handling
-java -jar ${metaHome}mgmt/bin/saxon9he.jar -s:$xmlModelPath -xsl:${metaHome}mgmt/templates/deploy.xslt -o:${targetPath}/sql/deploy.sh
+java -jar ${metaHome}mgmt/bin/saxon9he.jar -s:$xmlModelPath -xsl:${metaHome}mgmt/templates/deploy.xslt -o:${targetPath}/deploy.sh
 java -jar ${metaHome}mgmt/bin/saxon9he.jar -s:$xmlModelPath -xsl:${metaHome}mgmt/templates/deploy_mssql.xslt -o:${targetPath}/sql/deploy_mssql.sh
 
 echo Copying resources
