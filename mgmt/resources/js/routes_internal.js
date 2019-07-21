@@ -208,7 +208,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
     
     /**
     * @swagger
-    * /api/branch/{branch}/close-version/{version}:
+    * /api/branch/{branch}/close_version/{version}:
     *   get:
     *     tags:
     *       - Version
@@ -234,7 +234,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
     *         schema:
     *           $ref: '#/definitions/Version'
     */
-     app.get("/api/branch/:branch/close-version/:version", function(req , res) {          
+     app.get("/api/branch/:branch/close_version/:version", function(req , res) {          
         const request = new sql.Request(pool);
         request.input('branch_name', sql.NVarChar, req.params['branch']);
         request.input('version_name', sql.NVarChar, req.params['version']);
@@ -266,9 +266,9 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
     *       200:
     *         description: successful truncation
     */
-    app.get("/api/truncate-repository", function(req , res) {          
+    app.get("/api/truncate_repository", function(req , res) {          
         const request = new sql.Request(pool);
-        request.execute('meta.truncate_repository', (err, result) => {
+        request.execute('dbo.truncate_repository', (err, result) => {
             if(err) {
                 console.log(err);
                 res.status(400).send(err);

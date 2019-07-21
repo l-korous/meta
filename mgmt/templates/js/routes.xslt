@@ -287,7 +287,7 @@ app.put("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each s
 
 /**
  * @swagger
- * /api/data/{branch}/bulk-csv/<xsl:value-of select="$table_name" />:
+ * /api/data/{branch}/bulk_csv/<xsl:value-of select="$table_name" />:
  *   post:
  *     tags:
  *       - <xsl:value-of select="$table_name" />
@@ -333,7 +333,7 @@ app.put("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each s
  *         description: 'OK'
 
  */
-app.post("/api/data/:branch/bulk-csv/<xsl:value-of select="$table_name" />", function(req , res) {
+app.post("/api/data/:branch/bulk_csv/<xsl:value-of select="$table_name" />", function(req , res) {
     var busboy = new Busboy({ headers: req.headers });
     var full_path = '';
     

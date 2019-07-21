@@ -5,6 +5,7 @@
 	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
+const correlator = require('express-correlation-id');
 var express = require("express");
 var bodyParser = require("body-parser");
 var sql = require("mssql");
@@ -76,6 +77,30 @@ app.get('/swagger.json', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerSpec);
 });
+
+function getTimestamp (date) {
+    return date.getFullYear()
+    + '-' + (date.getMonth() &lt; 10 ? '0' : '') + date.getMonth()
+    + '-' + (date.getDate() &lt; 10 ? '0' : '') + date.getDate()
+    + ' ' + (date.getHours() &lt; 10 ? '0' : '') + date.getHours()
+    + ':' + (date.getMinutes() &lt; 10 ? '0' : '') + date.getMinutes()
+    + ':' + (date.getSeconds() &lt; 10 ? '0' : '') + date.getSeconds()
+    + '.' + (date.getMilliseconds() &lt; 100 ? (date.getMilliseconds() &lt; 10 ? '00' : '0') : '') + date.getMilliseconds();
+}
+
+app.use(correlator({header: "x-my-correlation-header-name"}));
+
+const logRequestStartFinish = (req, res, next) => {
+    console.info(getTimestamp(new Date()) + ' |' + req.correlationId() + '| ' + req.method + ' ' + req.originalUrl);
+
+    res.on('finish', () => {
+        console.info(getTimestamp(new Date()) + ' |' + req.correlationId() + '| ' + res.statusCode + ' ' + res.statusMessage);
+    })
+
+    next();
+}
+
+app.use(logRequestStartFinish);
 
 app.use(express.static('public'))
 var routes = require('./routes.js');
