@@ -14,7 +14,7 @@ IF OBJECT_ID ('dbo.bulk_insert_csv_<xsl:value-of select="@table_name" />') IS NO
 GO
 
 create PROCEDURE dbo.bulk_insert_csv_<xsl:value-of select="@table_name" />
-(@filepath nvarchar(max), @is_full_import bit = 0, @branch_name NVARCHAR(255) = 'master', @firstrow int = 2, @fieldterminator nvarchar(1) = ',', @rowterminator nvarchar(3) = '\n')
+(@filepath nvarchar(max), @is_full_import bit = 0, @branch_name NVARCHAR(255) = 'master', @firstrow int = 2, @fieldterminator nvarchar(1) = ',', @rowterminator nvarchar(3) = '\n', @additional_options nvarchar(255) = '')
 AS
 BEGIN
 	SET XACT_ABORT, NOCOUNT ON
@@ -48,7 +48,7 @@ BEGIN
 
 		-- This may fail (file may not exist)
 		declare @sql varchar(max)
-		set @sql = 'BULK INSERT #loadTable FROM ''' + @filepath + ''' WITH ( FIRSTROW = ' + cast(@firstrow AS nvarchar(255)) + ', FIELDTERMINATOR = ''' + @fieldterminator + ''', ROWTERMINATOR = ''' + @rowterminator + '''  );'
+		set @sql = 'BULK INSERT #loadTable FROM ''' + @filepath + ''' WITH ( FIRSTROW = ' + cast(@firstrow AS nvarchar(255)) + ', FIELDTERMINATOR = ''' + @fieldterminator + ''', ROWTERMINATOR = ''' + @rowterminator + ''', ' + @additional_options + ');'
 		exec (@sql);
         	   
 		CREATE TABLE #tempTable (

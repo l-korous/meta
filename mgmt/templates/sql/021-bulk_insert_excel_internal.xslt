@@ -5,7 +5,7 @@
 	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
     <xsl:strip-space elements="*"/>
     <xsl:template match="tables">
-    
+     
 use <xsl:value-of select="//configuration[@key='DbName']/@value" />
 GO
 
@@ -14,7 +14,7 @@ IF OBJECT_ID ('meta.bulk_insert_excel_internal') IS NOT NULL
 GO
 
 create PROCEDURE meta.bulk_insert_excel_internal
-(@random_string nvarchar(max), @branch_name NVARCHAR(255) = 'master')
+(@dirpath nvarchar(max), @random_string nvarchar(max), @branch_name NVARCHAR(255) = 'master')
 AS
 BEGIN
 	SET XACT_ABORT, NOCOUNT ON
@@ -23,11 +23,11 @@ BEGIN
     BEGIN TRANSACTION
 		-- disable all constraints
         EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT all"
-        DECLARE @tableName nvarchar(255)
-    
+        DECLARE @filepath nvarchar(max)
+        
     <xsl:for-each select="//table" >
-        SET @tableName = 'i_' + @random_string + '<xsl:value-of select="@table_name" />'
-        EXEC dbo.bulk_insert_<xsl:value-of select="@table_name" /> @tableName, 1, @branch_name
+        SET @filepath = @dirpath + @random_string + '<xsl:value-of select="@table_name" />' + '.csv'
+        EXEC dbo.bulk_insert_csv_<xsl:value-of select="@table_name" /> @filepath, 1, @branch_name, 8, ',', '\n', 'FORMAT=''CSV'', FIELDQUOTE = ''"'', TABLOCK, CODEPAGE=65001'
     </xsl:for-each>
         
         -- enable all constraints
