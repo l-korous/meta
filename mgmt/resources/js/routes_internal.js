@@ -415,4 +415,76 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
             }
         });
     });
+    
+    /**
+        * @swagger
+        * /api/upload_file:
+        *   post:
+        *     tags:
+        *       - Utility
+        *     description: Uploads a file to tmp directory
+        *     responses:
+        *       200:
+        *         description: (empty)
+    */
+    app.post("/api/upload_file", function(req , res) {  
+        var busboy = new Busboy({ headers: req.headers });
+        var full_path = '';
+        
+        busboy.on('file', function(fieldname, file, filename, encoding, mimetype) {
+          full_path = path.join(__dirname, 'tmp', filename);
+          file.pipe(fs.createWriteStream(full_path));
+        });
+        
+        busboy.on('finish', function() {
+          res.send();
+        });
+        return req.pipe(busboy);
+    });
+    
+    /**
+        * @swagger
+        * /api/bulk_insert_excel_internal:
+        *   get:
+        *     tags:
+        *       - Repository
+        *     description: Internal function to insert data from Excel
+        *     responses:
+        *       200:
+        *         description: (empty)
+    */
+    app.get("/api/bulk_insert_excel_internal", function(req , res) {          
+        const request = new sql.Request(pool);
+        request.input('file_root', sql.NVarChar, path.join(__dirname, 'tmp', req.query['random_string']));
+        request.execute('meta.bulk_insert_excel_internal', (err, result) => {
+            if(err) {
+                console.log(err);
+                res.status(400).send(err);
+            }
+            else {
+                if(result.recordset) {
+                    res.send(result.recordset);
+                }
+                else
+                    res.send(result.output);
+                
+                fs.readdir(path.join(__dirname, 'tmp'), function (err, files) {
+                    if (err) {
+                        return console.log('Unable to scan directory: ' + err);
+                    }
+                    
+                    files.forEach(function (file) {
+                        if(file.startsWith(req.query['random_string'])) {
+                            fs.unlink(path.join(__dirname, 'tmp', file), (err) => {
+                              if (err) {
+                                console.error(err)
+                                return
+                              }
+                            });
+                        }
+                    });
+                });
+            }
+        });
+    });
 };

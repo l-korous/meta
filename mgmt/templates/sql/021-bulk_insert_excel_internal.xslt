@@ -14,7 +14,7 @@ IF OBJECT_ID ('meta.bulk_insert_excel_internal') IS NOT NULL
 GO
 
 create PROCEDURE meta.bulk_insert_excel_internal
-(@dirpath nvarchar(max), @random_string nvarchar(max), @branch_name NVARCHAR(255) = 'master')
+(@file_root nvarchar(max), @branch_name NVARCHAR(255) = 'master')
 AS
 BEGIN
 	SET XACT_ABORT, NOCOUNT ON
@@ -26,7 +26,7 @@ BEGIN
         DECLARE @filepath nvarchar(max)
         
     <xsl:for-each select="//table" >
-        SET @filepath = @dirpath + @random_string + '<xsl:value-of select="@table_name" />' + '.csv'
+        SET @filepath = @file_root + '<xsl:value-of select="@table_name" />' + '.csv'
         EXEC dbo.bulk_insert_csv_<xsl:value-of select="@table_name" /> @filepath, 1, @branch_name, 8, ',', '\n', 'FORMAT=''CSV'', FIELDQUOTE = ''"'', TABLOCK, CODEPAGE=65001'
     </xsl:for-each>
         
