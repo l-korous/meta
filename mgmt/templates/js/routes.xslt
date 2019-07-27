@@ -82,7 +82,7 @@ app.get("/api/data/:branch/<xsl:value-of select="$table_name" />", function(req 
                 res.send(result.recordset);
             }
             else
-                res.send(result.output);
+                res.send(result.output == {} ? result.output : "success");
         }
     });
 });
@@ -210,7 +210,7 @@ app.get("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each s
                 res.send(result.recordset);
             }
             else
-                res.send(result.output);
+                res.send(result.output == {} ? result.output : "success");
         }
     });
 });
@@ -229,7 +229,7 @@ app.delete("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-eac
                 res.send(result.recordset);
             }
             else
-                res.send(result.output);
+                res.send(result.output == {} ? result.output : "success");
         }
     });
 });
@@ -254,7 +254,7 @@ app.post("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each 
                 res.send(result.recordset);
             }
             else
-                res.send(result.output);
+                res.send(result.output == {} ? result.output : "success");
         }
     });
 });
@@ -280,7 +280,7 @@ app.put("/api/data/:branch/<xsl:value-of select="$table_name" />/<xsl:for-each s
                 res.send(result.recordset);
             }
             else
-                res.send(result.output);
+                res.send(result.output == {} ? result.output : "success");
         }
     });
 });
@@ -365,7 +365,7 @@ app.post("/api/data/:branch/bulk_csv/<xsl:value-of select="$table_name" />", fun
                     res.send(result.recordset);
                 }
                 else
-                    res.send(result.output);
+                    res.send(result.output == {} ? result.output : "success");
             }
         });
     });

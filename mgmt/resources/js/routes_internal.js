@@ -66,7 +66,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
                     res.send(result.recordset);
                 }
                 else
-                    res.send(result.output);
+                    res.send(result.output == {} ? result.output : "success");
             }
         });
     });
@@ -106,7 +106,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
                     res.send(result.recordset);
                 }
                 else
-                    res.send(result.output);
+                    res.send(result.output == {} ? result.output : "success");
             }
         });
     });
@@ -201,7 +201,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
                     res.send(result.recordset);
                 }
                 else
-                    res.send(result.output);
+                    res.send(result.output == {} ? result.output : "success");
             }
         });
     });
@@ -209,7 +209,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
     /**
     * @swagger
     * /api/branch/{branch}/close_version/{version}:
-    *   get:
+    *   post:
     *     tags:
     *       - Version
     *     description: Closes an existing version
@@ -234,7 +234,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
     *         schema:
     *           $ref: '#/definitions/Version'
     */
-     app.get("/api/branch/:branch/close_version/:version", function(req , res) {          
+     app.post("/api/branch/:branch/close_version/:version", function(req , res) {          
         const request = new sql.Request(pool);
         request.input('branch_name', sql.NVarChar, req.params['branch']);
         request.input('version_name', sql.NVarChar, req.params['version']);
@@ -248,7 +248,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
                     res.send(result.recordset);
                 }
                 else
-                    res.send(result.output);
+                    res.send(result.output == {} ? result.output : "success");
             }
         });
     });
@@ -256,7 +256,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
     /**
     * @swagger
     * /api/truncate-repository:
-    *   get:
+    *   post:
     *     tags:
     *       - Repository
     *     description: Wipes out entire repository, leaving only master Branch and no Version / data
@@ -266,7 +266,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
     *       200:
     *         description: successful truncation
     */
-    app.get("/api/truncate_repository", function(req , res) {          
+    app.post("/api/truncate_repository", function(req , res) {          
         const request = new sql.Request(pool);
         request.execute('dbo.truncate_repository', (err, result) => {
             if(err) {
@@ -277,8 +277,9 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
                 if(result.recordset) {
                     res.send(result.recordset);
                 }
-                else
-                    res.send(result.output);
+                else {
+                    res.send(result.output == {} ? result.output : "success");
+                }
             }
         });
     });
@@ -318,7 +319,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
                     res.send(result.recordset);
                 }
                 else
-                    res.send(result.output);
+                    res.send(result.output == {} ? result.output : "success");
             }
         });
     });
@@ -411,7 +412,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
                     res.send(result.recordset);
                 }
                 else
-                    res.send(result.output);
+                    res.send(result.output == {} ? result.output : "success");
             }
         });
     });
@@ -445,7 +446,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
     /**
         * @swagger
         * /api/bulk_insert_excel_internal:
-        *   get:
+        *   post:
         *     tags:
         *       - Repository
         *     description: Internal function to insert data from Excel
@@ -453,7 +454,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
         *       200:
         *         description: (empty)
     */
-    app.get("/api/bulk_insert_excel_internal", function(req , res) {          
+    app.post("/api/bulk_insert_excel_internal", function(req , res) {          
         const request = new sql.Request(pool);
         request.input('file_root', sql.NVarChar, path.join(__dirname, 'tmp', req.query['random_string']));
         request.execute('meta.bulk_insert_excel_internal', (err, result) => {
@@ -466,7 +467,7 @@ exports.initialize = function (app, appConfig, sql, pool, Busboy, path, fs) {
                     res.send(result.recordset);
                 }
                 else
-                    res.send(result.output);
+                    res.send(result.output == {} ? result.output : "success");
                 
                 fs.readdir(path.join(__dirname, 'tmp'), function (err, files) {
                     if (err) {
