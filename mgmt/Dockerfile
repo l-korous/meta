@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM debian:stretch
 
 # Node.js
 RUN apt-get update
@@ -13,22 +13,21 @@ RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debia
 RUN apt-get update
 RUN apt-get install -y gzip docker-ce docker-ce-cli containerd.io
 
-RUN useradd -m meta && echo "meta:meta" | chpasswd && adduser meta sudo
-RUN mkdir -p /var/meta-mgmt && chown -R meta:meta /var/meta-mgmt && chmod 2777 /var/meta-mgmt
+RUN mkdir -p /var/meta && chmod 2777 /var/meta
 
 RUN npm install -g nodemon
 EXPOSE 4499
 
 WORKDIR /var/meta-mgmt
-COPY . .
+ADD bin bin
+ADD templates templates
+ADD public public
+COPY *.js ./
+COPY *.json ./
+RUN mkdir tmp
+RUN mkdir targets
 RUN npm install
 
-WORKDIR /var/meta-mgmt/resources/js
-RUN service docker start
-RUN sleep 1
-RUN docker build -t meta-app .
+CMD ["sh","-c","service docker start; nodemon server.js"]
 
-WORKDIR /var/meta-mgmt
-ENTRYPOINT nodemon server.js
-
-# correct execution: winpty docker run --privileged=true -it meta-mgmt:latest
+# correct execution: docker run --privileged=true -it meta-mgmt:latest

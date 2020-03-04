@@ -39,7 +39,7 @@ app.use(function (req, res, next) {
 const pool = new sql.ConnectionPool({
         user:'<xsl:value-of select="//configuration[@key='DbUser']/@value" />',
         password:'<xsl:value-of select="//configuration[@key='DbPassword']/@value" />',
-        server:'<xsl:value-of select="//configuration[@key='DbHostName']/@value" />',
+        server:'<xsl:value-of select="//configuration[@key='DbHostNameApp']/@value" />',
         database:'<xsl:value-of select="//configuration[@key='DbName']/@value" />',
         pool: {
             max: 10,

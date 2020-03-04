@@ -28,10 +28,6 @@ exports.initialize = function (app, appConfig, Busboy, path, fs, shell) {
         return path.join(__dirname, 'templates');
     }
     
-    function get_resources_path() {
-        return path.join(__dirname, 'resources', '*');
-    }
-    
     function get_bin_path() {
         return path.join(__dirname, 'bin');
     }

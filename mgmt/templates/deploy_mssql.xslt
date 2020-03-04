@@ -6,12 +6,8 @@
     <xsl:template match="configurations">
 #!/bin/bash
 # SQL credentials (! no quotes)
-<xsl:if test="//configuration[@key='UseEmbeddedDb']/@value = 1">
-sqlCredentials="-S localhost\\SQLEXPRESS"
-</xsl:if>
-<xsl:if test="//configuration[@key='UseEmbeddedDb']/@value = 0">
-sqlCredentials="-S <xsl:value-of select="//configuration[@key='DbHostName']/@value" /><xsl:if test="//configuration[@key='DbInstanceName']/@value != ''">\\<xsl:value-of select="//configuration[@key='DbInstanceName']/@value" /></xsl:if> -U <xsl:value-of select="//configuration[@key='DbUser']/@value" /> -P <xsl:value-of select="//configuration[@key='DbPassword']/@value" />"
-</xsl:if>
+sqlCredentials="-S <xsl:value-of select="//configuration[@key='DbHostNameMgmt']/@value" /><xsl:if test="//configuration[@key='DbInstanceName']/@value != ''">\\<xsl:value-of select="//configuration[@key='DbInstanceName']/@value" /></xsl:if> -U <xsl:value-of select="//configuration[@key='DbUser']/@value" /> -P <xsl:value-of select="//configuration[@key='DbPassword']/@value" />"
+
 #=================
 # For development only
 if [[ "$OSTYPE" != "linux-gnu" ]]; then

@@ -4,17 +4,11 @@
 	<xsl:output method="text" indent="no" encoding="UTF-8" omit-xml-declaration="yes" />
 	<xsl:strip-space elements="*"/>
     <xsl:template match="configurations">
-FROM lukaskorous/apps:meta-app
+#!/bin/bash
+set -e
 
-ARG BUILD_DATE
-LABEL org.label-schema.build-date=$BUILD_DATE
+docker stop $(docker ps -a -q --filter ancestor=<xsl:value-of select="lower-case(//configuration[@key='DbName']/@value)" />-${PWD##*/}) || :
 
-WORKDIR /var/meta
-
-COPY . .
-
-EXPOSE 80
-
-ENTRYPOINT nodemon server.js
+docker run -p80:80 <xsl:value-of select="lower-case(//configuration[@key='DbName']/@value)" />-${PWD##*/}:latest
 	</xsl:template>
 </xsl:stylesheet>
