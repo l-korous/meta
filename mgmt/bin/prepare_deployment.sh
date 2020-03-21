@@ -19,8 +19,6 @@ fi
 
 mkdir -p $targetPath
 
-echo Delete target
-rm -rf ${targetPath}*
 
 echo "Generating artefacts - DB"
 mkdir -p ${targetPath}db
@@ -63,6 +61,8 @@ java -jar ${metaHome}mgmt/bin/saxon9he.jar -s:$xmlModelPath -xsl:${metaHome}mgmt
 java -jar ${metaHome}mgmt/bin/saxon9he.jar -s:$xmlModelPath -xsl:${metaHome}mgmt/templates/Dockerfile.xslt -o:${targetPath}/app/Dockerfile
 
 echo Copying resources
+printf "."
 cp -r ${metaHome}mgmt/resources/* $targetPath
+echo ""
 
-echo Preparation successful, run deploy.sh.
+echo Preparation successful, run deploy.sh in ${targetPath}

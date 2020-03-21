@@ -5,9 +5,8 @@
 	<xsl:strip-space elements="*"/>
     <xsl:template match="configurations">
 #!/bin/bash
-set -e
-
-docker stop $(docker ps -a -q --filter ancestor=<xsl:value-of select="lower-case(//configuration[@key='DbName']/@value)" />-${PWD##*/}) || :
+# docker stop $(docker ps -a -q --filter ancestor=<xsl:value-of select="lower-case(//configuration[@key='DbName']/@value)" />-${PWD##*/}) || :
+docker stop $(docker ps -a -q)
 
 docker run -p80:80 <xsl:value-of select="lower-case(//configuration[@key='DbName']/@value)" />-${PWD##*/}:latest
 	</xsl:template>
