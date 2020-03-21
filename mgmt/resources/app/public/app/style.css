@@ -61,7 +61,7 @@ nav a.currentPage {
 
 .navLinkBundle {
     white-space: nowrap;
-    display:inline;
+    display:inline-block;
 }
 
 .newNavButton {
@@ -130,4 +130,31 @@ nav a.currentPage {
     border: 2px solid red;
     padding: 10px;
     margin: 10px;
+}
+
+ul.whisperer {
+    background: white;
+    border:1px solid black;
+    padding:0;
+    margin-left:10px;
+    overflow:hidden;
+    border-radius:5px;
+}
+
+ul.whisperer li {
+    padding-left:10px;
+    list-style:none;
+    color:black;
+}
+
+ul.whisperer li:hover {
+    background:lightblue;
+    cursor:pointer;
+}
+
+h1 {
+    display:inline-block;
+    color:white;
+    line-height:1em;
+    margin:0 20px;
 }
