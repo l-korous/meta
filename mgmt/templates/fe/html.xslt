@@ -138,14 +138,14 @@
                 </div>
                 </xsl:if>
                 <div class="read">
-                    <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0"><button class="editButton" onclick="$(this).parent().toggle();$(this).parent().prev().toggle();">Edit</button></xsl:if>
-                    <button class="entryDeleter">Delete</button>
                     <xsl:for-each select="columns/column[@is_primary_key=1]" >
                         <xsl:element name="h2">
                             <xsl:attribute name="class">entryIdentifierField entryIdentifierField<xsl:value-of select="@column_name" /></xsl:attribute>
                             &s;
                         </xsl:element>
                     </xsl:for-each>
+                    <xsl:if test="count(columns/column[@is_primary_key=0]) &gt; 0"><button class="editButton" onclick="$(this).parent().toggle();$(this).parent().prev().toggle();">Edit</button></xsl:if>
+                    <button class="entryDeleter">Delete</button>
                     <xsl:for-each select="columns/column[@is_primary_key=0]" >
                         <xsl:element name="div">
                             <xsl:attribute name="class">entryField entryField<xsl:value-of select="@column_name" /></xsl:attribute>

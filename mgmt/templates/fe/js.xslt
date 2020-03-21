@@ -203,7 +203,7 @@ function loadCall() {
         
         <!-- Read & Write -->
         <xsl:for-each select="columns/column" >
-        $(newElement).find('.entry<xsl:if test="@is_primary_key=1">Identifier</xsl:if>Field<xsl:value-of select="@column_name" />')[0].innerHTML = '<xsl:value-of select="@column_name" />: ' + <xsl:value-of select="@column_name" />_field_to_html_conversion(item);
+        $(newElement).find('.entry<xsl:if test="@is_primary_key=1">Identifier</xsl:if>Field<xsl:value-of select="@column_name" />')[0].innerHTML = <xsl:if test="@is_primary_key=0">'<xsl:value-of select="@column_name" />: ' + </xsl:if><xsl:value-of select="@column_name" />_field_to_html_conversion(item);
         <xsl:value-of select="@column_name" />_field_to_input_value(item, $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]'));
         $(newElement).find('[name=dummy_<xsl:value-of select="@column_name" />]').attr('name', i + '<xsl:value-of select="@column_name" />');
         $(newElement).find('[for=dummy_<xsl:value-of select="@column_name" />]').attr('for', i + '<xsl:value-of select="@column_name" />');

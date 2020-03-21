@@ -20,30 +20,60 @@ body {
 }
 
 .flex {
-    column-count: 4;
-    column-gap: 0em;
-    column-width: 25%;
-    padding:.1em;
+    column-count: 8;
+    width:calc(100% - 1em);
+}
+
+.entry {
+    background: #135ba6;
+    break-inside: avoid;
+    width:calc(100% - 1em);
+    overflow:hidden;
+    backface-visibility: hidden;
+    color:white;
+    padding:.5em;
+    margin:.5em;
+}
+
+@media(max-width: 2400px) {
+    .flex {
+        column-count: 7;
+    }
+}
+
+@media(max-width: 2100px) {
+    .flex {
+        column-count: 6;
+    }
+}
+
+@media(max-width: 1800px) {
+    .flex {
+        column-count: 5;
+    }
+}
+
+@media(max-width: 1500px) {
+    .flex {
+        column-count: 4;
+    }
 }
 
 @media(max-width: 1200px) {
     .flex {
         column-count: 3;
-        column-gap: 0;
     }
 }
 
 @media(max-width: 900px) {
     .flex {
         column-count: 2;
-        column-gap: 0;
     }
 }
 
 @media(max-width: 600px) {
     .flex {
         column-count: 1;
-        column-gap: 0;
     }
 }
 
@@ -68,17 +98,6 @@ nav a.currentPage {
     margin-right:20px;
 }
 
-.entry {
-    background: #135ba6;
-    break-inside: avoid;
-    width:calc(100% - 1.2em);
-    overflow:hidden;
-    backface-visibility: hidden;
-    color:white;
-    padding:.5em;
-    margin:.1em;
-}
-
 .entryDeleter, .entryLinkDeleter {
 	color:red;
 }
@@ -91,7 +110,8 @@ nav a.currentPage {
 }
 
 .entry h2.entryIdentifierField {
-    margin:.25em 0;
+    margin:0 0 .25em;
+    color:black;
 }
 
 .entry .entryField {
